@@ -4,10 +4,10 @@ project: "Smart Carbon-Free Village - Futuristic"
 repository: "https://github.com/damdayvillage-a11y/Village"
 last_updated: "2025-01-07T16:45:00.000Z"
 current_stage:
-  pr_number: 15
-  pr_title: "Admin Panel — Dynamic Content & Component Editor"
+  pr_number: 16
+  pr_title: "Booking & Payment Complete Flow (no placeholders)"
   status: "starting"
-  branch: "pr/15-admin-dynamic-editor"
+  branch: "pr/16-booking-payment-productionize"
 completed_prs:
   - number: 1
     title: "Foundation & infra (monorepo, Next.js, TypeScript, linting, basic PWA shell)"
