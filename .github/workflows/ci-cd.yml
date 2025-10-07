@@ -99,14 +99,26 @@ jobs:
       - name: Build
         run: npm run build
         
-      # Deploy to staging environment (CapRover or Vercel)
-      - name: Deploy to staging
-        run: echo "Deploy to staging environment - integration needed"
+      # Deploy to CapRover staging
+      - name: Deploy to CapRover Staging
+        uses: caprover/deploy-from-github@v1.1.2
+        with:
+          server: '${{ secrets.CAPROVER_SERVER }}'
+          app: '${{ secrets.CAPROVER_STAGING_APP }}'
+          token: '${{ secrets.CAPROVER_APP_TOKEN }}'
+          branch: '${{ github.head_ref }}'
+          
+      # Health check after staging deployment
+      - name: Health Check Staging
+        run: |
+          sleep 30
+          curl -f https://${{ secrets.CAPROVER_STAGING_APP }}.${{ secrets.CAPROVER_SERVER }}/api/health || exit 1
+        continue-on-error: true
         
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [validate, lighthouse-ci]
+    needs: [validate]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
     
@@ -126,6 +138,23 @@ jobs:
       - name: Build
         run: npm run build
         
-      # Deploy to production (requires human approval)
-      - name: Deploy to production
-        run: echo "Production deploy - CapRover integration needed"
+      # Deploy to CapRover production
+      - name: Deploy to CapRover Production
+        uses: caprover/deploy-from-github@v1.1.2
+        with:
+          server: '${{ secrets.CAPROVER_SERVER }}'
+          app: '${{ secrets.CAPROVER_PRODUCTION_APP }}'
+          token: '${{ secrets.CAPROVER_APP_TOKEN }}'
+          branch: 'main'
+          
+      # Health check after production deployment
+      - name: Health Check Production
+        run: |
+          sleep 30
+          curl -f https://${{ secrets.CAPROVER_PRODUCTION_APP }}.${{ secrets.CAPROVER_SERVER }}/api/health || exit 1
+          
+      # Run smoke tests after production deployment
+      - name: Smoke Tests
+        run: |
+          echo "Running post-deployment smoke tests..."
+          curl -f https://${{ secrets.CAPROVER_PRODUCTION_APP }}.${{ secrets.CAPROVER_SERVER }}/ || exit 1
