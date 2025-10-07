@@ -4,8 +4,8 @@ project: "Smart Carbon-Free Village - Futuristic"
 repository: "https://github.com/damdayvillage-a11y/Village"
 last_updated: "2024-10-07T03:45:00.000Z"
 current_stage:
-  pr_number: 4
-  pr_title: "Design system + 3D skeleton (Three.js viewer) + accessibility baseline"
+  pr_number: 5
+  pr_title: "Homepage & Digital Twin integration + AR/360 viewer"
   status: "completed"
 completed_prs:
   - number: 1
@@ -55,6 +55,20 @@ completed_prs:
     ui_pages: ["/digital-twin"]
     components: ["Button", "Input", "Card", "Modal", "Alert", "Badge", "Avatar", "Progress", "VillageViewer"]
     threejs_features: ["3D Scene", "Interactive village model", "Mouse controls", "Lighting system", "Performance optimization"]
+  - number: 5
+    title: "Homepage & Digital Twin integration + AR/360 viewer"
+    merge_commit: "pending"
+    date: "2024-10-07T06:30:00.000Z"
+    ci_status: "passed"
+    staging_url: "http://localhost:3000"
+    screenshot_paths: ["docs/memory/screenshots/pr-05/homepage-with-village-tour.png", "docs/memory/screenshots/pr-05/village-tour-360-page.png"]
+    telemetry_snapshot: "docs/memory/telemetry/pr-05-ar-360-features.json"
+    lighthouse_scores: {performance: "pending", accessibility: "pending", best_practices: "pending", seo: "pending"}
+    test_coverage: "pending"
+    build_status: "successful"
+    ui_pages: ["/village-tour"]
+    ar_features: ["360° Panorama Viewer", "Interactive Hotspots", "WebXR AR Integration", "Mobile Gestures", "Real-time Village Data"]
+    api_endpoints: ["/api/village/info"]
 upcoming_prs:
   - number: 1
     title: "Foundation & infra"
@@ -69,8 +83,8 @@ upcoming_prs:
     title: "Design system & 3D viewer"
     status: "completed"
   - number: 5
-    title: "Homepage & Digital Twin"
-    status: "pending"
+    title: "Homepage & Digital Twin integration + AR/360 viewer"
+    status: "completed"
   - number: 6
     title: "Homestay booking & offline sync"
     status: "pending"
@@ -114,12 +128,24 @@ artifacts:
       path: 'docs/memory/screenshots/pr-04/digital-twin-3d-viewer-pr4.png'
       desc: 'Three.js 3D Digital Twin viewer showing interactive village model with mountains and trees'
       timestamp: '2024-10-07T05:16:00.000Z'
+    - pr: 5
+      path: 'docs/memory/screenshots/pr-05/homepage-with-village-tour.png'
+      desc: 'Enhanced homepage with integrated 360° Village Tour navigation and call-to-action buttons'
+      timestamp: '2024-10-07T06:30:00.000Z'
+    - pr: 5
+      path: 'docs/memory/screenshots/pr-05/village-tour-360-page.png'
+      desc: 'Complete 360° Village Tour page with AR panorama viewer, interactive features, and live environmental data'
+      timestamp: '2024-10-07T06:31:00.000Z'
   videos: [] # optional screen recordings {pr, path, desc, timestamp}
   telemetry_snapshots: 
     - pr: 2
       path: 'docs/memory/telemetry/pr-02-sample.json'
       desc: 'Sample IoT device telemetry data for 3 device types'
       timestamp: '2024-10-07T03:50:00.000Z'
+    - pr: 5
+      path: 'docs/memory/telemetry/pr-05-ar-360-features.json'
+      desc: 'AR/360 viewer telemetry and interactive features performance data'
+      timestamp: '2024-10-07T06:30:00.000Z'
   model_versions: [] # {pr, model_name, version, metrics, path}
   deployments:
     - pr: 0

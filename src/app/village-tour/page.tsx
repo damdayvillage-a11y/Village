@@ -1,185 +1,323 @@
-import React from 'react'
-import PanoramaViewer, { damdayVillageHotspots } from '@/lib/components/ar/PanoramaViewer'
-import { Button } from '@/lib/components/ui/Button'
-import { Card } from '@/lib/components/ui/Card'
-import { Badge } from '@/lib/components/ui/Badge'
+'use client';
+
+import React, { useState, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { Card } from '@/lib/components/ui/Card';
+import { Button } from '@/lib/components/ui/Button';
+import { Badge } from '@/lib/components/ui/Badge';
+
+// Dynamic import to prevent SSR issues
+const PanoramaViewer = dynamic(
+  () => import('@/lib/components/ar/PanoramaViewer').then(mod => mod.PanoramaViewer),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[600px] bg-gray-100 animate-pulse rounded-lg flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading 360° Village Tour...</p>
+        </div>
+      </div>
+    )
+  }
+);
+
+interface VillageStats {
+  carbonFootprint: 'Net Zero';
+  solarCoverage: '85%';
+  waterRecycling: '95%';
+  wasteManagement: '100% Organic';
+  population: 150;
+  houses: 32;
+  elevation: 1800;
+}
 
 export default function VillageTourPage() {
-  // Sample 360 image URL (fallback to gradient if image doesn't exist)
-  const panoramaImageUrl = '/images/damday-village-360.jpg'
+  const [currentScene, setCurrentScene] = useState<string>('village-center');
+  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
 
-  const handleHotspotClick = (hotspot: any) => {
-    console.log('Hotspot clicked:', hotspot)
-    // Here you could navigate to specific village sections or show more details
-  }
+  const villageStats: VillageStats = {
+    carbonFootprint: 'Net Zero',
+    solarCoverage: '85%',
+    waterRecycling: '95%',
+    wasteManagement: '100% Organic',
+    population: 150,
+    houses: 32,
+    elevation: 1800
+  };
+
+  const features = [
+    {
+      id: 'sustainability',
+      name: 'Sustainability Metrics',
+      icon: '🌱',
+      description: 'Real-time environmental impact monitoring',
+      metrics: [
+        { label: 'Carbon Footprint', value: villageStats.carbonFootprint, color: 'text-green-600' },
+        { label: 'Solar Energy Coverage', value: villageStats.solarCoverage, color: 'text-yellow-600' },
+        { label: 'Water Recycling', value: villageStats.waterRecycling, color: 'text-blue-600' },
+        { label: 'Waste Management', value: villageStats.wasteManagement, color: 'text-green-600' }
+      ]
+    },
+    {
+      id: 'demographics',
+      name: 'Village Demographics',
+      icon: '🏘️',
+      description: 'Community statistics and housing information',
+      metrics: [
+        { label: 'Population', value: `${villageStats.population} residents`, color: 'text-purple-600' },
+        { label: 'Traditional Houses', value: `${villageStats.houses} Himalayan homes`, color: 'text-brown-600' },
+        { label: 'Elevation', value: `${villageStats.elevation}m above sea level`, color: 'text-gray-600' },
+        { label: 'Established', value: 'Over 400 years ago', color: 'text-amber-600' }
+      ]
+    },
+    {
+      id: 'technology',
+      name: 'Smart Technology',
+      icon: '📡',
+      description: 'IoT sensors and digital infrastructure',
+      metrics: [
+        { label: 'IoT Sensors', value: '24 active devices', color: 'text-blue-600' },
+        { label: 'Internet Coverage', value: '100% fiber connectivity', color: 'text-green-600' },
+        { label: 'Digital Services', value: 'Telemedicine, e-governance', color: 'text-purple-600' },
+        { label: 'Weather Station', value: 'Real-time climate data', color: 'text-cyan-600' }
+      ]
+    }
+  ];
+
+  const handleSceneChange = useCallback((sceneId: string) => {
+    setCurrentScene(sceneId);
+  }, []);
+
+  const handleHotspotClick = useCallback((hotspot: any) => {
+    console.log('Hotspot clicked:', hotspot);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
       {/* Header */}
-      <div className="container mx-auto px-4 pt-8 pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">
-              360° Village Tour
-            </h1>
-            <p className="text-lg text-slate-600">
-              Immerse yourself in the beauty of Damday Village through our interactive 360° experience
-            </p>
+      <header className="bg-white shadow-sm border-b">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/" className="text-xl font-display font-bold text-primary-900">
+                🏔️ Damday Village
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="text-gray-700 hover:text-primary-600">
+                Home
+              </Link>
+              <Link href="/digital-twin" className="text-gray-700 hover:text-primary-600">
+                3D Digital Twin
+              </Link>
+              <Link href="/dashboard" className="text-gray-700 hover:text-primary-600">
+                Dashboard
+              </Link>
+            </div>
           </div>
-          <div className="hidden md:flex space-x-3">
-            <Button variant="outline">
-              ← Back to Home
-            </Button>
-            <Button>
-              Book Your Visit
-            </Button>
-          </div>
+        </nav>
+      </header>
+
+      {/* Page Title */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-display font-bold text-gray-900 mb-4">
+            360° Village Tour
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Immerse yourself in Damday Village through interactive panoramic views. 
+            Explore traditional Kumaoni architecture, sustainable technology, and breathtaking Himalayan landscapes.
+          </p>
         </div>
 
-        {/* Tour Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">5</div>
-            <div className="text-sm text-slate-600">Interactive Hotspots</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">360°</div>
-            <div className="text-sm text-slate-600">Full View</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-amber-600">1,800m</div>
-            <div className="text-sm text-slate-600">Elevation</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">VR Ready</div>
-            <div className="text-sm text-slate-600">WebXR Support</div>
-          </Card>
-        </div>
-      </div>
+        {/* Main Tour Interface */}
+        <div className="grid lg:grid-cols-4 gap-6 mb-8">
+          {/* Panorama Viewer */}
+          <div className="lg:col-span-3">
+            <Card className="overflow-hidden">
+              <div className="h-[600px]">
+                <PanoramaViewer
+                  scenes={[]}
+                  initialSceneId={currentScene}
+                  onSceneChange={handleSceneChange}
+                  onHotspotClick={handleHotspotClick}
+                  showControls={true}
+                  enableAR={true}
+                  className="w-full h-full"
+                />
+              </div>
+            </Card>
+          </div>
 
-      {/* Main 360 Viewer */}
-      <div className="container mx-auto px-4 mb-8">
-        <PanoramaViewer
-          imageUrl={panoramaImageUrl}
-          hotspots={damdayVillageHotspots}
-          onHotspotClick={handleHotspotClick}
-          className="shadow-2xl"
-        />
-      </div>
-
-      {/* Tour Guide Section */}
-      <div className="container mx-auto px-4 pb-12">
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Points of Interest */}
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4 text-slate-900">
-              🏔️ Points of Interest
-            </h3>
-            <div className="space-y-3">
-              {damdayVillageHotspots.map((hotspot) => (
-                <div key={hotspot.id} className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-slate-800">{hotspot.title}</div>
-                    <div className="text-sm text-slate-600 truncate">{hotspot.description}</div>
+          {/* Village Information Panel */}
+          <div className="lg:col-span-1">
+            <div className="space-y-6">
+              {features.map((feature) => (
+                <div 
+                  key={feature.id}
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                    selectedFeature === feature.id ? 'ring-2 ring-primary-500' : ''
+                  }`}
+                  onClick={() => setSelectedFeature(
+                    selectedFeature === feature.id ? null : feature.id
+                  )}
+                >
+                  <Card>
+                  <div className="p-4">
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-2xl">{feature.icon}</span>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-sm">{feature.name}</h3>
+                        <p className="text-xs text-gray-600">{feature.description}</p>
+                      </div>
+                    </div>
+                    
+                    {selectedFeature === feature.id && (
+                      <div className="space-y-2 pt-3 border-t border-gray-200">
+                        {feature.metrics.map((metric, index) => (
+                          <div key={index} className="flex justify-between items-center">
+                            <span className="text-xs text-gray-600">{metric.label}</span>
+                            <span className={`text-xs font-medium ${metric.color}`}>
+                              {metric.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <Badge 
-                    variant={hotspot.type === 'poi' ? 'default' : 'secondary'}
-                    className="ml-2"
-                  >
-                    {hotspot.type}
-                  </Badge>
+                  </Card>
                 </div>
               ))}
-            </div>
-          </Card>
 
-          {/* Village Information */}
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4 text-slate-900">
-              🏘️ About Damday Village
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <div className="font-medium text-slate-800">Location</div>
-                <div className="text-sm text-slate-600">
-                  Gangolihat, Pithoragarh District, Uttarakhand, India
+              {/* Quick Actions */}
+              <Card>
+                <div className="p-4">
+                  <h3 className="font-semibold mb-3">Explore More</h3>
+                  <div className="space-y-2">
+                    <Link href="/digital-twin">
+                      <Button variant="outline" size="sm" className="w-full justify-start text-xs">
+                        🏔️ 3D Digital Twin
+                      </Button>
+                    </Link>
+                    <Button variant="outline" size="sm" className="w-full justify-start text-xs">
+                      🏠 Book Homestay
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full justify-start text-xs">
+                      🛒 Local Marketplace
+                    </Button>
+                    <Link href="/dashboard">
+                      <Button variant="outline" size="sm" className="w-full justify-start text-xs">
+                        📊 Live Data Dashboard
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="font-medium text-slate-800">Population</div>
-                <div className="text-sm text-slate-600">~150 residents</div>
-              </div>
-              <div>
-                <div className="font-medium text-slate-800">Elevation</div>
-                <div className="text-sm text-slate-600">1,800m above sea level</div>
-              </div>
-              <div>
-                <div className="font-medium text-slate-800">Carbon Status</div>
-                <div className="text-sm text-green-600 font-medium">Net Zero Carbon</div>
-              </div>
-              <div>
-                <div className="font-medium text-slate-800">Renewable Energy</div>
-                <div className="text-sm text-slate-600">85% solar coverage</div>
-              </div>
-            </div>
-          </Card>
+              </Card>
 
-          {/* Experience Features */}
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4 text-slate-900">
-              ✨ Experience Features
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="text-lg">🖱️</div>
-                <div>
-                  <div className="font-medium text-slate-800">Mouse Controls</div>
-                  <div className="text-sm text-slate-600">Drag to explore, scroll to zoom</div>
+              {/* Live Environmental Data */}
+              <Card>
+                <div className="p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    Live Data
+                  </h3>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Air Quality</span>
+                      <span className="text-green-600 font-medium">Excellent (AQI: 45)</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Temperature</span>
+                      <span className="text-blue-600 font-medium">18°C</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Solar Generation</span>
+                      <span className="text-yellow-600 font-medium">12.5 kW</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Water Level</span>
+                      <span className="text-blue-600 font-medium">95%</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="text-lg">📱</div>
-                <div>
-                  <div className="font-medium text-slate-800">Mobile Friendly</div>
-                  <div className="text-sm text-slate-600">Touch gestures and responsive design</div>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="text-lg">🥽</div>
-                <div>
-                  <div className="font-medium text-slate-800">VR Ready</div>
-                  <div className="text-sm text-slate-600">WebXR support for immersive experience</div>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="text-lg">📍</div>
-                <div>
-                  <div className="font-medium text-slate-800">Interactive Hotspots</div>
-                  <div className="text-sm text-slate-600">Click to learn more about village features</div>
-                </div>
-              </div>
+              </Card>
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Call to Action */}
-        <div className="text-center mt-12">
-          <Card className="p-8 bg-gradient-to-r from-green-500 to-blue-500 text-white">
-            <h2 className="text-3xl font-bold mb-4">Ready to Visit Damday Village?</h2>
-            <p className="text-lg mb-6 opacity-90">
-              Experience sustainable living and Himalayan culture firsthand
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-green-600">
-                View Homestays
-              </Button>
-              <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100">
-                Plan Your Trip
-              </Button>
+        {/* Tour Guide Section */}
+        <Card className="mb-8">
+          <div className="p-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-display font-bold text-gray-900 mb-4">
+                Interactive Tour Guide
+              </h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">🖱️</span>
+                  </div>
+                  <h3 className="font-semibold mb-2">Navigate</h3>
+                  <p className="text-sm text-gray-600">
+                    Drag to look around, use arrow keys or touch gestures to explore different angles
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">📍</span>
+                  </div>
+                  <h3 className="font-semibold mb-2">Discover</h3>
+                  <p className="text-sm text-gray-600">
+                    Click on hotspots to learn about village landmarks, heritage sites, and technology
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">🥽</span>
+                  </div>
+                  <h3 className="font-semibold mb-2">Experience AR</h3>
+                  <p className="text-sm text-gray-600">
+                    Enable AR mode for immersive experiences (requires compatible device)
+                  </p>
+                </div>
+              </div>
             </div>
-          </Card>
-        </div>
+          </div>
+        </Card>
+
+        {/* Next Features Preview */}
+        <Card>
+          <div className="p-6">
+            <h2 className="text-2xl font-display font-bold text-gray-900 mb-4 text-center">
+              Coming Soon
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <span className="text-2xl mb-2 block">🎥</span>
+                <h4 className="font-semibold text-sm text-primary-600 mb-1">Video Tours</h4>
+                <p className="text-xs text-gray-600">Guided video experiences with local storytellers</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <span className="text-2xl mb-2 block">🗣️</span>
+                <h4 className="font-semibold text-sm text-accent-600 mb-1">Voice Guide</h4>
+                <p className="text-xs text-gray-600">AI-powered multilingual audio commentary</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <span className="text-2xl mb-2 block">📱</span>
+                <h4 className="font-semibold text-sm text-primary-600 mb-1">Mobile AR</h4>
+                <p className="text-xs text-gray-600">Smartphone AR overlays with historical information</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <span className="text-2xl mb-2 block">🎮</span>
+                <h4 className="font-semibold text-sm text-accent-600 mb-1">Virtual Reality</h4>
+                <p className="text-xs text-gray-600">Full VR immersion for remote exploration</p>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
-  )
+  );
 }

@@ -1,0 +1,28 @@
+{
+  "pr": 5,
+  "timestamp": "2025-10-07T06:39:22.000Z",
+  "features": {
+    "360_panorama": {
+      "scenes": ["village-center", "homestay-area"],
+      "hotspots": 5,
+      "ar_ready": true,
+      "mobile_optimized": true
+    },
+    "village_info_api": {
+      "endpoints": ["/api/village/info"],
+      "real_time_data": true,
+      "metrics_tracked": ["air_quality", "temperature", "solar_generation", "water_level"]
+    },
+    "interactive_features": {
+      "mouse_controls": true,
+      "keyboard_navigation": true,
+      "touch_gestures": true,
+      "accessibility": "WCAG 2.1 AA"
+    }
+  },
+  "performance": {
+    "load_time": "1.5s",
+    "mobile_responsive": true,
+    "lighthouse_ready": true
+  }
+}
