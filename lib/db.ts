@@ -5,18 +5,24 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
+export const prisma = 
+  globalThis.prisma ??
+  new PrismaClient({
+    log: ['query'],
+  });
+
 export const db =
   globalThis.prisma ??
   new PrismaClient({
     log: ['query'],
   });
 
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = db;
+if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
 
 // Health check function
 export async function checkDatabaseHealth() {
   try {
-    await db.$queryRaw`SELECT 1`;
+    await prisma.$queryRaw`SELECT 1`;
     return { status: 'healthy', timestamp: new Date().toISOString() };
   } catch (error) {
     console.error('Database health check failed:', error);

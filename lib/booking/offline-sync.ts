@@ -58,7 +58,10 @@ export class OfflineBookingSync {
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready;
-        await registration.sync.register('booking-sync');
+        // Check if sync is supported
+        if ('sync' in registration) {
+          await (registration as any).sync.register('booking-sync');
+        }
       } catch (error) {
         console.error('Background sync registration failed:', error);
         // Fallback to immediate sync attempt

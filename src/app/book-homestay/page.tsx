@@ -173,7 +173,7 @@ export default function BookHomestayPage() {
       ...defaultPricingPolicy,
       homestayId: selectedHomestay.id,
       basePrice: selectedHomestay.basePrice,
-      currency: selectedHomestay.currency,
+      currency: 'INR' as const,
     });
 
     const bookingDates: BookingDates = {
@@ -326,14 +326,14 @@ export default function BookHomestayPage() {
             {homestay.amenities.slice(0, 4).map((amenity) => {
               const Icon = AMENITY_ICONS[amenity] || Coffee;
               return (
-                <Badge key={amenity} variant="outline" className="text-xs">
+                <Badge key={amenity} variant="default" className="text-xs border border-gray-300">
                   <Icon className="w-3 h-3 mr-1" />
                   {amenity}
                 </Badge>
               );
             })}
             {homestay.amenities.length > 4 && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="default" className="text-xs border border-gray-300">
                 +{homestay.amenities.length - 4} more
               </Badge>
             )}
@@ -637,7 +637,7 @@ export default function BookHomestayPage() {
             <div className="text-sm space-y-2">
               <div><span className="font-medium">Confirmation Number:</span> {bookingConfirmation.confirmationNumber}</div>
               <div><span className="font-medium">Status:</span> 
-                <Badge className="ml-2" variant={bookingConfirmation.offline ? 'outline' : 'default'}>
+                <Badge className="ml-2" variant={bookingConfirmation.offline ? 'warning' : 'success'}>
                   {bookingConfirmation.offline ? 'QUEUED FOR SYNC' : bookingConfirmation.status}
                 </Badge>
               </div>
