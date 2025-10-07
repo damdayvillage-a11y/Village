@@ -20,7 +20,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Generate Prisma client and build
-RUN npx prisma generate && npm run build
+RUN npm config set strict-ssl false && npx prisma generate && npm run build
 
 # Production stage
 FROM node:18-alpine AS runner
