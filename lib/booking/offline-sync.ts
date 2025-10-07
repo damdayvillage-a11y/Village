@@ -34,8 +34,11 @@ export class OfflineBookingSync {
   private syncInProgress = false;
 
   constructor() {
-    this.setupServiceWorkerSync();
-    this.setupOnlineEventListeners();
+    // Only setup browser-specific features on client side
+    if (typeof window !== 'undefined') {
+      this.setupServiceWorkerSync();
+      this.setupOnlineEventListeners();
+    }
   }
 
   /**
@@ -55,7 +58,7 @@ export class OfflineBookingSync {
     this.saveOfflineBookings(existingBookings);
 
     // Request background sync if service worker is available
-    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready;
         // Check if sync is supported
@@ -79,6 +82,9 @@ export class OfflineBookingSync {
    * Get all offline bookings
    */
   getOfflineBookings(): OfflineBooking[] {
+    if (typeof window === 'undefined') {
+      return [];
+    }
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
@@ -99,7 +105,7 @@ export class OfflineBookingSync {
    * Sync all pending bookings with the server
    */
   async syncBookings(): Promise<void> {
-    if (this.syncInProgress || !navigator.onLine) {
+    if (typeof window === 'undefined' || this.syncInProgress || (navigator && !navigator.onLine)) {
       return;
     }
 
@@ -368,6 +374,9 @@ export class OfflineBookingSync {
   }
 
   private saveOfflineBookings(bookings: OfflineBooking[]): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(bookings));
     } catch (error) {
@@ -376,7 +385,7 @@ export class OfflineBookingSync {
   }
 
   private setupServiceWorkerSync(): void {
-    if ('serviceWorker' in navigator) {
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'SYNC_BOOKINGS') {
           this.syncBookings();
@@ -386,14 +395,16 @@ export class OfflineBookingSync {
   }
 
   private setupOnlineEventListeners(): void {
-    window.addEventListener('online', () => {
-      console.log('Connection restored, syncing offline bookings...');
-      this.syncBookings();
-    });
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', () => {
+        console.log('Connection restored, syncing offline bookings...');
+        this.syncBookings();
+      });
 
-    window.addEventListener('offline', () => {
-      console.log('Connection lost, bookings will be queued offline');
-    });
+      window.addEventListener('offline', () => {
+        console.log('Connection lost, bookings will be queued offline');
+      });
+    }
   }
 }
 

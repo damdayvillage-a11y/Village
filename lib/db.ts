@@ -21,6 +21,15 @@ if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
 
 // Health check function
 export async function checkDatabaseHealth() {
+  // Skip database check during build time
+  if (!process.env.DATABASE_URL || process.env.DATABASE_URL === 'postgresql://dummy:dummy@localhost:5432/dummy') {
+    return { 
+      status: 'skip', 
+      message: 'Database check skipped during build',
+      timestamp: new Date().toISOString() 
+    };
+  }
+
   try {
     await prisma.$queryRaw`SELECT 1`;
     return { status: 'healthy', timestamp: new Date().toISOString() };

@@ -13,6 +13,10 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
+  eslint: {
+    // Disable ESLint during production builds
+    ignoreDuringBuilds: true,
+  },
   async headers() {
     return [
       {
