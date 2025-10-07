@@ -15,14 +15,21 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
+  emailVerified DateTime?
+  password  String?  // For credentials authentication
   phone     String?
   name      String
   role      UserRole @default(GUEST)
   avatar    String?
+  image     String?  // For NextAuth compatibility
   did       String?  // Optional DID/SSI identity
   locale    String   @default("en")
   verified  Boolean  @default(false)
   active    Boolean  @default(true)
+  
+  // Two-factor authentication
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
   
   // Preferences
   preferences Json?
@@ -45,9 +52,14 @@ model User {
   uploads          Media[]
   products         Product[]     @relation("ProductSeller")
   
+  // NextAuth.js relations
+  accounts         Account[]
+  authSessions     AuthSession[]
+  
   @@map("users")
 }
 
+// Custom session model (separate from NextAuth sessions)
 model Session {
   id        String   @id @default(cuid())
   userId    String
@@ -58,6 +70,47 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("sessions")
+}
+
+// NextAuth.js required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model AuthSession {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("auth_sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 enum UserRole {
