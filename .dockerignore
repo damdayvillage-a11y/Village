@@ -1,0 +1,13 @@
+.git
+.gitignore
+npm-debug.log
+.env
+.nyc_output
+coverage
+.coverage
+.coverage.*
+.DS_Store
+.vscode
+.idea
+*.log
+*.tar.gz
