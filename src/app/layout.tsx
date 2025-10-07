@@ -1,0 +1,55 @@
+import type { Metadata } from 'next';
+import './globals.css';
+
+export const metadata: Metadata = {
+  title: 'Smart Carbon-Free Village - Damday',
+  description:
+    'Experience Damday Village, a carbon-neutral, culturally-rich, and technologically progressive model village in the Himalayas.',
+  keywords: [
+    'carbon-free',
+    'village',
+    'tourism',
+    'sustainability',
+    'Himalayas',
+    'eco-tourism',
+  ],
+  authors: [{ name: 'Damday Village Team' }],
+  manifest: '/manifest.json',
+  themeColor: '#10b981',
+  viewport: 'width=device-width, initial-scale=1',
+  robots: 'index, follow',
+  openGraph: {
+    title: 'Smart Carbon-Free Village - Damday',
+    description:
+      'Experience Damday Village, a carbon-neutral model village in the Himalayas',
+    type: 'website',
+    locale: 'en_US',
+  },
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <head>
+        <meta name="application-name" content="Smart Carbon-Free Village" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Damday Village" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#10b981" />
+        
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+      </head>
+      <body className="font-sans antialiased">
+        {children}
+      </body>
+    </html>
+  );
+}
