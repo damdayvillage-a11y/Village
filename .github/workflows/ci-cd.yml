@@ -111,8 +111,8 @@ jobs:
       # Health check after staging deployment
       - name: Health Check Staging
         run: |
-          sleep 30
-          curl -f https://${{ secrets.CAPROVER_STAGING_APP }}.${{ secrets.CAPROVER_SERVER }}/api/health || exit 1
+          chmod +x ./scripts/health-check.sh
+          ./scripts/health-check.sh "https://${{ secrets.CAPROVER_STAGING_APP }}.${{ secrets.CAPROVER_SERVER }}" 20 10
         continue-on-error: true
         
   deploy-production:
@@ -150,11 +150,5 @@ jobs:
       # Health check after production deployment
       - name: Health Check Production
         run: |
-          sleep 30
-          curl -f https://${{ secrets.CAPROVER_PRODUCTION_APP }}.${{ secrets.CAPROVER_SERVER }}/api/health || exit 1
-          
-      # Run smoke tests after production deployment
-      - name: Smoke Tests
-        run: |
-          echo "Running post-deployment smoke tests..."
-          curl -f https://${{ secrets.CAPROVER_PRODUCTION_APP }}.${{ secrets.CAPROVER_SERVER }}/ || exit 1
+          chmod +x ./scripts/health-check.sh
+          ./scripts/health-check.sh "https://${{ secrets.CAPROVER_PRODUCTION_APP }}.${{ secrets.CAPROVER_SERVER }}" 30 10

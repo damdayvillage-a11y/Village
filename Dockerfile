@@ -7,13 +7,20 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm config set strict-ssl false && npm ci
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Set build-time environment variables
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV NEXTAUTH_SECRET="dummy-secret-for-build"
+ENV NEXTAUTH_URL="http://localhost:3000"
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Generate Prisma client and build
+RUN npx prisma generate && npm run build
 
 # Production stage
 FROM node:18-alpine AS runner
