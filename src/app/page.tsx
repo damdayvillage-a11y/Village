@@ -16,17 +16,26 @@ export default function HomePage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/digital-twin" className="text-gray-700 hover:text-primary-600">
-                Digital Twin
-              </Link>
-              <Link href="/village-tour" className="text-gray-700 hover:text-primary-600">
-                360° Tour
-              </Link>
-              <Link href="/dashboard" className="text-gray-700 hover:text-primary-600">
-                Dashboard
-              </Link>
               <Link href="/about" className="text-gray-700 hover:text-primary-600">
                 About
+              </Link>
+              <Link href="/vision" className="text-gray-700 hover:text-primary-600">
+                Vision
+              </Link>
+              <Link href="/booking" className="text-gray-700 hover:text-primary-600">
+                Booking
+              </Link>
+              <Link href="/projects" className="text-gray-700 hover:text-primary-600">
+                Projects
+              </Link>
+              <Link href="/marketplace" className="text-gray-700 hover:text-primary-600">
+                Marketplace
+              </Link>
+              <Link href="/events" className="text-gray-700 hover:text-primary-600">
+                Events
+              </Link>
+              <Link href="/blog" className="text-gray-700 hover:text-primary-600">
+                Blog
               </Link>
               <Link href="/contact" className="text-gray-700 hover:text-primary-600">
                 Contact
