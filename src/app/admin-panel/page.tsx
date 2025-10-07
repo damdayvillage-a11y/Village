@@ -64,7 +64,7 @@ export default function AdminPanelPage() {
     
     if (status === 'authenticated') {
       // Check if user has admin permissions
-      if (!session.user?.role || !hasPermission(session.user, ['manage_users', 'manage_content'])) {
+      if (!session.user?.role || (!hasPermission(session.user, 'manage_users') && !hasPermission(session.user, 'manage_content'))) {
         router.push('/auth/unauthorized');
         return;
       }
