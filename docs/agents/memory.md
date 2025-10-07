@@ -2,16 +2,26 @@
 
 project: "Smart Carbon-Free Village - Futuristic"
 repository: "https://github.com/damdayvillage-a11y/Village"
-last_updated: "2024-10-07T03:14:00.000Z"
+last_updated: "2024-10-07T03:45:00.000Z"
 current_stage:
-  pr_number: 0
-  pr_title: "initialization"
-  status: "pending"
-completed_prs: []
+  pr_number: 1
+  pr_title: "Foundation & PWA shell"
+  status: "completed"
+completed_prs:
+  - number: 1
+    title: "Foundation & infra (monorepo, Next.js, TypeScript, linting, basic PWA shell)"
+    merge_commit: "2c61be5"
+    date: "2024-10-07T03:45:00.000Z"
+    ci_status: "passed"
+    staging_url: "http://localhost:3000"
+    screenshot_paths: ["docs/memory/screenshots/pr-01/homepage-desktop.png"]
+    lighthouse_scores: {performance: "pending", accessibility: "pending", best_practices: "pending", seo: "pending"}
+    test_coverage: "pending"
+    build_status: "successful"
 upcoming_prs:
   - number: 1
     title: "Foundation & infra"
-    status: "pending"
+    status: "completed"
   - number: 2
     title: "DB & sensor infra"
     status: "pending"
@@ -46,7 +56,11 @@ upcoming_prs:
     title: "Testing & production deploy"
     status: "pending"
 artifacts:
-  screenshots: [] # append {pr: n, path: 'docs/memory/screenshots/pr-N/name.png', desc, timestamp}
+  screenshots: 
+    - pr: 1
+      path: 'docs/memory/screenshots/pr-01/homepage-desktop.png'
+      desc: 'Homepage with hero section, feature cards, and coming soon sections'
+      timestamp: '2024-10-07T03:45:00.000Z'
   videos: [] # optional screen recordings {pr, path, desc, timestamp}
   telemetry_snapshots: [] # sample sensor data (json) captured for PR
   model_versions: [] # {pr, model_name, version, metrics, path}
