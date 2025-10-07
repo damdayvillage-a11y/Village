@@ -19,6 +19,9 @@ export default function HomePage() {
               <Link href="/digital-twin" className="text-gray-700 hover:text-primary-600">
                 Digital Twin
               </Link>
+              <Link href="/village-tour" className="text-gray-700 hover:text-primary-600">
+                360° Tour
+              </Link>
               <Link href="/dashboard" className="text-gray-700 hover:text-primary-600">
                 Dashboard
               </Link>
@@ -50,6 +53,11 @@ export default function HomePage() {
             <Link href="/digital-twin">
               <Button variant="primary" size="lg">
                 🏔️ Explore Digital Twin
+              </Button>
+            </Link>
+            <Link href="/village-tour">
+              <Button variant="outline" size="lg">
+                🌐 360° Village Tour
               </Button>
             </Link>
             <Button variant="outline" size="lg">
