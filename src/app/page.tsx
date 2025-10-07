@@ -44,6 +44,9 @@ export default function HomePage() {
               <Link href="/user-panel" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                 My Panel
               </Link>
+              <Link href="/admin-panel" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                Admin
+              </Link>
               <Link href="/village-tour" className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
                 Explore
               </Link>
