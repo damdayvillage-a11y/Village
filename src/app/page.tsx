@@ -4,6 +4,8 @@ import { Suspense } from 'react';
 import { Button } from '@/lib/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Badge } from '@/lib/components/ui/Badge';
+import { LiveData } from '@/lib/components/ui/LiveData';
+import { AuthNavigation } from '@/lib/components/ui/AuthNavigation';
 
 export default function HomePage() {
   return (
@@ -41,12 +43,7 @@ export default function HomePage() {
               <Link href="/projects" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                 Projects
               </Link>
-              <Link href="/user-panel" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                My Panel
-              </Link>
-              <Link href="/admin-panel" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                Admin
-              </Link>
+              <AuthNavigation />
               <Link href="/village-tour" className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
                 Explore
               </Link>
@@ -89,8 +86,18 @@ export default function HomePage() {
             </div>
             <div className="flex items-center px-4 py-2 bg-white/80 rounded-full border border-purple-200">
               <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-              <span className="text-purple-700 font-medium">Temperature: 22°C</span>
+              <span className="text-purple-700 font-medium">Carbon Neutral: 100%</span>
             </div>
+          </div>
+
+          {/* Live Environmental Data */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
+              Live Environmental Data
+            </h2>
+            <Suspense fallback={<div className="text-center">Loading live data...</div>}>
+              <LiveData />
+            </Suspense>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
