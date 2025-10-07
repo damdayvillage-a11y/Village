@@ -1,0 +1,72 @@
+(Agent state file — keep chronological history; update after every PR merge.)
+
+project: "Smart Carbon-Free Village - Futuristic"
+repository: "https://github.com/damdayvillage-a11y/Village"
+last_updated: "2024-10-07T03:14:00.000Z"
+current_stage:
+  pr_number: 0
+  pr_title: "initialization"
+  status: "pending"
+completed_prs: []
+upcoming_prs:
+  - number: 1
+    title: "Foundation & infra"
+    status: "pending"
+  - number: 2
+    title: "DB & sensor infra"
+    status: "pending"
+  - number: 3
+    title: "Auth & RBAC"
+    status: "pending"
+  - number: 4
+    title: "Design system & 3D viewer"
+    status: "pending"
+  - number: 5
+    title: "Homepage & Digital Twin"
+    status: "pending"
+  - number: 6
+    title: "Homestay booking & offline sync"
+    status: "pending"
+  - number: 7
+    title: "Marketplace & web3 escrow"
+    status: "pending"
+  - number: 8
+    title: "Projects transparency & DAO"
+    status: "pending"
+  - number: 9
+    title: "IoT ingestion & microgrid"
+    status: "pending"
+  - number: 10
+    title: "Cultural CMS & AR tours"
+    status: "pending"
+  - number: 11
+    title: "Admin panel & ML features"
+    status: "pending"
+  - number: 12
+    title: "Testing & production deploy"
+    status: "pending"
+artifacts:
+  screenshots: [] # append {pr: n, path: 'docs/memory/screenshots/pr-N/name.png', desc, timestamp}
+  videos: [] # optional screen recordings {pr, path, desc, timestamp}
+  telemetry_snapshots: [] # sample sensor data (json) captured for PR
+  model_versions: [] # {pr, model_name, version, metrics, path}
+  deployments:
+    - pr: 0
+      env: "none"
+      url: ""
+  test_reports: [] # {pr, path, summary, coverage}
+notes: []
+issues_open: []
+tasks_blocked: []
+security_notes: []
+deployment_history: []
+iot_devices_sample: [] # sample devices used in simulation with schemas
+data_retention_policy: {media: "2y", telemetry: "5y", user_pii: "as per consent"}
+ledger_backups: [] # blockchain/ledger snapshot links
+
+MEMORY UPDATE RULES:
+- On PR merge, append to `completed_prs`: number, title, merge_commit, date, CI status, staging_url, prod_url (if deployed), screenshot paths, video paths, test coverage, Lighthouse scores, sensor sample snapshots, model metadata.
+- For hardware features, capture a simulated telemetry snapshot and store sample device definitions in `iot_devices_sample`.
+- On ML changes, store model artifact path and evaluation metrics in `model_versions`.
+- On blockchain actions, store tx hashes (if in testnet) and contract addresses plus audit notes.
+- For any failed CI/test or security flag, create an entry under `tasks_blocked` with remediation plan.
