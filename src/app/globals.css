@@ -1,14 +1,20 @@
+/* Import Design System */
+@import url('../../lib/design-system/design-system.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  /* Design system base styles are already imported above */
+  
+  /* Additional custom base styles */
   html {
     scroll-behavior: smooth;
   }
   
   body {
-    @apply text-gray-900 bg-white;
+    @apply text-neutral-900 bg-neutral-50;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -17,21 +23,96 @@
 }
 
 @layer components {
+  /* Button component styles using design tokens */
   .btn-primary {
-    @apply px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg shadow-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200;
+    @apply px-6 py-3 bg-primary-500 text-white font-semibold rounded-lg shadow-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200;
   }
   
   .btn-secondary {
-    @apply px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg shadow-md border border-primary-600 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200;
+    @apply px-6 py-3 bg-white text-primary-500 font-semibold rounded-lg shadow-md border border-primary-500 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200;
   }
   
+  .btn-outline {
+    @apply px-6 py-3 bg-transparent text-primary-500 font-medium rounded-lg border border-primary-300 hover:bg-primary-50 hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200;
+  }
+  
+  .btn-ghost {
+    @apply px-6 py-3 bg-transparent text-primary-500 font-medium rounded-lg hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200;
+  }
+  
+  /* Card component styles using design tokens */
   .card {
-    @apply bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-200;
+    @apply bg-white rounded-lg shadow-md p-6 border border-neutral-200 hover:shadow-lg transition-shadow duration-200;
+  }
+  
+  .card-elevated {
+    @apply bg-white rounded-xl shadow-xl p-8 border border-neutral-100 hover:shadow-2xl transition-all duration-300;
+  }
+  
+  /* Input component styles */
+  .input-base {
+    @apply w-full px-4 py-2 rounded-lg border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+  }
+  
+  .input-error {
+    @apply border-error-500 focus:ring-error-500;
+  }
+  
+  .input-success {
+    @apply border-success-500 focus:ring-success-500;
+  }
+  
+  /* Alert component styles */
+  .alert-info {
+    @apply bg-info-50 border-l-4 border-info-500 text-info-700 p-4 rounded-md;
+  }
+  
+  .alert-success {
+    @apply bg-success-50 border-l-4 border-success-500 text-success-700 p-4 rounded-md;
+  }
+  
+  .alert-warning {
+    @apply bg-warning-50 border-l-4 border-warning-500 text-warning-700 p-4 rounded-md;
+  }
+  
+  .alert-error {
+    @apply bg-error-50 border-l-4 border-error-500 text-error-700 p-4 rounded-md;
+  }
+  
+  /* Navigation styles */
+  .nav-link {
+    @apply text-neutral-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+  }
+  
+  .nav-link-active {
+    @apply text-primary-600 bg-primary-50;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* Gradient utilities using design tokens */
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  }
+  
+  .bg-gradient-secondary {
+    background: linear-gradient(135deg, var(--color-secondary-400), var(--color-secondary-500));
+  }
+  
+  .bg-gradient-accent {
+    background: linear-gradient(135deg, var(--color-accent-400), var(--color-accent-500));
+  }
+  
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn var(--duration-normal) var(--easing-ease-out);
+  }
+  
+  .animate-slide-up {
+    animation: slideUp var(--duration-normal) var(--easing-ease-out);
   }
 }
