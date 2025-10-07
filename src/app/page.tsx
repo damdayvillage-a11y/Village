@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { Button } from '@/lib/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
+import { Badge } from '@/lib/components/ui/Badge';
 
 export default function HomePage() {
   return (
@@ -13,6 +16,9 @@ export default function HomePage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Link href="/digital-twin" className="text-gray-700 hover:text-primary-600">
+                Digital Twin
+              </Link>
               <Link href="/dashboard" className="text-gray-700 hover:text-primary-600">
                 Dashboard
               </Link>
@@ -41,12 +47,14 @@ export default function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <button className="btn-primary">
-              Explore Digital Twin
-            </button>
-            <button className="btn-secondary">
-              Book Homestay
-            </button>
+            <Link href="/digital-twin">
+              <Button variant="primary" size="lg">
+                🏔️ Explore Digital Twin
+              </Button>
+            </Link>
+            <Button variant="outline" size="lg">
+              🏠 Book Homestay
+            </Button>
           </div>
         </div>
 

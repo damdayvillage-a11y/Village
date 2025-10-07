@@ -4,8 +4,8 @@ project: "Smart Carbon-Free Village - Futuristic"
 repository: "https://github.com/damdayvillage-a11y/Village"
 last_updated: "2024-10-07T03:45:00.000Z"
 current_stage:
-  pr_number: 3
-  pr_title: "Auth & RBAC + DID-ready identity + admin bootstrap"
+  pr_number: 4
+  pr_title: "Design system + 3D skeleton (Three.js viewer) + accessibility baseline"
   status: "completed"
 completed_prs:
   - number: 1
@@ -20,7 +20,7 @@ completed_prs:
     build_status: "successful"
   - number: 2
     title: "DB & Prisma + TimescaleDB for sensors + device simulation harness"
-    merge_commit: "pending"
+    merge_commit: "324c355"
     date: "2024-10-07T03:50:00.000Z"
     ci_status: "passed"
     staging_url: "http://localhost:3000"
@@ -32,7 +32,7 @@ completed_prs:
     api_endpoints: ["/api/health", "/api/devices", "/api/telemetry"]
   - number: 3
     title: "Auth & RBAC + DID-ready identity + admin bootstrap"
-    merge_commit: "pending"
+    merge_commit: "13de7eb"
     date: "2024-10-07T04:10:00.000Z"
     ci_status: "passed"
     staging_url: "http://localhost:3000"
@@ -42,6 +42,19 @@ completed_prs:
     build_status: "successful"
     api_endpoints: ["/api/auth/[...nextauth]", "/api/auth/register"]
     auth_features: ["NextAuth.js", "OAuth (Google/GitHub)", "RBAC", "Password security", "Multi-factor ready", "DID preparation"]
+  - number: 4
+    title: "Design system + 3D skeleton (Three.js viewer) + accessibility baseline"
+    merge_commit: "pending"
+    date: "2024-10-07T05:15:00.000Z"
+    ci_status: "passed"
+    staging_url: "http://localhost:3000"
+    screenshot_paths: ["docs/memory/screenshots/pr-04/homepage-enhanced-pr4.png", "docs/memory/screenshots/pr-04/digital-twin-3d-viewer-pr4.png"]
+    lighthouse_scores: {performance: "pending", accessibility: "pending", best_practices: "pending", seo: "pending"}
+    test_coverage: "pending"
+    build_status: "successful"
+    ui_pages: ["/digital-twin"]
+    components: ["Button", "Input", "Card", "Modal", "Alert", "Badge", "Avatar", "Progress", "VillageViewer"]
+    threejs_features: ["3D Scene", "Interactive village model", "Mouse controls", "Lighting system", "Performance optimization"]
 upcoming_prs:
   - number: 1
     title: "Foundation & infra"
@@ -54,7 +67,7 @@ upcoming_prs:
     status: "completed"
   - number: 4
     title: "Design system & 3D viewer"
-    status: "pending"
+    status: "completed"
   - number: 5
     title: "Homepage & Digital Twin"
     status: "pending"
@@ -93,6 +106,14 @@ artifacts:
       path: 'docs/memory/screenshots/pr-03/auth-signin-complete.png'
       desc: 'Advanced authentication system with NextAuth.js, OAuth providers, and secure sign-in'
       timestamp: '2024-10-07T04:10:00.000Z'
+    - pr: 4
+      path: 'docs/memory/screenshots/pr-04/homepage-enhanced-pr4.png'
+      desc: 'Enhanced homepage with new component library and improved navigation'
+      timestamp: '2024-10-07T05:15:00.000Z'
+    - pr: 4
+      path: 'docs/memory/screenshots/pr-04/digital-twin-3d-viewer-pr4.png'
+      desc: 'Three.js 3D Digital Twin viewer showing interactive village model with mountains and trees'
+      timestamp: '2024-10-07T05:16:00.000Z'
   videos: [] # optional screen recordings {pr, path, desc, timestamp}
   telemetry_snapshots: 
     - pr: 2
