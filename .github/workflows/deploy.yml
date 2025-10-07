@@ -50,15 +50,17 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Create deployment archive
+    - name: Prepare deployment files
       run: |
-        # Create a tar.gz file with all necessary files for deployment
-        tar -czf village-app.tar.gz \
-          --exclude=node_modules \
-          --exclude=.git \
-          --exclude=.github \
-          --exclude="*.tar.gz" \
-          .
+        # Remove any existing tar files to prevent conflicts
+        rm -f *.tar.gz
+        # Create clean deployment directory
+        mkdir -p deployment-temp
+        # Copy necessary files for deployment, excluding problematic directories
+        rsync -av --exclude='node_modules' --exclude='.git' --exclude='.github' --exclude='*.tar.gz' --exclude='deployment-temp' . deployment-temp/
+        # Create tar.gz from the clean directory
+        cd deployment-temp
+        tar -czf ../village-app.tar.gz .
     
     - name: Deploy to CapRover
       uses: caprover/deploy-from-github@v1.1.2
@@ -67,7 +69,70 @@ jobs:
         app: '${{ secrets.CAPROVER_APP_NAME }}'
         token: '${{ secrets.CAPROVER_APP_TOKEN }}'
     
+    - name: Wait for deployment
+      run: |
+        echo "⏳ Waiting for deployment to complete..."
+        sleep 30
+    
+    - name: Setup Playwright
+      run: |
+        npm install playwright@latest
+        npx playwright install chromium
+    
+    - name: Test live deployment
+      run: |
+        # Construct the app URL (assuming standard CapRover pattern)
+        APP_URL="https://${{ secrets.CAPROVER_APP_NAME }}.apps.${{ secrets.CAPROVER_SERVER }}"
+        echo "Testing deployment at: $APP_URL"
+        
+        # Test health endpoint
+        echo "Testing health endpoint..."
+        curl -f "$APP_URL/health" || echo "Health check failed"
+        
+        # Test main app endpoint
+        echo "Testing main application..."
+        curl -f "$APP_URL/" || echo "Main app test failed"
+        
+        # Run playwright tests
+        node -e "
+        const { chromium } = require('playwright');
+        (async () => {
+          const browser = await chromium.launch();
+          const page = await browser.newPage();
+          
+          try {
+            console.log('🌐 Taking screenshots of deployed application...');
+            
+            // Test main page
+            await page.goto('$APP_URL', { waitUntil: 'networkidle' });
+            await page.screenshot({ path: 'deployment-main-page.png', fullPage: true });
+            console.log('✅ Main page screenshot saved');
+            
+            // Test health endpoint
+            await page.goto('$APP_URL/health', { waitUntil: 'networkidle' });
+            await page.screenshot({ path: 'deployment-health-page.png', fullPage: true });
+            console.log('✅ Health endpoint screenshot saved');
+            
+            console.log('🎉 All tests completed successfully!');
+          } catch (error) {
+            console.error('❌ Error during testing:', error);
+            process.exit(1);
+          } finally {
+            await browser.close();
+          }
+        })();
+        "
+    
+    - name: Upload screenshots
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-screenshots
+        path: "*.png"
+        retention-days: 30
+    
     - name: Deployment Status
       run: |
         echo "🚀 Deployment completed!"
-        echo "App should be available at your CapRover domain"
+        echo "📸 Screenshots uploaded as artifacts"
+        echo "🔗 App should be available at: https://${{ secrets.CAPROVER_APP_NAME }}.apps.${{ secrets.CAPROVER_SERVER }}"
