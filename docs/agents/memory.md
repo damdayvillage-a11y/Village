@@ -2,11 +2,12 @@
 
 project: "Smart Carbon-Free Village - Futuristic"
 repository: "https://github.com/damdayvillage-a11y/Village"
-last_updated: "2024-10-07T03:45:00.000Z"
+last_updated: "2025-01-07T16:45:00.000Z"
 current_stage:
-  pr_number: 5
-  pr_title: "Homepage & Digital Twin integration + AR/360 viewer"
-  status: "completed"
+  pr_number: 6
+  pr_title: "Homestay booking + dynamic pricing + offline-first sync + payments (sandbox)"
+  status: "in_progress"
+  branch: "copilot/optimize-loading-speed-design"
 completed_prs:
   - number: 1
     title: "Foundation & infra (monorepo, Next.js, TypeScript, linting, basic PWA shell)"
@@ -70,24 +71,9 @@ completed_prs:
     ar_features: ["360° Panorama Viewer", "Interactive Hotspots", "WebXR AR Integration", "Mobile Gestures", "Real-time Village Data"]
     api_endpoints: ["/api/village/info"]
 upcoming_prs:
-  - number: 1
-    title: "Foundation & infra"
-    status: "completed"
-  - number: 2
-    title: "DB & sensor infra"
-    status: "completed"
-  - number: 3
-    title: "Auth & RBAC"
-    status: "completed"
-  - number: 4
-    title: "Design system & 3D viewer"
-    status: "completed"
-  - number: 5
-    title: "Homepage & Digital Twin integration + AR/360 viewer"
-    status: "completed"
   - number: 6
     title: "Homestay booking & offline sync"
-    status: "pending"
+    status: "in_progress"
   - number: 7
     title: "Marketplace & web3 escrow"
     status: "pending"
@@ -105,6 +91,33 @@ upcoming_prs:
     status: "pending"
   - number: 12
     title: "Testing & production deploy"
+    status: "pending"
+  - number: 13
+    title: "Complete Navigation & Page Implementation"
+    status: "pending"
+  - number: 14
+    title: "User Panel — Full Features & Auth Flow"
+    status: "pending"
+  - number: 15
+    title: "Admin Panel — Dynamic Content & Component Editor"
+    status: "pending"
+  - number: 16
+    title: "Booking & Payment Complete Flow"
+    status: "pending"
+  - number: 17
+    title: "Marketplace & Seller Management"
+    status: "pending"
+  - number: 18
+    title: "Projects Transparency & Live Dashboard"
+    status: "pending"
+  - number: 19
+    title: "Media, Gram Pradhan & National Heroes Block"
+    status: "pending"
+  - number: 20
+    title: "Full Site Admin Customization Panel & Theming"
+    status: "pending"
+  - number: 21
+    title: "Final QA, Security, Accessibility, Performance & Public Release"
     status: "pending"
 artifacts:
   screenshots: 
@@ -151,6 +164,10 @@ artifacts:
     - pr: 0
       env: "none"
       url: ""
+    - pr: 5
+      env: "production"
+      url: "https://village-app.captain.damdayvillage.com/"
+      status: "active"
   test_reports: [] # {pr, path, summary, coverage}
 notes: []
 issues_open: []
