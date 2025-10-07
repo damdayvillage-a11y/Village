@@ -3,15 +3,6 @@ import { prisma } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const homestays = await prisma.homestay.findMany({
-      include: {
-        village: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
     // Sample homestays data for the marketplace
     const sampleHomestays = [
       {
@@ -39,6 +30,30 @@ export async function GET(request: NextRequest) {
         images: ['/images/retreat-1.jpg', '/images/retreat-2.jpg']
       }
     ];
+
+    // Try to fetch from database only if DATABASE_URL is available and not during build
+    if (process.env.DATABASE_URL && process.env.DATABASE_URL !== 'postgresql://dummy:dummy@localhost:5432/dummy') {
+      try {
+        const homestays = await prisma.homestay.findMany({
+          include: {
+            village: true
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
+        });
+
+        if (homestays.length > 0) {
+          return NextResponse.json({
+            homestays: homestays,
+            total: homestays.length
+          });
+        }
+      } catch (dbError) {
+        console.warn('Database connection failed, using sample data:', dbError);
+        // Fall through to return sample data
+      }
+    }
 
     return NextResponse.json({
       homestays: sampleHomestays,
