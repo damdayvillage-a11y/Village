@@ -9,7 +9,8 @@ const withPWA = require('next-pwa')({
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: 'standalone',
+  // Temporarily disable standalone for development
+  // output: 'standalone',
   images: {
     domains: ['localhost'],
   },

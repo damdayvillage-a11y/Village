@@ -149,6 +149,10 @@ artifacts:
       path: 'docs/memory/screenshots/pr-05/village-tour-360-page.png'
       desc: 'Complete 360° Village Tour page with AR panorama viewer, interactive features, and live environmental data'
       timestamp: '2024-10-07T06:31:00.000Z'
+    - pr: 6
+      path: 'docs/memory/screenshots/pr-06/enhanced-homepage-after-improvements.png'
+      desc: 'Enhanced homepage with professional design, real-time village stats, improved navigation, and authentic Damday Village information'
+      timestamp: '2025-01-07T17:30:00.000Z'
   videos: [] # optional screen recordings {pr, path, desc, timestamp}
   telemetry_snapshots: 
     - pr: 2
