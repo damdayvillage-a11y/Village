@@ -43,7 +43,9 @@ interface AdminStats {
 }
 
 export default function AdminPanelPage() {
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status || 'loading';
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [adminStats, setAdminStats] = useState<AdminStats>({
@@ -62,7 +64,7 @@ export default function AdminPanelPage() {
       return;
     }
     
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && session) {
       // Check if user has admin permissions
       if (!session.user?.role || (!hasPermission(session.user, 'manage_users') && !hasPermission(session.user, 'manage_content'))) {
         router.push('/auth/unauthorized');

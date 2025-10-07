@@ -66,7 +66,9 @@ interface Complaint {
 }
 
 export default function UserPanelPage() {
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status || 'loading';
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [userStats, setUserStats] = useState<UserStats>({
@@ -239,7 +241,7 @@ export default function UserPanelPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Welcome back, {session.user?.name || 'User'}!
+          Welcome back, {session?.user?.name || 'User'}!
         </h2>
         <p className="text-gray-600">
           Here's what's happening with your Damday Village account
@@ -391,15 +393,15 @@ export default function UserPanelPage() {
         <CardContent>
           <div className="flex items-center space-x-6 mb-6">
             <Avatar 
-              src={session.user?.image} 
-              alt={session.user?.name || 'User'} 
+              src={session?.user?.image} 
+              alt={session?.user?.name || 'User'} 
               size="lg"
             />
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {session.user?.name || 'User'}
+                {session?.user?.name || 'User'}
               </h3>
-              <p className="text-gray-600">{session.user?.email}</p>
+              <p className="text-gray-600">{session?.user?.email}</p>
               <Button variant="outline" size="sm" className="mt-2">
                 Change Photo
               </Button>
@@ -414,7 +416,7 @@ export default function UserPanelPage() {
               <input
                 type="text"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                defaultValue={session.user?.name || ''}
+                defaultValue={session?.user?.name || ''}
               />
             </div>
             <div>
@@ -424,7 +426,7 @@ export default function UserPanelPage() {
               <input
                 type="email"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                defaultValue={session.user?.email || ''}
+                defaultValue={session?.user?.email || ''}
               />
             </div>
             <div>
@@ -513,8 +515,8 @@ export default function UserPanelPage() {
                 </Button>
               </Link>
               <Avatar 
-                src={session.user?.image} 
-                alt={session.user?.name || 'User'} 
+                src={session?.user?.image} 
+                alt={session?.user?.name || 'User'} 
                 size="sm"
               />
             </div>

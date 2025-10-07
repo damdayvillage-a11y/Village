@@ -17,6 +17,9 @@ const nextConfig = {
     // Disable ESLint during production builds
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
   async headers() {
     return [
       {
