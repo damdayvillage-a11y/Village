@@ -4,8 +4,8 @@ project: "Smart Carbon-Free Village - Futuristic"
 repository: "https://github.com/damdayvillage-a11y/Village"
 last_updated: "2024-10-07T03:45:00.000Z"
 current_stage:
-  pr_number: 1
-  pr_title: "Foundation & PWA shell"
+  pr_number: 2
+  pr_title: "Database & sensor infrastructure"
   status: "completed"
 completed_prs:
   - number: 1
@@ -18,13 +18,25 @@ completed_prs:
     lighthouse_scores: {performance: "pending", accessibility: "pending", best_practices: "pending", seo: "pending"}
     test_coverage: "pending"
     build_status: "successful"
+  - number: 2
+    title: "DB & Prisma + TimescaleDB for sensors + device simulation harness"
+    merge_commit: "pending"
+    date: "2024-10-07T03:50:00.000Z"
+    ci_status: "passed"
+    staging_url: "http://localhost:3000"
+    screenshot_paths: ["docs/memory/screenshots/pr-02/dashboard-desktop.png"]
+    telemetry_snapshot: "docs/memory/telemetry/pr-02-sample.json"
+    lighthouse_scores: {performance: "pending", accessibility: "pending", best_practices: "pending", seo: "pending"}
+    test_coverage: "pending"
+    build_status: "successful"
+    api_endpoints: ["/api/health", "/api/devices", "/api/telemetry"]
 upcoming_prs:
   - number: 1
     title: "Foundation & infra"
     status: "completed"
   - number: 2
     title: "DB & sensor infra"
-    status: "pending"
+    status: "completed"
   - number: 3
     title: "Auth & RBAC"
     status: "pending"
@@ -61,8 +73,16 @@ artifacts:
       path: 'docs/memory/screenshots/pr-01/homepage-desktop.png'
       desc: 'Homepage with hero section, feature cards, and coming soon sections'
       timestamp: '2024-10-07T03:45:00.000Z'
+    - pr: 2
+      path: 'docs/memory/screenshots/pr-02/dashboard-desktop.png'
+      desc: 'Database dashboard showing system health, API endpoints, and schema info'
+      timestamp: '2024-10-07T03:50:00.000Z'
   videos: [] # optional screen recordings {pr, path, desc, timestamp}
-  telemetry_snapshots: [] # sample sensor data (json) captured for PR
+  telemetry_snapshots: 
+    - pr: 2
+      path: 'docs/memory/telemetry/pr-02-sample.json'
+      desc: 'Sample IoT device telemetry data for 3 device types'
+      timestamp: '2024-10-07T03:50:00.000Z'
   model_versions: [] # {pr, model_name, version, metrics, path}
   deployments:
     - pr: 0

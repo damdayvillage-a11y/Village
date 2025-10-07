@@ -1,0 +1,45 @@
+{
+  "timestamp": "2024-10-07T03:50:00.000Z",
+  "sample_devices": [
+    {
+      "deviceId": "air-quality-001",
+      "name": "Village Center Air Quality Monitor", 
+      "type": "AIR_QUALITY",
+      "metrics": {
+        "pm25": 15.7,
+        "pm10": 28.3,
+        "co2": 420,
+        "humidity": 65.2,
+        "temperature": 12.8,
+        "aqi": 72
+      }
+    },
+    {
+      "deviceId": "energy-meter-001", 
+      "name": "Solar Microgrid Main Meter",
+      "type": "ENERGY_METER",
+      "metrics": {
+        "voltage": 235.2,
+        "current": 8.7, 
+        "power": 1890.5,
+        "energy": 647.3,
+        "frequency": 49.8,
+        "powerFactor": 0.92
+      }
+    },
+    {
+      "deviceId": "weather-001",
+      "name": "Village Weather Station",
+      "type": "WEATHER_STATION", 
+      "metrics": {
+        "temperature": 15.3,
+        "humidity": 58.7,
+        "pressure": 1013.2,
+        "windSpeed": 4.2,
+        "windDirection": 285,
+        "rainfall": 0.0,
+        "uvIndex": 2
+      }
+    }
+  ]
+}

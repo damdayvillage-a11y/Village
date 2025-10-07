@@ -1,0 +1,516 @@
+// Smart Carbon-Free Village - Database Schema
+// Includes core models + TimescaleDB extensions for sensor data
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== CORE USER & AUTH MODELS ====================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?
+  name      String
+  role      UserRole @default(GUEST)
+  avatar    String?
+  did       String?  // Optional DID/SSI identity
+  locale    String   @default("en")
+  verified  Boolean  @default(false)
+  active    Boolean  @default(true)
+  
+  // Preferences
+  preferences Json?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLogin DateTime?
+  
+  // Relations
+  ownedHomestays   Homestay[]    @relation("HomestayOwner")
+  bookings         Booking[]
+  orders           Order[]
+  projects         Project[]     @relation("ProjectCreator")
+  votes            Vote[]
+  reviews          Review[]
+  sentMessages     Message[]     @relation("SentMessages")
+  receivedMessages Message[]     @relation("ReceivedMessages")
+  sessions         Session[]
+  uploads          Media[]
+  products         Product[]     @relation("ProductSeller")
+  
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+enum UserRole {
+  ADMIN
+  VILLAGE_COUNCIL
+  HOST
+  SELLER
+  OPERATOR
+  GUEST
+  RESEARCHER
+}
+
+// ==================== VILLAGE & LOCATION MODELS ====================
+
+model Village {
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  latitude    Float
+  longitude   Float
+  elevation   Float?
+  carbonScore Float   @default(0)
+  
+  // Digital Twin metadata
+  digitalTwinData Json?
+  
+  // Relations
+  homestays Homestay[]
+  devices   Device[]
+  projects  Project[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("villages")
+}
+
+// ==================== HOMESTAY & BOOKING MODELS ====================
+
+model Homestay {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  ownerId     String
+  villageId   String
+  
+  // Location
+  latitude  Float
+  longitude Float
+  address   String
+  
+  // Amenities & Features
+  rooms         Int
+  maxGuests     Int
+  amenities     Json // Array of amenity codes
+  assets3D      Json? // 3D model references
+  photos        Json // Array of photo URLs
+  
+  // Pricing
+  basePrice        Float
+  pricingPolicyId  String?
+  
+  // Availability
+  available     Boolean @default(true)
+  calendar      Json? // Availability calendar
+  
+  // Relations
+  owner        User         @relation("HomestayOwner", fields: [ownerId], references: [id])
+  village      Village      @relation(fields: [villageId], references: [id])
+  pricingPolicy PricingPolicy? @relation(fields: [pricingPolicyId], references: [id])
+  bookings     Booking[]
+  reviews      Review[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("homestays")
+}
+
+model Booking {
+  id         String        @id @default(cuid())
+  homestayId String
+  guestId    String
+  
+  // Booking window
+  checkIn    DateTime
+  checkOut   DateTime
+  guests     Int
+  
+  // Pricing breakdown
+  pricing    Json // {basePrice, taxes, fees, total}
+  
+  // Status
+  status     BookingStatus @default(PENDING)
+  paymentRef String?
+  
+  // Carbon footprint tracking
+  carbonFootprint Json?
+  
+  // Relations
+  homestay Homestay @relation(fields: [homestayId], references: [id])
+  guest    User     @relation(fields: [guestId], references: [id])
+  payments Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("bookings")
+}
+
+model PricingPolicy {
+  id        String @id @default(cuid())
+  name      String
+  rules     Json   // Dynamic pricing rules
+  
+  homestays Homestay[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("pricing_policies")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
+
+// ==================== MARKETPLACE MODELS ====================
+
+model Product {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  sellerId    String
+  category    String
+  
+  // Pricing
+  price       Float
+  currency    String @default("INR")
+  
+  // Inventory
+  stock       Int    @default(0)
+  unlimited   Boolean @default(false)
+  
+  // Media
+  images      Json   // Array of image URLs
+  
+  // Sustainability
+  carbonFootprint Float?
+  locallySourced  Boolean @default(false)
+  
+  // Status
+  active      Boolean @default(true)
+  
+  // Relations
+  seller     User        @relation("ProductSeller", fields: [sellerId], references: [id])
+  orderItems OrderItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("products")
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  customerId String
+  
+  // Order details
+  total      Float
+  currency   String      @default("INR")
+  status     OrderStatus @default(PENDING)
+  
+  // Shipping
+  shippingAddress Json
+  
+  // Relations
+  customer User        @relation(fields: [customerId], references: [id])
+  items    OrderItem[]
+  payments Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+// ==================== PAYMENT MODELS ====================
+
+model Payment {
+  id        String        @id @default(cuid())
+  amount    Float
+  currency  String        @default("INR")
+  status    PaymentStatus @default(PENDING)
+  method    PaymentMethod
+  
+  // External references
+  stripeId    String?
+  razorpayId  String?
+  web3TxHash  String? // Blockchain transaction hash
+  
+  // Relations (polymorphic)
+  bookingId String?
+  orderId   String?
+  projectId String?
+  
+  booking Booking? @relation(fields: [bookingId], references: [id])
+  order   Order?   @relation(fields: [orderId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE
+  RAZORPAY
+  WEB3
+  BANK_TRANSFER
+}
+
+// ==================== PROJECT & DAO MODELS ====================
+
+model Project {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  creatorId   String
+  villageId   String
+  
+  // Funding
+  fundingGoal    Float
+  currentFunding Float @default(0)
+  
+  // Timeline
+  startDate DateTime?
+  endDate   DateTime?
+  
+  // Transparency
+  ledgerEntries Json? // Array of ledger entries
+  photos        Json? // Progress photos
+  
+  // Blockchain (optional)
+  contractAddress String? // Smart contract for funding
+  
+  // Status
+  status ProjectStatus @default(PLANNING)
+  
+  // Relations
+  creator  User      @relation("ProjectCreator", fields: [creatorId], references: [id])
+  village  Village   @relation(fields: [villageId], references: [id])
+  votes    Vote[]
+  payments Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("projects")
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  choice    VoteChoice
+  weight    Float    @default(1.0)
+  
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, projectId])
+  @@map("votes")
+}
+
+enum ProjectStatus {
+  PLANNING
+  VOTING
+  FUNDED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum VoteChoice {
+  FOR
+  AGAINST
+  ABSTAIN
+}
+
+// ==================== IOT & SENSOR MODELS ====================
+
+model Device {
+  id          String     @id @default(cuid())
+  name        String
+  type        DeviceType
+  villageId   String
+  
+  // Location
+  latitude    Float?
+  longitude   Float?
+  elevation   Float?
+  location    String? // Human readable location
+  
+  // Configuration
+  config      Json? // Device-specific configuration
+  schema      Json? // Telemetry data schema
+  
+  // Status
+  status      DeviceStatus @default(OFFLINE)
+  lastSeen    DateTime?
+  firmware    String?
+  
+  // Relations
+  village  Village        @relation(fields: [villageId], references: [id])
+  readings SensorReading[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("devices")
+}
+
+// TimescaleDB hypertable for time-series sensor data
+model SensorReading {
+  id       String   @id @default(cuid())
+  deviceId String
+  timestamp DateTime @default(now())
+  
+  // Flexible metrics storage
+  metrics Json
+  
+  // Relations
+  device Device @relation(fields: [deviceId], references: [id])
+  
+  @@map("sensor_readings")
+  // Note: This will be converted to TimescaleDB hypertable in migration
+}
+
+enum DeviceType {
+  AIR_QUALITY
+  ENERGY_METER
+  SOLAR_PANEL
+  WEATHER_STATION
+  WATER_SENSOR
+  MOTION_SENSOR
+  CAMERA
+  MICROPHONE
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+  ERROR
+}
+
+// ==================== CONTENT & MEDIA MODELS ====================
+
+model Media {
+  id        String    @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  checksum  String
+  ipfsCid   String?   // IPFS content identifier
+  tags      Json?     // Array of tags
+  
+  // Relations
+  uploadedBy String?
+  uploader   User? @relation(fields: [uploadedBy], references: [id])
+  
+  createdAt DateTime @default(now())
+  
+  @@map("media")
+}
+
+model Review {
+  id         String @id @default(cuid())
+  rating     Int    // 1-5 stars
+  comment    String?
+  userId     String
+  homestayId String?
+  productId  String?
+  
+  user     User      @relation(fields: [userId], references: [id])
+  homestay Homestay? @relation(fields: [homestayId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("reviews")
+}
+
+model Message {
+  id         String      @id @default(cuid())
+  content    String
+  senderId   String
+  receiverId String?
+  type       MessageType @default(TEXT)
+  
+  sender   User  @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User? @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  
+  createdAt DateTime @default(now())
+  
+  @@map("messages")
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+}

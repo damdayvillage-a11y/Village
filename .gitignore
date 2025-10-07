@@ -88,3 +88,4 @@ captain-definition
 
 # Memory artifacts (keep in repo but ignore temp files)
 docs/memory/temp/
+/generated/prisma

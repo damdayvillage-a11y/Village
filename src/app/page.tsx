@@ -13,6 +13,9 @@ export default function HomePage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Link href="/dashboard" className="text-gray-700 hover:text-primary-600">
+                Dashboard
+              </Link>
               <Link href="/about" className="text-gray-700 hover:text-primary-600">
                 About
               </Link>
