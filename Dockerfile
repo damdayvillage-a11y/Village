@@ -28,14 +28,12 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 ENV CI=true
 ENV DISABLE_ESLINT_PLUGIN=true
 
-# Generate Prisma client and build with verbose logging
+# Use enhanced Docker build script with PWA optimizations
 RUN npm config set strict-ssl false && \
     npm config set registry https://registry.npmjs.org/ && \
-    echo "Generating Prisma client..." && \
-    NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma generate && \
-    echo "Starting Next.js build with timeout protection..." && \
-    (timeout 900 npm run build 2>&1 | while IFS= read -r line; do echo "[BUILD] $line"; done) || \
-    (echo "Build process failed or timed out" && exit 1)
+    echo "Using Docker-optimized build script..." && \
+    chmod +x scripts/docker-build.sh && \
+    NODE_TLS_REJECT_UNAUTHORIZED=0 ./scripts/docker-build.sh
 
 # Production stage
 FROM node:20-alpine AS runner

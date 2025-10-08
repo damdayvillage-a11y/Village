@@ -10,6 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:docker": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 next build",
+    "build:caprover": "./scripts/docker-build.sh",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
