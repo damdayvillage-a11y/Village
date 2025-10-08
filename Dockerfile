@@ -33,7 +33,7 @@ RUN npm config set strict-ssl false && \
     npm config set registry https://registry.npmjs.org/ && \
     echo "Using Docker-optimized build script..." && \
     chmod +x scripts/docker-build.sh && \
-    NODE_TLS_REJECT_UNAUTHORIZED=0 ./scripts/docker-build.sh
+    NODE_TLS_REJECT_UNAUTHORIZED=0 sh scripts/docker-build.sh
 
 # Production stage
 FROM node:20-alpine AS runner
