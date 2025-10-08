@@ -5,8 +5,43 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   // Optimize PWA for Docker builds
-  buildExcludes: [/middleware-manifest\.json$/],
+  buildExcludes: [
+    /middleware-manifest\.json$/,
+    /build-manifest\.json$/,
+    'app-build-manifest.json'
+  ],
   maximumFileSizeToCacheInBytes: 5000000, // 5MB limit
+  // Runtime caching for better performance
+  runtimeCaching: [
+    {
+      urlPattern: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'google-fonts-webfonts',
+        expiration: {
+          maxEntries: 4,
+          maxAgeSeconds: 365 * 24 * 60 * 60 // 1 year
+        }
+      }
+    },
+    {
+      urlPattern: /^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'google-fonts-stylesheets',
+        expiration: {
+          maxEntries: 4,
+          maxAgeSeconds: 7 * 24 * 60 * 60 // 7 days
+        }
+      }
+    }
+  ],
+  // Fallback for build issues in Docker
+  fallbacks: {
+    document: '/offline'
+  },
+  // Docker-specific optimizations
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development'
   // Additional Docker build optimization
   runtimeCaching: [],
   publicExcludes: ['!workbox-*.js']

@@ -33,6 +33,12 @@ ENV GENERATE_SOURCEMAP=false
 ENV DISABLE_ESLINT=true
 ENV TYPESCRIPT_NO_TYPE_CHECK=false
 
+# Use enhanced Docker build script with PWA optimizations
+RUN npm config set strict-ssl false && \
+    npm config set registry https://registry.npmjs.org/ && \
+    echo "Using Docker-optimized build script..." && \
+    chmod +x scripts/docker-build.sh && \
+    NODE_TLS_REJECT_UNAUTHORIZED=0 sh scripts/docker-build.sh
 # Generate Prisma client and build with enhanced monitoring
 ENV CAPROVER_BUILD=true
 RUN npm config set strict-ssl false && \

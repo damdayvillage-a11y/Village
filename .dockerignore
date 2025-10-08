@@ -12,9 +12,12 @@ Dockerfile
 coverage
 .nyc_output
 docs/memory/temp
+# Service worker files - exclude existing ones to prevent build conflicts
 public/sw.js
-public/workbox-*
+public/workbox-*.js
+# Build cache files
 .swc
 tsconfig.tsbuildinfo
+.next/cache
 *.log
 .storybook-cache
