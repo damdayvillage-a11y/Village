@@ -1,0 +1,363 @@
+{
+  "audit_date": "2025-01-07T19:15:00.000Z",
+  "total_components": 17,
+  "total_pages": 19,
+  "total_api_endpoints": 14,
+  "components": {
+    "ui": [
+      {
+        "name": "Button",
+        "path": "lib/components/ui/Button.tsx",
+        "lines": 83,
+        "variants": ["primary", "secondary", "ghost", "outline"],
+        "props": ["variant", "size", "disabled", "loading"],
+        "redesign_priority": "HIGH",
+        "admin_editable_fields": ["text", "variant", "size", "href"],
+        "current_issues": ["No design token integration", "Limited accessibility", "Missing states"]
+      },
+      {
+        "name": "Card",
+        "path": "lib/components/ui/Card.tsx", 
+        "lines": 107,
+        "variants": ["default", "outlined", "elevated"],
+        "props": ["className", "children", "variant"],
+        "redesign_priority": "MEDIUM",
+        "admin_editable_fields": ["title", "content", "image", "variant"],
+        "current_issues": ["Inconsistent spacing", "No hover effects"]
+      },
+      {
+        "name": "Input",
+        "path": "lib/components/ui/Input.tsx",
+        "lines": 68,
+        "variants": ["text", "email", "password", "search"],
+        "props": ["type", "placeholder", "value", "onChange"],
+        "redesign_priority": "MEDIUM", 
+        "admin_editable_fields": ["label", "placeholder", "required", "type"],
+        "current_issues": ["No error states", "Inconsistent focus styles"]
+      },
+      {
+        "name": "Modal",
+        "path": "lib/components/ui/Modal.tsx",
+        "lines": 120,
+        "variants": ["default", "fullscreen", "drawer"],
+        "props": ["isOpen", "onClose", "title", "children"],
+        "redesign_priority": "LOW",
+        "admin_editable_fields": ["title", "content", "size", "backdrop"],
+        "current_issues": ["Accessibility improvements needed"]
+      },
+      {
+        "name": "Alert",
+        "path": "lib/components/ui/Alert.tsx",
+        "lines": 48,
+        "variants": ["info", "success", "warning", "error"],
+        "props": ["type", "title", "message", "dismissible"],
+        "redesign_priority": "MEDIUM",
+        "admin_editable_fields": ["type", "title", "message", "dismissible"],
+        "current_issues": ["Limited variant styles", "No icon system"]
+      },
+      {
+        "name": "Badge",
+        "path": "lib/components/ui/Badge.tsx",
+        "lines": 46,
+        "variants": ["default", "secondary", "success", "warning", "error"],
+        "props": ["variant", "size", "children"],
+        "redesign_priority": "MEDIUM",
+        "admin_editable_fields": ["text", "variant", "size"],
+        "current_issues": ["No design token integration"]
+      },
+      {
+        "name": "Avatar", 
+        "path": "lib/components/ui/Avatar.tsx",
+        "lines": 55,
+        "variants": ["default", "small", "large"],
+        "props": ["src", "alt", "size", "fallback"],
+        "redesign_priority": "LOW",
+        "admin_editable_fields": ["src", "alt", "size", "fallback"],
+        "current_issues": ["Missing image optimization"]
+      },
+      {
+        "name": "Progress",
+        "path": "lib/components/ui/Progress.tsx", 
+        "lines": 59,
+        "variants": ["default", "success", "warning"],
+        "props": ["value", "max", "variant", "showLabel"],
+        "redesign_priority": "LOW",
+        "admin_editable_fields": ["value", "max", "variant", "label"],
+        "current_issues": ["Style consistency with design tokens"]
+      },
+      {
+        "name": "AuthNavigation",
+        "path": "lib/components/ui/AuthNavigation.tsx",
+        "lines": 78, 
+        "variants": ["header", "sidebar", "mobile"],
+        "props": ["user", "variant", "showProfile"],
+        "redesign_priority": "HIGH",
+        "admin_editable_fields": ["logo", "menu_items", "user_menu", "colors"],
+        "current_issues": ["Not responsive", "No mega-nav", "Inconsistent styling"]
+      },
+      {
+        "name": "LiveData",
+        "path": "lib/components/ui/LiveData.tsx",
+        "lines": 131,
+        "variants": ["weather", "stats", "sensors", "compact"],
+        "props": ["dataType", "refreshInterval", "variant"],
+        "redesign_priority": "HIGH", 
+        "admin_editable_fields": ["data_sources", "refresh_rate", "display_format", "widgets"],
+        "current_issues": ["No real API integration", "Static placeholder data"]
+      }
+    ],
+    "specialized": [
+      {
+        "name": "VillageViewer",
+        "path": "lib/components/3d/VillageViewer.tsx",
+        "lines": 245,
+        "type": "3D_COMPONENT",
+        "dependencies": ["three.js", "WebGL"],
+        "redesign_priority": "MEDIUM", 
+        "admin_editable_fields": ["model_assets", "lighting", "camera_positions", "hotspots"],
+        "current_issues": ["Performance optimization needed", "Mobile responsiveness"]
+      },
+      {
+        "name": "PanoramaViewer", 
+        "path": "lib/components/ar/PanoramaViewer.tsx",
+        "lines": 476,
+        "type": "AR_COMPONENT",
+        "dependencies": ["WebXR", "three.js"],
+        "redesign_priority": "LOW",
+        "admin_editable_fields": ["panorama_images", "hotspots", "navigation", "overlays"],
+        "current_issues": ["Already well implemented"]
+      },
+      {
+        "name": "ContentEditor",
+        "path": "lib/components/admin-panel/ContentEditor.tsx", 
+        "lines": 452,
+        "type": "ADMIN_COMPONENT",
+        "dependencies": ["Draft.js", "React"],
+        "redesign_priority": "HIGH",
+        "admin_editable_fields": ["blocks", "templates", "preview_modes", "permissions"],
+        "current_issues": ["No inline editing", "Limited block types", "No live preview"]
+      },
+      {
+        "name": "UserManagement",
+        "path": "lib/components/admin-panel/UserManagement.tsx",
+        "lines": 351, 
+        "type": "ADMIN_COMPONENT",
+        "dependencies": ["React", "API"],
+        "redesign_priority": "MEDIUM",
+        "admin_editable_fields": ["user_roles", "permissions", "bulk_actions", "filters"],
+        "current_issues": ["UI consistency", "Better filtering system"]
+      },
+      {
+        "name": "ArticleEditor",
+        "path": "lib/components/user-panel/ArticleEditor.tsx",
+        "lines": 300,
+        "type": "USER_COMPONENT", 
+        "dependencies": ["React", "Rich text editor"],
+        "redesign_priority": "MEDIUM",
+        "admin_editable_fields": ["editor_config", "media_upload", "publishing_options"],
+        "current_issues": ["Rich text improvements", "Image handling"]
+      },
+      {
+        "name": "ComplaintsForm",
+        "path": "lib/components/user-panel/ComplaintsForm.tsx",
+        "lines": 280,
+        "type": "USER_COMPONENT",
+        "dependencies": ["React", "Form validation"],
+        "redesign_priority": "MEDIUM", 
+        "admin_editable_fields": ["form_fields", "categories", "validation_rules", "notifications"],
+        "current_issues": ["Form design enhancement", "Better validation"]
+      }
+    ]
+  },
+  "pages": [
+    {
+      "route": "/",
+      "file": "src/app/page.tsx",
+      "title": "Damday Village - Smart Carbon-Free Village",
+      "components_used": ["Button", "Card", "LiveData", "AuthNavigation"],
+      "admin_editable_sections": ["hero", "stats", "features", "testimonials"],
+      "placeholder_content": ["testimonials", "some statistics"],
+      "redesign_priority": "HIGH"
+    },
+    {
+      "route": "/about", 
+      "file": "src/app/about/page.tsx",
+      "title": "About Damday Village",
+      "components_used": ["Card", "AuthNavigation"],
+      "admin_editable_sections": ["hero", "history", "culture", "team"],
+      "placeholder_content": ["team profiles", "historical timeline"],
+      "redesign_priority": "MEDIUM"
+    },
+    {
+      "route": "/vision",
+      "file": "src/app/vision/page.tsx", 
+      "title": "Vision & Mission",
+      "components_used": ["Card", "AuthNavigation"],
+      "admin_editable_sections": ["mission", "goals", "sustainability"],
+      "placeholder_content": ["future plans", "impact metrics"],
+      "redesign_priority": "MEDIUM"
+    },
+    {
+      "route": "/digital-twin",
+      "file": "src/app/digital-twin/page.tsx",
+      "title": "Digital Twin - 3D Village Model", 
+      "components_used": ["VillageViewer", "AuthNavigation", "Card"],
+      "admin_editable_sections": ["3d_models", "hotspot_info", "navigation"],
+      "placeholder_content": ["none - 3D assets in place"],
+      "redesign_priority": "LOW"
+    },
+    {
+      "route": "/village-tour",
+      "file": "src/app/village-tour/page.tsx",
+      "title": "360° Village Tour",
+      "components_used": ["PanoramaViewer", "AuthNavigation", "LiveData"],
+      "admin_editable_sections": ["panoramas", "tour_points", "descriptions"],
+      "placeholder_content": ["none - AR system functional"],
+      "redesign_priority": "LOW"
+    },
+    {
+      "route": "/book-homestay", 
+      "file": "src/app/book-homestay/page.tsx",
+      "title": "Book Homestay Experience",
+      "components_used": ["Card", "Button", "Input", "AuthNavigation"],
+      "admin_editable_sections": ["homestay_listings", "pricing", "amenities"],
+      "placeholder_content": ["some homestay photos", "availability calendar"],
+      "redesign_priority": "HIGH"
+    },
+    {
+      "route": "/booking",
+      "file": "src/app/booking/page.tsx",
+      "title": "Booking Management",
+      "components_used": ["Card", "Button", "Modal", "AuthNavigation"],
+      "admin_editable_sections": ["booking_form", "pricing_display", "confirmation"],
+      "placeholder_content": ["payment integration testing"],
+      "redesign_priority": "HIGH"
+    },
+    {
+      "route": "/marketplace",
+      "file": "src/app/marketplace/page.tsx",
+      "title": "Village Marketplace",
+      "components_used": ["Card", "Badge", "Button", "AuthNavigation"], 
+      "admin_editable_sections": ["product_grid", "categories", "seller_info"],
+      "placeholder_content": ["some product images", "seller profiles"],
+      "redesign_priority": "HIGH"
+    },
+    {
+      "route": "/projects",
+      "file": "src/app/projects/page.tsx",
+      "title": "Community Projects",
+      "components_used": ["Card", "Progress", "Button", "AuthNavigation"],
+      "admin_editable_sections": ["project_list", "progress_tracking", "funding"],
+      "placeholder_content": ["project photos", "funding details"],
+      "redesign_priority": "MEDIUM"
+    },
+    {
+      "route": "/admin-panel",
+      "file": "src/app/admin-panel/page.tsx", 
+      "title": "Admin Dashboard",
+      "components_used": ["ContentEditor", "UserManagement", "Card", "Button"],
+      "admin_editable_sections": ["dashboard_widgets", "sidebar_menu", "theme_settings"],
+      "placeholder_content": ["coming soon sections"],
+      "redesign_priority": "HIGH"
+    }
+  ],
+  "api_endpoints": [
+    {
+      "path": "/api/admin/stats",
+      "methods": ["GET"],
+      "purpose": "Admin dashboard statistics",
+      "admin_configurable": false
+    },
+    {
+      "path": "/api/auth/[...nextauth]", 
+      "methods": ["GET", "POST"],
+      "purpose": "Authentication handling",
+      "admin_configurable": false
+    },
+    {
+      "path": "/api/bookings",
+      "methods": ["GET", "POST"], 
+      "purpose": "Booking management",
+      "admin_configurable": true
+    },
+    {
+      "path": "/api/village/info",
+      "methods": ["GET"],
+      "purpose": "Village information and stats", 
+      "admin_configurable": true
+    }
+  ],
+  "missing_for_redesign": {
+    "database_models": [
+      "SiteSettings",
+      "ComponentRegistry", 
+      "PageTemplates",
+      "ThemeSettings",
+      "MediaRights"
+    ],
+    "api_endpoints": [
+      "/api/site-settings",
+      "/api/theme-editor",
+      "/api/component-registry",
+      "/api/page-templates", 
+      "/api/media-upload",
+      "/api/weather"
+    ],
+    "components": [
+      "ThemeEditor",
+      "ComponentRegistryEditor", 
+      "InlineEditor",
+      "WeatherWidget",
+      "GramPradhanBlock",
+      "EnvironmentSidebar"
+    ]
+  },
+  "design_tokens": {
+    "current": {
+      "colors": {
+        "primary": "Green palette (50-900)",
+        "accent": "Amber palette (50-900)"
+      },
+      "fonts": {
+        "sans": ["system-ui", "Segoe UI", "Roboto"],
+        "display": ["Georgia", "Times New Roman", "serif"]
+      },
+      "spacing": "Tailwind default scale",
+      "shadows": "Tailwind default shadows",
+      "animations": ["fade-in", "slide-up", "bounce-subtle"]
+    },
+    "needed": {
+      "color_palettes": 4,
+      "typography_scales": 2,
+      "spacing_systems": 1,
+      "shadow_systems": 1,
+      "animation_library": 1,
+      "admin_editor": 1
+    }
+  },
+  "priority_matrix": {
+    "critical": [
+      "Fix TypeScript errors (4,537)",
+      "Create design token system",
+      "Build component registry",
+      "Implement theme editor"
+    ],
+    "high": [
+      "Redesign global navigation",
+      "Create weather widget system", 
+      "Build inline editing",
+      "Replace placeholder content"
+    ],
+    "medium": [
+      "Enhance existing components",
+      "Add accessibility features",
+      "Optimize performance",
+      "Create Storybook"
+    ],
+    "low": [
+      "Minor styling updates",
+      "Component prop additions",
+      "Documentation improvements"
+    ]
+  }
+}

@@ -10,7 +10,37 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  asChild?: boolean;
+  children?: React.ReactNode;
 }
+
+const getButtonClasses = ({ variant, size, className }: { variant: string; size: string; className?: string }) => {
+  const baseClasses = [
+    'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-offset-2',
+    'disabled:cursor-not-allowed disabled:opacity-50',
+    'active:scale-[0.98] motion-reduce:active:scale-100'
+  ];
+
+  const variants = {
+    default: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500',
+    primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500',
+    secondary: 'bg-secondary-400 text-white hover:bg-secondary-500 focus:ring-secondary-400',
+    outline: 'border border-primary-500 text-primary-500 hover:bg-primary-50 focus:ring-primary-500',
+    ghost: 'text-primary-500 hover:bg-primary-50 focus:ring-primary-500',
+    destructive: 'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500',
+  };
+
+  const sizes = {
+    xs: 'px-2.5 py-1.5 text-xs',
+    sm: 'px-3 py-2 text-sm',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base',
+    xl: 'px-8 py-4 text-lg',
+  };
+
+  return cn(baseClasses, variants[variant as keyof typeof variants], sizes[size as keyof typeof sizes], className);
+};
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ 
@@ -20,33 +50,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     loading = false, 
     icon, 
     iconPosition = 'left',
+    asChild = false,
     children, 
     disabled,
     ...props 
   }, ref) => {
-    const baseClasses = [
-      'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200',
-      'focus:outline-none focus:ring-2 focus:ring-offset-2',
-      'disabled:cursor-not-allowed disabled:opacity-50',
-      'active:scale-[0.98] motion-reduce:active:scale-100'
-    ];
-
-    const variants = {
-      default: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500',
-      primary: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
-      secondary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-      outline: 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500',
-      ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
-      destructive: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
-    };
-
-    const sizes = {
-      xs: 'px-2 py-1 text-xs h-6',
-      sm: 'px-3 py-1.5 text-sm h-8',
-      md: 'px-4 py-2 text-sm h-10',
-      lg: 'px-6 py-3 text-base h-12',
-      xl: 'px-8 py-4 text-lg h-14'
-    };
+    // If asChild is true, just render children as-is for now
+    // TODO: Implement proper polymorphic component pattern
+    if (asChild) {
+      return children as React.ReactElement;
+    }
 
     const isDisabled = disabled || loading;
 
@@ -55,12 +68,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={cn(
-          baseClasses,
-          variants[variant],
-          sizes[size],
-          className
-        )}
+        className={getButtonClasses({ variant, size, className })}
         disabled={isDisabled}
         {...props}
       >
