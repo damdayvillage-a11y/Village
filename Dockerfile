@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY package*.json ./
 
 # Install dependencies (including dev dependencies for build)
 RUN npm config set strict-ssl false && \
-    npm config set registry http://registry.npmjs.org/ && \
+    npm config set registry https://registry.npmjs.org/ && \
     npm ci --include=dev
 
 # Copy source code
@@ -30,7 +30,7 @@ ENV DISABLE_ESLINT_PLUGIN=true
 
 # Generate Prisma client and build with verbose logging
 RUN npm config set strict-ssl false && \
-    npm config set registry http://registry.npmjs.org/ && \
+    npm config set registry https://registry.npmjs.org/ && \
     echo "Generating Prisma client..." && \
     NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma generate && \
     echo "Starting Next.js build with timeout protection..." && \
@@ -38,7 +38,7 @@ RUN npm config set strict-ssl false && \
     (echo "Build process failed or timed out" && exit 1)
 
 # Production stage
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
