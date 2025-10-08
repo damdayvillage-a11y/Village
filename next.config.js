@@ -41,9 +41,8 @@ const withPWA = require('next-pwa')({
     document: '/offline'
   },
   // Docker-specific optimizations
-  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development'
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   // Additional Docker build optimization
-  runtimeCaching: [],
   publicExcludes: ['!workbox-*.js']
 })
 
