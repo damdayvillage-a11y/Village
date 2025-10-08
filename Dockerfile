@@ -7,20 +7,7 @@ WORKDIR /app
 ENV NODE_OPTIONS="--max-old-space-size=4096 --max-semi-space-size=1024"
 ENV UV_THREADPOOL_SIZE=64
 
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies (including dev dependencies for build)
-RUN npm config set strict-ssl false && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm config set fund false && \
-    npm config set update-notifier false && \
-    npm ci --include=dev --silent --no-audit --no-fund
-
-# Copy source code
-COPY . .
-
-# Set build-time environment variables
+# Set build-time environment variables early
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 ENV NEXTAUTH_SECRET="dummy-secret-for-build"
 ENV NEXTAUTH_URL="http://localhost:3000"
@@ -32,40 +19,72 @@ ENV DISABLE_ESLINT_PLUGIN=true
 ENV GENERATE_SOURCEMAP=false
 ENV DISABLE_ESLINT=true
 ENV TYPESCRIPT_NO_TYPE_CHECK=false
-
-# Use enhanced Docker build script with PWA optimizations
-RUN npm config set strict-ssl false && \
-    npm config set registry https://registry.npmjs.org/ && \
-    echo "Using Docker-optimized build script..." && \
-    chmod +x scripts/docker-build.sh && \
-    NODE_TLS_REJECT_UNAUTHORIZED=0 sh scripts/docker-build.sh
-# Generate Prisma client and build with enhanced monitoring
 ENV CAPROVER_BUILD=true
-RUN npm config set strict-ssl false && \
+
+# Copy package files
+COPY package*.json ./
+
+# Configure npm for stability and debugging
+RUN echo "🔧 Configuring npm for CapRover build..." && \
+    npm config set strict-ssl false && \
     npm config set registry https://registry.npmjs.org/ && \
     npm config set fund false && \
     npm config set update-notifier false && \
-    npm config set audit false
+    npm config set audit false && \
+    npm config set loglevel info && \
+    npm config set progress true && \
+    echo "📋 NPM Configuration:" && \
+    npm config list
 
-# Generate Prisma client first
-RUN echo "Generating Prisma client..." && \
-    NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma generate
+# Install dependencies with CapRover-friendly monitoring
+RUN echo "📦 [$(date '+%H:%M:%S')] Starting dependency installation for CapRover..." && \
+    echo "💾 [$(date '+%H:%M:%S')] Available memory: $(free -h)" && \
+    echo "🔄 [$(date '+%H:%M:%S')] Installing dependencies (monitoring for hangs)..." && \
+    npm ci --include=dev --no-audit --no-fund --loglevel=info 2>&1 | \
+    tee /tmp/npm-install.log | \
+    while IFS= read -r line; do \
+      echo "[$(date '+%H:%M:%S')] NPM: $line"; \
+      case "$line" in \
+        *"added"*) echo "[$(date '+%H:%M:%S')] ✅ Package installation progressing..." ;; \
+        *"deprecated"*) echo "[$(date '+%H:%M:%S')] ⚠️ Deprecated package (not critical)" ;; \
+        *"WARN"*) echo "[$(date '+%H:%M:%S')] ⚠️ Warning: $line" ;; \
+        *"ERR"*) echo "[$(date '+%H:%M:%S')] ❌ Error: $line" ;; \
+      esac; \
+    done && \
+    echo "✅ [$(date '+%H:%M:%S')] Dependencies installed successfully!" && \
+    echo "📊 [$(date '+%H:%M:%S')] node_modules size: $(du -sh node_modules)"
 
-# Build with timeout and monitoring
-RUN echo "Starting Next.js build with enhanced monitoring..." && \
-    timeout 1200 sh -c '\
-      npm run build:production 2>&1 | while IFS= read -r line; do \
-        timestamp=$(date "+%H:%M:%S"); \
-        echo "[$timestamp] BUILD: $line"; \
-        case "$line" in \
-          *"Checking validity of types"*) echo "[$timestamp] STATUS: Type checking started" ;; \
-          *"Collecting page data"*) echo "[$timestamp] STATUS: Data collection started" ;; \
-          *"Generating static pages"*) echo "[$timestamp] STATUS: Static generation started" ;; \
-          *"Finalizing page optimization"*) echo "[$timestamp] STATUS: Final optimization started" ;; \
-          "") echo "[$timestamp] HEARTBEAT: Still processing..." ;; \
-        esac; \
-      done' && \
-    echo "Build completed successfully!" && \
+# Copy source code
+COPY . .
+
+# Generate Prisma client
+RUN echo "🔧 Generating Prisma client..." && \
+    echo "⏰ Timestamp: $(date '+%Y-%m-%d %H:%M:%S')" && \
+    npx prisma generate && \
+    echo "✅ Prisma client generated successfully!"
+
+# Build application with CapRover-friendly monitoring  
+RUN echo "🏗️ [$(date '+%H:%M:%S')] Starting Next.js build for CapRover..." && \
+    echo "💾 [$(date '+%H:%M:%S')] Available memory: $(free -h)" && \
+    echo "🔧 [$(date '+%H:%M:%S')] Build env: NODE_OPTIONS=$NODE_OPTIONS" && \
+    npm run build:production 2>&1 | \
+    tee /tmp/build.log | \
+    while IFS= read -r line; do \
+      echo "[$(date '+%H:%M:%S')] BUILD: $line"; \
+      case "$line" in \
+        *"Creating an optimized production build"*) echo "[$(date '+%H:%M:%S')] 🚀 Build started" ;; \
+        *"PWA"*"Compile server"*) echo "[$(date '+%H:%M:%S')] 📱 PWA server compilation" ;; \
+        *"PWA"*"Compile client"*) echo "[$(date '+%H:%M:%S')] 🌐 PWA client compilation" ;; \
+        *"Compiled successfully"*) echo "[$(date '+%H:%M:%S')] ✅ Compilation successful" ;; \
+        *"Checking validity of types"*) echo "[$(date '+%H:%M:%S')] 🔍 Type checking (critical phase)" ;; \
+        *"Collecting page data"*) echo "[$(date '+%H:%M:%S')] 📄 Page data collection" ;; \
+        *"Generating static pages"*) echo "[$(date '+%H:%M:%S')] 🎯 Static pages generation" ;; \
+        *"Finalizing page optimization"*) echo "[$(date '+%H:%M:%S')] 🚀 Final optimization" ;; \
+        "") echo "[$(date '+%H:%M:%S')] ⏳ Build process active..." ;; \
+      esac; \
+    done && \
+    echo "✅ [$(date '+%H:%M:%S')] Build completed successfully!" && \
+    echo "📁 [$(date '+%H:%M:%S')] Build artifacts:" && \
     ls -la .next/ | head -5
 
 # Production stage
