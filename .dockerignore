@@ -11,3 +11,7 @@ Dockerfile
 coverage
 .nyc_output
 docs/memory/temp
+public/sw.js
+public/workbox-*
+.swc
+tsconfig.tsbuildinfo
