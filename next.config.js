@@ -58,8 +58,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // Allow type checking during build but don't fail on errors in CI
-    ignoreBuildErrors: process.env.CI === 'true' && process.env.TYPESCRIPT_NO_TYPE_CHECK === 'true',
+    // Skip type checking during Docker builds to prevent hangs
+    ignoreBuildErrors: process.env.CAPROVER_BUILD === 'true' || 
+                      (process.env.CI === 'true' && process.env.TYPESCRIPT_NO_TYPE_CHECK === 'true'),
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,

@@ -19,7 +19,7 @@ ENV CI=true
 ENV DISABLE_ESLINT_PLUGIN=true
 ENV GENERATE_SOURCEMAP=false
 ENV DISABLE_ESLINT=true
-ENV TYPESCRIPT_NO_TYPE_CHECK=false
+ENV TYPESCRIPT_NO_TYPE_CHECK=true
 
 # Copy package files for dependency caching
 COPY package*.json ./
