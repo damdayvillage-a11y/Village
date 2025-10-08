@@ -7,7 +7,9 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies (including dev dependencies for build)
-RUN npm config set strict-ssl false && npm ci --include=dev
+RUN npm config set strict-ssl false && \
+    npm config set registry http://registry.npmjs.org/ && \
+    npm ci --include=dev
 
 # Copy source code
 COPY . .
@@ -18,9 +20,13 @@ ENV NEXTAUTH_SECRET="dummy-secret-for-build"
 ENV NEXTAUTH_URL="http://localhost:3000"
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Generate Prisma client and build
-RUN npm config set strict-ssl false && npx prisma generate && npm run build
+RUN npm config set strict-ssl false && \
+    npm config set registry http://registry.npmjs.org/ && \
+    NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma generate && \
+    npm run build
 
 # Production stage
 FROM node:18-alpine AS runner
