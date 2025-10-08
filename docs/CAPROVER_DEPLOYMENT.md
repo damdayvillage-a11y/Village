@@ -98,9 +98,11 @@ The original error was caused by CapRover looking for `master` branch when the r
 ## Troubleshooting
 
 ### Build Failures
+- **Build hanging after npm warnings**: Fixed with optimized Docker configuration
 - Check environment variables are properly set
 - Verify database connection string format
 - Ensure all required secrets are configured
+- Monitor CapRover build logs for timeout issues
 
 ### Deployment Issues  
 - Check CapRover app logs

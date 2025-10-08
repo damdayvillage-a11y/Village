@@ -11,6 +11,8 @@
     "build": "next build",
     "build:docker": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 next build",
     "build:caprover": "./scripts/docker-build.sh",
+    "build:docker": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 GENERATE_SOURCEMAP=false next build",
+    "build:production": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 GENERATE_SOURCEMAP=false CI=true next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",

@@ -42,6 +42,9 @@ const withPWA = require('next-pwa')({
   },
   // Docker-specific optimizations
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development'
+  // Additional Docker build optimization
+  runtimeCaching: [],
+  publicExcludes: ['!workbox-*.js']
 })
 
 const nextConfig = {
@@ -56,8 +59,8 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // Disable type checking during build (already done separately)
-    ignoreBuildErrors: false,
+    // Allow type checking during build but don't fail on errors in CI
+    ignoreBuildErrors: process.env.CI === 'true' && process.env.TYPESCRIPT_NO_TYPE_CHECK === 'true',
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,

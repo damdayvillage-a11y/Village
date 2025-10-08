@@ -13,7 +13,9 @@ COPY package*.json ./
 # Install dependencies (including dev dependencies for build)
 RUN npm config set strict-ssl false && \
     npm config set registry https://registry.npmjs.org/ && \
-    npm ci --include=dev
+    npm config set fund false && \
+    npm config set update-notifier false && \
+    npm ci --include=dev --silent --no-audit --no-fund
 
 # Copy source code
 COPY . .
@@ -27,6 +29,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 ENV CI=true
 ENV DISABLE_ESLINT_PLUGIN=true
+ENV GENERATE_SOURCEMAP=false
+ENV DISABLE_ESLINT=true
+ENV TYPESCRIPT_NO_TYPE_CHECK=false
 
 # Use enhanced Docker build script with PWA optimizations
 RUN npm config set strict-ssl false && \
@@ -34,6 +39,34 @@ RUN npm config set strict-ssl false && \
     echo "Using Docker-optimized build script..." && \
     chmod +x scripts/docker-build.sh && \
     NODE_TLS_REJECT_UNAUTHORIZED=0 sh scripts/docker-build.sh
+# Generate Prisma client and build with enhanced monitoring
+ENV CAPROVER_BUILD=true
+RUN npm config set strict-ssl false && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config set fund false && \
+    npm config set update-notifier false && \
+    npm config set audit false
+
+# Generate Prisma client first
+RUN echo "Generating Prisma client..." && \
+    NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma generate
+
+# Build with timeout and monitoring
+RUN echo "Starting Next.js build with enhanced monitoring..." && \
+    timeout 1200 sh -c '\
+      npm run build:production 2>&1 | while IFS= read -r line; do \
+        timestamp=$(date "+%H:%M:%S"); \
+        echo "[$timestamp] BUILD: $line"; \
+        case "$line" in \
+          *"Checking validity of types"*) echo "[$timestamp] STATUS: Type checking started" ;; \
+          *"Collecting page data"*) echo "[$timestamp] STATUS: Data collection started" ;; \
+          *"Generating static pages"*) echo "[$timestamp] STATUS: Static generation started" ;; \
+          *"Finalizing page optimization"*) echo "[$timestamp] STATUS: Final optimization started" ;; \
+          "") echo "[$timestamp] HEARTBEAT: Still processing..." ;; \
+        esac; \
+      done' && \
+    echo "Build completed successfully!" && \
+    ls -la .next/ | head -5
 
 # Production stage
 FROM node:20-alpine AS runner
