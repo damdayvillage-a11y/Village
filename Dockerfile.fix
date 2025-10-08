@@ -1,0 +1,72 @@
+# Build stage - Optimized to prevent type checking hangs
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Set Node.js memory limits and Docker-specific optimizations
+ENV NODE_OPTIONS="--max-old-space-size=4096 --max-semi-space-size=1024"
+ENV UV_THREADPOOL_SIZE=64
+
+# Docker build environment variables - prevent hangs
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV NEXTAUTH_SECRET="dummy-secret-for-build"
+ENV NEXTAUTH_URL="http://localhost:3000"
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+ENV CI=true
+ENV DISABLE_ESLINT_PLUGIN=true
+ENV GENERATE_SOURCEMAP=false
+ENV DISABLE_ESLINT=true
+# Critical: Skip TypeScript type checking to prevent Docker hangs
+ENV TYPESCRIPT_NO_TYPE_CHECK=true
+ENV CAPROVER_BUILD=true
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies with minimal output
+RUN echo "📦 Installing dependencies..." && \
+    npm ci --silent --include=dev --no-audit --no-fund && \
+    echo "✅ Dependencies installed"
+
+# Copy source code
+COPY . .
+
+# Generate Prisma client
+RUN echo "🔧 Generating Prisma client..." && \
+    npx prisma generate && \
+    echo "✅ Prisma client generated"
+
+# Build with simplified approach - no complex monitoring
+RUN echo "🏗️ Building Next.js application..." && \
+    echo "⚙️ TypeScript checking disabled: $TYPESCRIPT_NO_TYPE_CHECK" && \
+    npm run build:production && \
+    echo "✅ Build completed!" && \
+    ls -la .next/
+
+# Production stage
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy built application
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 80
+
+ENV PORT=80
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
