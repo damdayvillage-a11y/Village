@@ -96,29 +96,6 @@ export default function VillageTourPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-display font-bold text-primary-900">
-                🏔️ Damday Village
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="text-gray-700 hover:text-primary-600">
-                Home
-              </Link>
-              <Link href="/digital-twin" className="text-gray-700 hover:text-primary-600">
-                3D Digital Twin
-              </Link>
-              <Link href="/dashboard" className="text-gray-700 hover:text-primary-600">
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </nav>
-      </header>
 
       {/* Page Title */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

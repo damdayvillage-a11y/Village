@@ -332,37 +332,6 @@ export default function AdminPanelPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center space-x-3">
-                <Shield className="h-6 w-6 text-primary-600" />
-                <span className="text-xl font-display font-bold text-primary-900">
-                  Admin Panel
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Badge className="bg-red-100 text-red-800">
-                <Shield className="h-3 w-3 mr-1" />
-                Admin Access
-              </Badge>
-              <Link href="/">
-                <Button variant="outline" size="sm">
-                  Back to Site
-                </Button>
-              </Link>
-              <Avatar 
-                src={session.user?.image} 
-                alt={session.user?.name || 'Admin'} 
-                size="sm"
-              />
-            </div>
-          </div>
-        </div>
-      </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">

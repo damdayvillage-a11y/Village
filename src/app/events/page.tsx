@@ -17,38 +17,6 @@ export const metadata: Metadata = {
 export default function EventsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-display font-bold text-primary-900">
-                Damday Village
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/digital-twin" className="text-gray-700 hover:text-primary-600">
-                Digital Twin
-              </Link>
-              <Link href="/village-tour" className="text-gray-700 hover:text-primary-600">
-                360° Tour
-              </Link>
-              <Link href="/dashboard" className="text-gray-700 hover:text-primary-600">
-                Dashboard
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-primary-600">
-                About
-              </Link>
-              <Link href="/events" className="text-primary-600 font-semibold">
-                Events
-              </Link>
-              <Link href="/contact" className="text-gray-700 hover:text-primary-600">
-                Contact
-              </Link>
-            </div>
-          </div>
-        </nav>
-      </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -397,20 +365,6 @@ export default function EventsPage() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <p className="text-lg mb-2">
-              Damday Village, Gangolihat, Pithoragarh, Uttarakhand, India
-            </p>
-            <p className="text-sm text-gray-400">
-              Building a sustainable future through technology and community
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
