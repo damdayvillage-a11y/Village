@@ -1,54 +1,51 @@
 # Docker Build Hang Fix - Updated 2025-01-08
 
 ## Problem Description
-The Docker build process was hanging after the "Checking validity of types" step during `npm run build`. The build would appear to freeze without any error messages, causing deployment failures in CapRover environments. Based on the user-reported logs, npm install was completing successfully but the build step would hang indefinitely with numerous deprecation warnings.
+The Docker build process was hanging during step 6 (`npm ci`) in CapRover environments. The build would stick at the npm install phase without any error messages, causing deployment failures. Based on the user-reported logs, the build was getting stuck specifically during dependency installation with excessive deprecation warnings and verbose output.
 
 ## Root Cause Analysis
 The issue was caused by several factors:
 
-1. **Verbose NPM Output**: Excessive npm warnings and deprecation messages were overwhelming the build process
-2. **Shell Compatibility**: Using bash commands in Alpine Linux environment which only has sh
-3. **Build Process Monitoring**: Lack of proper heartbeat and progress monitoring
-4. **Memory Constraints**: Insufficient memory allocation for Node.js build process
-5. **Telemetry Issues**: Next.js telemetry trying to connect in restricted Docker environment
+1. **Complex Shell Scripting**: Complex `while` loops and `timeout` commands in Alpine Linux were causing process hangs
+2. **Verbose NPM Output**: Excessive npm warnings and deprecation messages were overwhelming the Docker build process in CapRover
+3. **Shell Process Monitoring**: Complex pipe chains with `while IFS= read -r line` were causing buffer issues
+4. **Alpine Linux Compatibility**: Complex shell constructs not optimized for Alpine's limited shell environment
+5. **Docker Layer Caching**: Multiple redundant npm configurations and build steps creating layer conflicts
 
 ## Solution Implemented
 
-### 1. Node.js Version Upgrade
-- Upgraded from `node:18-alpine` to `node:20-alpine`
-- This resolves engine compatibility warnings for packages like Storybook and ical-generator
+### 1. Simplified Docker Build Process
+- **Removed complex shell scripting**: Eliminated `while IFS= read -r line` loops that were causing hangs
+- **Simplified npm install**: Used direct `npm ci` command with `--verbose` flag instead of complex monitoring
+- **Eliminated timeout commands**: Removed `timeout 1800 sh -c` constructs that were problematic in CapRover
 
-### 2. Registry Configuration
-- Changed from `http://registry.npmjs.org/` to `https://registry.npmjs.org/`
-- This prevents 403 Forbidden errors when accessing packages
+### 2. Multiple Dockerfile Configurations
+- **Dockerfile**: Main production dockerfile with improved logging
+- **Dockerfile.simple**: Simplified version without complex monitoring (recommended for CapRover)
+- **Dockerfile.debug**: Full debugging version with comprehensive logging for troubleshooting
 
-### 3. Memory Management
-- Added Node.js memory limits: `--max-old-space-size=4096 --max-semi-space-size=1024`
-- Set thread pool size: `UV_THREADPOOL_SIZE=64`
-- These prevent out-of-memory issues during build
+### 3. Enhanced NPM Configuration
+- Set `npm config set loglevel warn` to reduce verbose output that was overwhelming CapRover
+- Added `npm config set progress true` for better progress indication
+- Configured registry and SSL settings optimized for containerized environments
+- Used `--verbose` flag only when needed for debugging
 
-### 4. NPM Configuration Optimization
-- Added `npm config set fund false` to disable funding messages
-- Added `npm config set update-notifier false` to disable update notifications
-- Added `npm config set audit false` to disable audit warnings
-- Added `--silent --no-audit --no-fund` flags to npm ci command
+### 4. Improved Build Monitoring
+- **Timestamp-based logging**: Added `[$(date '+%H:%M:%S')]` prefixes for all output
+- **Phase detection**: Simple progress indicators without complex shell constructs  
+- **Memory monitoring**: Added memory checks at key stages
+- **Removed timeouts**: Eliminated timeout commands that were causing process hangs
 
-### 5. Build Process Monitoring
-- Split Prisma generation into separate step for better error handling
-- Added heartbeat messages to prevent apparent hanging
-- Added build phase detection and status reporting
-- Increased timeout from 15 to 20 minutes for complex builds
+### 5. Debug Tools and Scripts
+- **npm-install-debug.js**: Node.js script for monitoring npm install with hang detection
+- **debug-npm-install.sh**: Shell script for debugging npm install issues
+- **caprover-debug-build.sh**: Comprehensive build debugging script
 
-### 6. Shell Compatibility Fix
-- Changed from `bash -c` to `sh -c` for Alpine Linux compatibility
-- Fixed shell variable assignment and command chaining
-- Improved error handling and exit codes
-
-### 7. Enhanced Error Handling
-- Added build timeout (20 minutes)
-- Added timestamped logging with build phase detection
-- Improved error reporting and diagnostics
-- Added build artifact verification
+### 6. CapRover-Specific Optimizations  
+- **Reduced shell complexity**: Simplified all shell commands for Alpine Linux compatibility
+- **Better error handling**: Clear error messages without complex exit code handling
+- **Optimized layer caching**: Reorganized Dockerfile for better Docker layer reuse
+- **Container environment detection**: Added `CAPROVER_BUILD=true` environment detection
 
 ## Files Modified
 
@@ -73,20 +70,42 @@ The fix has been tested and verified:
 
 ## Usage
 
-To build with the fixed configuration:
+### For CapRover Production (Recommended)
+Use the simplified Dockerfile that avoids complex shell scripting:
 
 ```bash
-# Build only the application (for testing)
-docker build -t village-app:latest --target builder .
+# In your captain-definition file, specify:
+{
+  "schemaVersion": 2,
+  "dockerfilePath": "./Dockerfile.simple"
+}
+```
 
-# Build complete production image
-docker build -t village-app:latest .
+### For Local Testing
+```bash
+# Test with simplified build (recommended)
+docker build -t village-app:test -f Dockerfile.simple .
+
+# Test with standard build (has monitoring)
+docker build -t village-app:test .
+
+# Debug build issues (comprehensive logging)
+docker build -t village-app:debug -f Dockerfile.debug .
+```
+
+### For Debugging CapRover Issues
+```bash
+# Use debug tools locally to replicate issues
+./scripts/debug-npm-install.sh
+./scripts/caprover-debug-build.sh
 ```
 
 ## Environment Variables
 
-The following environment variables are set for Docker builds:
-- `NODE_OPTIONS`: Memory limits and optimizations
-- `NEXT_TELEMETRY_DISABLED`: Disable Next.js telemetry
-- `CI`: Enable CI mode for better build behavior
-- `UV_THREADPOOL_SIZE`: Increase thread pool for better performance
+The following environment variables are optimized for Docker builds:
+- `NODE_OPTIONS="--max-old-space-size=4096 --max-semi-space-size=1024"`: Memory limits
+- `UV_THREADPOOL_SIZE=64`: Thread pool optimization
+- `NEXT_TELEMETRY_DISABLED=1`: Disable Next.js telemetry  
+- `CI=true`: Enable CI mode for better build behavior
+- `CAPROVER_BUILD=true`: CapRover environment detection
+- `NODE_TLS_REJECT_UNAUTHORIZED=0`: SSL compatibility for build-time connections
