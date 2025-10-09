@@ -24,35 +24,22 @@ ENV CAPROVER_BUILD=true
 # Copy package files
 COPY package*.json ./
 
-# Configure npm for stability and debugging
-RUN echo "🔧 Configuring npm for CapRover build..." && \
+# Configure npm for CapRover environment
+RUN echo "🔧 Configuring npm for CapRover..." && \
     npm config set strict-ssl false && \
     npm config set registry https://registry.npmjs.org/ && \
     npm config set fund false && \
     npm config set update-notifier false && \
     npm config set audit false && \
-    npm config set loglevel info && \
-    npm config set progress true && \
-    echo "📋 NPM Configuration:" && \
-    npm config list
+    npm config set loglevel warn && \
+    echo "✅ NPM configured successfully"
 
-# Install dependencies with CapRover-friendly monitoring
-RUN echo "📦 [$(date '+%H:%M:%S')] Starting dependency installation for CapRover..." && \
-    echo "💾 [$(date '+%H:%M:%S')] Available memory: $(free -h)" && \
-    echo "🔄 [$(date '+%H:%M:%S')] Installing dependencies (monitoring for hangs)..." && \
-    npm ci --include=dev --no-audit --no-fund --loglevel=info 2>&1 | \
-    tee /tmp/npm-install.log | \
-    while IFS= read -r line; do \
-      echo "[$(date '+%H:%M:%S')] NPM: $line"; \
-      case "$line" in \
-        *"added"*) echo "[$(date '+%H:%M:%S')] ✅ Package installation progressing..." ;; \
-        *"deprecated"*) echo "[$(date '+%H:%M:%S')] ⚠️ Deprecated package (not critical)" ;; \
-        *"WARN"*) echo "[$(date '+%H:%M:%S')] ⚠️ Warning: $line" ;; \
-        *"ERR"*) echo "[$(date '+%H:%M:%S')] ❌ Error: $line" ;; \
-      esac; \
-    done && \
-    echo "✅ [$(date '+%H:%M:%S')] Dependencies installed successfully!" && \
-    echo "📊 [$(date '+%H:%M:%S')] node_modules size: $(du -sh node_modules)"
+# Install dependencies with simple logging (no pipes or loops to avoid hangs)
+RUN echo "📦 Installing dependencies..." && \
+    echo "Start time: $(date)" && \
+    npm ci --include=dev --no-audit --no-fund --loglevel=warn && \
+    echo "Dependencies installed at: $(date)" && \
+    echo "node_modules size: $(du -sh node_modules)"
 
 # Copy source code
 COPY . .
@@ -63,22 +50,16 @@ RUN echo "🔧 Generating Prisma client..." && \
     npx prisma generate && \
     echo "✅ Prisma client generated successfully!"
 
-# Build application with enhanced timeout handling for type checking
-RUN echo "🏗️ [$(date '+%H:%M:%S')] Starting Next.js build for CapRover..." && \
-    echo "💾 [$(date '+%H:%M:%S')] Available memory: $(free -h)" && \
-    echo "🔧 [$(date '+%H:%M:%S')] Build env: NODE_OPTIONS=$NODE_OPTIONS" && \
-    echo "⚙️  [$(date '+%H:%M:%S')] TypeScript checking: $TYPESCRIPT_NO_TYPE_CHECK" && \
-    timeout 1800 npm run build:production || \
-    (echo "⚠️  [$(date '+%H:%M:%S')] Build timeout, but checking if artifacts exist..." && \
-     if [ -d ".next" ] && [ -f ".next/BUILD_ID" ]; then \
-       echo "✅ [$(date '+%H:%M:%S')] Build artifacts found, build succeeded despite timeout"; \
-     else \
-       echo "❌ [$(date '+%H:%M:%S')] Build failed - no artifacts found"; \
-       exit 1; \
-     fi) && \
-    echo "✅ [$(date '+%H:%M:%S')] Build completed successfully!" && \
-    echo "📁 [$(date '+%H:%M:%S')] Build artifacts:" && \
-    ls -la .next/ | head -5
+# Build the application (no timeout to avoid hangs)
+RUN echo "🏗️ Building application..." && \
+    echo "Build start time: $(date)" && \
+    echo "Memory before build: $(free -h)" && \
+    echo "Running: npm run build:production" && \
+    npm run build:production && \
+    echo "Build completed at: $(date)" && \
+    echo "Verifying build output..." && \
+    ls -la .next/ && \
+    echo "Build verification complete"
 
 # Production stage
 FROM node:20-alpine AS runner

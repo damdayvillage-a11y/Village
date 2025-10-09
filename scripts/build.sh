@@ -37,9 +37,9 @@ if [ -z "$DATABASE_URL" ]; then
 fi
 
 echo "🔧 Generating Prisma client..."
-npx prisma generate --silent
+npx prisma generate
 
-# Build the application with timeout and progress monitoring
+# Build the application with simple logging
 echo "🏗️  Building application..."
 echo "📊 Node memory limits: ${NODE_OPTIONS}"
 echo "🔧 Thread pool size: ${UV_THREADPOOL_SIZE}"
@@ -51,42 +51,15 @@ if [ "$CAPROVER_BUILD" = "true" ] || [ "$CI" = "true" ]; then
   export TYPESCRIPT_NO_TYPE_CHECK=false
 fi
 
-# Run the build with timeout and enhanced monitoring
-echo "⏱️  Starting build with 20-minute timeout..."
-timeout 1200 sh -c '
-  npm run build:production 2>&1 | while IFS= read -r line; do
-    timestamp=$(date "+%H:%M:%S")
-    echo "[$timestamp] BUILD: $line"
-    
-    # Detect potential hang indicators
-    case "$line" in
-      *"Checking validity of types"*)
-        echo "[$timestamp] STATUS: Type checking phase started"
-        ;;
-      *"Collecting page data"*)
-        echo "[$timestamp] STATUS: Data collection phase started"
-        ;;
-      *"Generating static pages"*)
-        echo "[$timestamp] STATUS: Static generation phase started"
-        ;;
-      *"Finalizing page optimization"*)
-        echo "[$timestamp] STATUS: Final optimization phase started"
-        ;;
-      "")
-        echo "[$timestamp] HEARTBEAT: Build process is still running..."
-        ;;
-    esac
-  done
-'
+# Run the build without timeout or complex pipes to avoid hangs
+echo "🚀 Starting build..."
+echo "Start time: $(date)"
+
+npm run build:production
 
 BUILD_EXIT_CODE=$?
 
-if [ $BUILD_EXIT_CODE -eq 124 ]; then
-  echo "❌ Build timed out after 20 minutes"
-  echo "📋 Checking for partial build artifacts..."
-  ls -la .next/ 2>/dev/null || echo "No .next directory found"
-  exit 1
-elif [ $BUILD_EXIT_CODE -ne 0 ]; then
+if [ $BUILD_EXIT_CODE -ne 0 ]; then
   echo "❌ Build failed with exit code $BUILD_EXIT_CODE"
   echo "📋 Checking for build logs..."
   ls -la . | grep -E "\.(log|err)$" || echo "No log files found"
@@ -94,5 +67,6 @@ elif [ $BUILD_EXIT_CODE -ne 0 ]; then
 fi
 
 echo "✅ Build completed successfully!"
+echo "End time: $(date)"
 echo "📁 Build artifacts:"
 ls -la .next/ | head -10
