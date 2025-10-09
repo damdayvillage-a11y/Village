@@ -88,6 +88,7 @@ docker build -f Dockerfile.debug -t village-app .
 
 ## 📖 Documentation
 
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions (500 errors, login issues, database setup)
 - **[Admin Setup Guide](docs/ADMIN_SETUP.md)** - Complete admin credentials and setup guide
 - **[CapRover Troubleshooting Guide](docs/CAPROVER_TROUBLESHOOTING.md)** - Fix build hangs and deployment issues
 - **[Docker Build Fix Guide](docs/DOCKER_BUILD_FIX.md)** - Technical details of the build fixes
