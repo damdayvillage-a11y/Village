@@ -7,6 +7,9 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 ### Local Development
 ```bash
 npm install
+npm run db:generate
+npm run db:seed
+npm run admin:verify  # Verify admin setup
 npm run dev
 ```
 
@@ -51,6 +54,7 @@ docker build -f Dockerfile.debug -t village-app .
 
 ## 📖 Documentation
 
+- **[Admin Setup Guide](docs/ADMIN_SETUP.md)** - Complete admin credentials and setup guide
 - **[CapRover Troubleshooting Guide](docs/CAPROVER_TROUBLESHOOTING.md)** - Fix build hangs and deployment issues
 - **[Docker Build Fix Guide](docs/DOCKER_BUILD_FIX.md)** - Technical details of the build fixes
 - **[Deployment Checklist](DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment guide
@@ -65,6 +69,22 @@ NEXTAUTH_URL=https://your-app.domain.com
 NEXTAUTH_SECRET=[32+ character random string]
 DATABASE_URL=postgresql://[user]:[pass]@[host]:[port]/[db]
 ```
+
+## 🔑 Default Admin Credentials
+
+After running the database seed (`npm run db:seed`), you can log in with:
+
+**Administrator Account:**
+- Email: `admin@damdayvillage.org` 
+- Password: `Admin@123`
+- Role: Admin (full access to admin panel)
+
+**Host Account:**
+- Email: `host@damdayvillage.org`
+- Password: `Host@123` 
+- Role: Host (can manage homestays and bookings)
+
+⚠️ **Security Note**: Change these default passwords immediately in production!
 
 ### Build Optimizations
 ```bash
