@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { SAMPLE_DEVICES } from '../lib/device-simulator';
+import { hashPassword } from '../lib/auth/password';
 
 const db = new PrismaClient();
 
@@ -29,6 +30,9 @@ async function main() {
   console.log('✅ Created village:', village.name);
 
   // Create sample users
+  const adminPassword = 'Admin@123'; // Default admin password
+  const hashedAdminPassword = await hashPassword(adminPassword);
+  
   const adminUser = await db.user.upsert({
     where: { email: 'admin@damdayvillage.org' },
     update: {},
@@ -36,6 +40,7 @@ async function main() {
       email: 'admin@damdayvillage.org',
       name: 'Village Administrator',
       role: 'ADMIN',
+      password: hashedAdminPassword,
       verified: true,
       preferences: {
         language: 'en',
@@ -44,6 +49,9 @@ async function main() {
     }
   });
 
+  const hostPassword = 'Host@123'; // Default host password
+  const hashedHostPassword = await hashPassword(hostPassword);
+  
   const hostUser = await db.user.upsert({
     where: { email: 'host@damdayvillage.org' },
     update: {},
@@ -51,6 +59,7 @@ async function main() {
       email: 'host@damdayvillage.org',
       name: 'Raj Singh',
       role: 'HOST',
+      password: hashedHostPassword,
       verified: true,
       phone: '+91-9876543210',
       preferences: {
@@ -61,6 +70,13 @@ async function main() {
   });
 
   console.log('✅ Created users:', adminUser.name, 'and', hostUser.name);
+  console.log('');
+  console.log('🔑 Default Login Credentials:');
+  console.log('   Admin Email: admin@damdayvillage.org');
+  console.log('   Admin Password: Admin@123');
+  console.log('   Host Email: host@damdayvillage.org');  
+  console.log('   Host Password: Host@123');
+  console.log('');
 
   // Create sample homestay
   const homestay = await db.homestay.create({
@@ -207,6 +223,9 @@ async function main() {
   console.log('- 3 IoT Devices');
   console.log('- 1 Community Project');
   console.log('- 3 Marketplace Products');
+  console.log('\n🔑 Login with these credentials:');
+  console.log('   Admin: admin@damdayvillage.org / Admin@123');
+  console.log('   Host: host@damdayvillage.org / Host@123');
 }
 
 function getDeviceSchema(deviceType: string) {

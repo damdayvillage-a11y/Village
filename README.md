@@ -66,6 +66,22 @@ NEXTAUTH_SECRET=[32+ character random string]
 DATABASE_URL=postgresql://[user]:[pass]@[host]:[port]/[db]
 ```
 
+## 🔑 Default Admin Credentials
+
+After running the database seed (`npm run db:seed`), you can log in with:
+
+**Administrator Account:**
+- Email: `admin@damdayvillage.org` 
+- Password: `Admin@123`
+- Role: Admin (full access to admin panel)
+
+**Host Account:**
+- Email: `host@damdayvillage.org`
+- Password: `Host@123` 
+- Role: Host (can manage homestays and bookings)
+
+⚠️ **Security Note**: Change these default passwords immediately in production!
+
 ### Build Optimizations
 ```bash
 NEXT_TELEMETRY_DISABLED=1
