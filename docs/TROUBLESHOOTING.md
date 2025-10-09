@@ -9,10 +9,14 @@ Common issues and solutions for the Smart Carbon-Free Village application.
 **Symptoms:**
 - Cannot access `/admin-panel`
 - Getting 500 error when trying to login
+- Redirected to `/api/auth/error` with error message
 - Error message: "Internal Server Error"
 
 **Solution:**
-This typically means the application is not properly set up. Run the setup script:
+
+**Note:** As of the latest update, authentication errors are now handled gracefully and will redirect you to `/auth/error` with a clear error message instead of showing a 500 error. See [AUTH_ERROR_HANDLING.md](./AUTH_ERROR_HANDLING.md) for details.
+
+If you still see 500 errors, the application may not be properly set up. Run the setup script:
 
 ```bash
 npm run setup
@@ -26,6 +30,14 @@ Or manually:
 5. Push schema: `npm run db:push`
 6. Seed data: `npm run db:seed`
 7. Verify: `npm run admin:verify`
+
+**Common Authentication Errors:**
+- **Database Connection Failed**: Check that PostgreSQL is running and DATABASE_URL is correct
+- **Configuration Error**: Verify NEXTAUTH_URL and NEXTAUTH_SECRET are set
+- **Invalid Credentials**: Use default admin credentials (see below)
+- **OAuth Errors**: OAuth providers (Google/GitHub) are now optional and only loaded when configured
+
+For detailed error handling information, see [AUTH_ERROR_HANDLING.md](./AUTH_ERROR_HANDLING.md).
 
 ### Cannot Login with Admin Credentials
 
@@ -193,6 +205,23 @@ NEXTAUTH_SECRET="your-generated-secret"
 
 ## Authentication Issues
 
+### Authentication Errors and Error Page
+
+**New Feature:** Authentication errors are now handled gracefully with a dedicated error page at `/auth/error`.
+
+**Common Error Types:**
+- **Configuration** - Server configuration issues
+- **AccessDenied** - Insufficient permissions
+- **Verification** - Email verification required
+- **CredentialsSignin** - Invalid email or password
+- **OAuthSignin** - OAuth provider error (only if OAuth is configured)
+
+**What to do:**
+1. Read the error message displayed on the error page
+2. Click "Try Again" to return to sign in
+3. Follow the troubleshooting steps below
+4. Check [AUTH_ERROR_HANDLING.md](./AUTH_ERROR_HANDLING.md) for detailed information
+
 ### Cannot Sign In with Credentials
 
 **Check:**
@@ -204,6 +233,10 @@ NEXTAUTH_SECRET="your-generated-secret"
 2. Password is correct (default: `Admin@123`)
 
 3. User is active and verified in database
+
+4. Database is running and accessible
+
+5. NEXTAUTH_URL and NEXTAUTH_SECRET are set in environment
 
 ### Session Not Persisting
 
@@ -220,6 +253,8 @@ NEXTAUTH_SECRET="your-generated-secret"
 2. Cookies are enabled in browser
 
 3. Clear browser cookies and try again
+
+4. Check that NEXTAUTH_SECRET is set and consistent across deployments
 
 ## Permission Issues
 
