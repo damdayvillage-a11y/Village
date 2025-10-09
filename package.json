@@ -7,6 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
+    "prestart": "node scripts/startup-check.js",
     "dev": "next dev",
     "build": "next build",
     "build:docker": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 GENERATE_SOURCEMAP=false next build",

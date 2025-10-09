@@ -38,13 +38,34 @@ export async function checkDatabaseHealth() {
   }
 
   try {
+    const startTime = Date.now();
     await prisma.$queryRaw`SELECT 1`;
-    return { status: 'healthy', timestamp: new Date().toISOString() };
+    const responseTime = Date.now() - startTime;
+    return { 
+      status: 'healthy', 
+      responseTime: `${responseTime}ms`,
+      timestamp: new Date().toISOString() 
+    };
   } catch (error) {
     console.error('Database health check failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Provide helpful error messages based on error type
+    let helpfulMessage = 'Database connection failed.';
+    if (errorMessage.includes('ECONNREFUSED')) {
+      helpfulMessage += ' The database server is not accessible. Please check if PostgreSQL is running and the host/port are correct.';
+    } else if (errorMessage.includes('ENOTFOUND')) {
+      helpfulMessage += ' The database hostname could not be resolved. Please check the DATABASE_URL.';
+    } else if (errorMessage.includes('authentication failed')) {
+      helpfulMessage += ' Database authentication failed. Please check the username and password in DATABASE_URL.';
+    } else if (errorMessage.includes('timeout')) {
+      helpfulMessage += ' Database connection timeout. The server may be overloaded or unreachable.';
+    }
+    
     return { 
       status: 'unhealthy', 
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: errorMessage,
+      help: helpfulMessage,
       timestamp: new Date().toISOString() 
     };
   }
