@@ -5,19 +5,24 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 ## 🎉 Production Ready - CapRover Deployment Fixed
 
 ✅ **All deployment issues resolved** - Build time: ~45-55 seconds, Image size: 194MB  
-✅ **Latest Fix (2025-01-09)**: Removed all problematic shell loops and timeout commands
+✅ **Latest Fix (2025-01-09)**: Enhanced validation to detect unreplaced placeholders
 
 **Quick Deploy to CapRover:**
 1. 📖 Read the [Quick Fix Guide](./docs/QUICK_FIX_GUIDE.md) (15-minute deployment)
-2. 📋 Follow the [Production Deployment Checklist](./docs/PRODUCTION_DEPLOYMENT_CHECKLIST.md)
-3. 🚀 See [DEPLOYMENT_FIX_SUMMARY.md](./DEPLOYMENT_FIX_SUMMARY.md) for all fixes
+2. ⚠️ **CRITICAL:** [Deployment Validation Guide](./docs/DEPLOYMENT_VALIDATION.md) - Prevent 500 errors!
+3. 📋 Follow the [Production Deployment Checklist](./docs/PRODUCTION_DEPLOYMENT_CHECKLIST.md)
+4. 🚀 See [DEPLOYMENT_FIX_SUMMARY.md](./DEPLOYMENT_FIX_SUMMARY.md) for all fixes
 
 **Key Features:**
 - ✅ HTTPS/SSL enforced automatically
 - ✅ Build completes without hanging
 - ✅ Admin panel working (no 500 errors)
+- ✅ **NEW:** Placeholder detection in environment validation
 - ✅ Environment validation: `npm run validate:env`
 - ✅ Comprehensive security headers
+
+**⚠️ Most Common Issue:** 500 error on admin login caused by unreplaced CapRover placeholders (e.g., `$$cap_appname$$`).  
+**Solution:** Run `npm run validate:env` after deployment to detect this issue!
 
 ## 🚀 Quick Start
 
