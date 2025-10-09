@@ -11,34 +11,40 @@ import { UserRole } from '@prisma/client';
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
   providers: [
-    // OAuth Providers
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-      allowDangerousEmailAccountLinking: true,
-    }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID ?? '',
-      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
-      allowDangerousEmailAccountLinking: true,
-    }),
+    // OAuth Providers - only include if credentials are configured
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true,
+      })
+    ] : []),
+    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET ? [
+      GitHubProvider({
+        clientId: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true,
+      })
+    ] : []),
     
-    // Email Provider for passwordless login
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
+    // Email Provider for passwordless login - only include if email server is configured
+    ...(process.env.EMAIL_SERVER_HOST && process.env.EMAIL_FROM ? [
+      EmailProvider({
+        server: {
+          host: process.env.EMAIL_SERVER_HOST,
+          port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
+          auth: {
+            user: process.env.EMAIL_SERVER_USER,
+            pass: process.env.EMAIL_SERVER_PASSWORD,
+          },
         },
-      },
-      from: process.env.EMAIL_FROM,
-      sendVerificationRequest: async ({ identifier: email, url, provider }) => {
-        // Custom email verification logic will be implemented here
-        console.log(`Sending verification email to ${email}: ${url}`);
-      },
-    }),
+        from: process.env.EMAIL_FROM,
+        sendVerificationRequest: async ({ identifier: email, url, provider }) => {
+          // Custom email verification logic will be implemented here
+          console.log(`Sending verification email to ${email}: ${url}`);
+        },
+      })
+    ] : []),
     
     // Credentials Provider for email/password login
     CredentialsProvider({
@@ -149,12 +155,24 @@ export const authOptions: NextAuthOptions = {
   
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Allow sign in for verified users or OAuth providers
-      if (account?.provider !== 'credentials') {
+      try {
+        // Allow sign in for verified users or OAuth providers
+        if (account?.provider !== 'credentials') {
+          return true;
+        }
+        
+        // Check if user is verified for credentials login
+        if ('verified' in user && !user.verified) {
+          // Return error URL to redirect to error page with specific message
+          return '/auth/error?error=Verification';
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('Sign in callback error:', error);
+        // Allow sign in to continue, but log the error
         return true;
       }
-      
-      return user.verified === true;
     },
     
     async redirect({ url, baseUrl }) {
@@ -167,8 +185,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       // Add custom fields to JWT token
       if (user) {
-        token.role = user.role;
-        token.verified = user.verified;
+        token.role = 'role' in user ? user.role : UserRole.GUEST;
+        token.verified = 'verified' in user ? user.verified : false;
         token.userId = user.id;
       }
       
@@ -181,49 +199,60 @@ export const authOptions: NextAuthOptions = {
     },
     
     async session({ session, token }) {
-      // Add custom fields to session
-      if (token) {
-        session.user.id = token.userId as string;
-        session.user.role = token.role as UserRole;
-        session.user.verified = token.verified as boolean;
-        session.user.provider = token.provider as string;
-      }
-      
-      // Update last login timestamp (non-blocking, fails gracefully)
-      if (session.user?.id) {
-        try {
-          await db.user.update({
-            where: { id: session.user.id },
-            data: { lastLogin: new Date() },
-          });
-        } catch (error) {
-          // Log but don't fail the session if database update fails
-          console.warn('Failed to update last login timestamp:', error);
+      try {
+        // Add custom fields to session
+        if (token && session.user) {
+          (session.user as any).id = token.userId as string;
+          (session.user as any).role = token.role as UserRole;
+          (session.user as any).verified = token.verified as boolean;
+          (session.user as any).provider = token.provider as string;
         }
+        
+        // Update last login timestamp (non-blocking, fails gracefully)
+        if (session.user && 'id' in session.user) {
+          try {
+            await db.user.update({
+              where: { id: (session.user as any).id },
+              data: { lastLogin: new Date() },
+            });
+          } catch (error) {
+            // Log but don't fail the session if database update fails
+            console.warn('Failed to update last login timestamp:', error);
+          }
+        }
+        
+        return session;
+      } catch (error) {
+        console.error('Session callback error:', error);
+        // Return session even if there's an error to prevent breaking the auth flow
+        return session;
       }
-      
-      return session;
     },
   },
   
   events: {
     async signIn({ user, account, isNewUser }) {
-      console.log(`User ${user.email} signed in via ${account?.provider}`);
-      
-      if (isNewUser) {
-        try {
-          // Set default role for new users
-          await db.user.update({
-            where: { id: user.id },
-            data: { 
-              role: UserRole.GUEST,
-              verified: account?.provider !== 'credentials', // Auto-verify OAuth users
-            },
-          });
-        } catch (error) {
-          // Log but don't fail the sign in if database update fails
-          console.warn('Failed to update new user role:', error);
+      try {
+        console.log(`User ${user.email} signed in via ${account?.provider}`);
+        
+        if (isNewUser) {
+          try {
+            // Set default role for new users
+            await db.user.update({
+              where: { id: user.id },
+              data: { 
+                role: UserRole.GUEST,
+                verified: account?.provider !== 'credentials', // Auto-verify OAuth users
+              },
+            });
+          } catch (error) {
+            // Log but don't fail the sign in if database update fails
+            console.warn('Failed to update new user role:', error);
+          }
         }
+      } catch (error) {
+        // Log but don't fail the sign in
+        console.error('Sign in event error:', error);
       }
     },
     
