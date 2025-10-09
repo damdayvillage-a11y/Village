@@ -37,7 +37,7 @@ if [ -z "$DATABASE_URL" ]; then
 fi
 
 echo "🔧 Generating Prisma client..."
-npx prisma generate
+node node_modules/prisma/build/index.js generate
 
 # Build the application with simple logging
 echo "🏗️  Building application..."

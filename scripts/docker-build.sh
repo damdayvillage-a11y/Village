@@ -32,7 +32,7 @@ if [ -z "$DATABASE_URL" ]; then
 fi
 
 echo "🔧 Generating Prisma client..."
-npx prisma generate
+node node_modules/prisma/build/index.js generate
 
 # Build without timeout or complex pipes to avoid hangs
 echo "🏗️  Starting Next.js build with PWA optimizations..."
