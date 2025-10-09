@@ -96,9 +96,13 @@ export const authOptions: NextAuthOptions = {
           )) {
             throw error;
           }
-          // For database connection errors, provide a generic message
+          // For database connection errors, provide a more helpful message
           console.error('Database error during authentication:', error);
-          throw new Error('Unable to authenticate. Database connection failed.');
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          if (errorMsg.includes('connect') || errorMsg.includes('ECONNREFUSED') || errorMsg.includes('timeout')) {
+            throw new Error('Database connection failed. Please contact support.');
+          }
+          throw new Error('Unable to authenticate. Please try again later.');
         }
       },
     }),
