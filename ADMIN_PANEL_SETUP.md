@@ -64,27 +64,34 @@ After running `npm run db:seed`:
 
 **Causes:**
 - Database not configured or unreachable
-- Environment variables missing or using dummy values
+- Environment variables missing or using dummy/placeholder values
+- **CRITICAL:** CapRover placeholders (like `$$cap_appname$$`) not replaced with actual values
 - Admin user not created
 
 **Solutions:**
 
-1. **Check database connection:**
+1. **Validate environment configuration (MOST COMMON ISSUE):**
+   ```bash
+   npm run validate:env
+   ```
+   
+   **Common errors:**
+   - ❌ **NEXTAUTH_URL contains placeholders** like `$$cap_appname$$.$$cap_root_domain$$`
+     - **Fix:** Replace with actual domain: `https://damdayvillage.com`
+   - ❌ **DATABASE_URL contains placeholders** like `$$cap_database_url$$`
+     - **Fix:** Replace with actual PostgreSQL URL: `postgresql://user:pass@host:5432/db`
+   - ❌ **NEXTAUTH_SECRET contains placeholders** or is too short
+     - **Fix:** Generate with `openssl rand -base64 32` and use the result
+
+2. **Check database connection:**
    ```bash
    curl https://your-domain.com/api/health
    ```
    
    If database is unhealthy:
-   - Verify DATABASE_URL is correct
+   - Verify DATABASE_URL is correct and doesn't contain placeholders
    - Check if PostgreSQL is running
    - Test connection: `psql -h host -U user -d database`
-
-2. **Validate environment configuration:**
-   ```bash
-   npm run validate:env
-   ```
-   
-   Fix any errors shown (missing variables, dummy values, etc.)
 
 3. **Verify admin user exists:**
    ```bash

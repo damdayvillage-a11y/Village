@@ -28,14 +28,16 @@ All admin panel 500 errors have been fixed and the application is production-rea
 - Created `scripts/startup-check.js` that validates configuration before startup
 - Checks for required environment variables
 - Warns about dummy/example values in production
+- **NEW:** Detects unreplaced CapRover placeholders ($$cap_*$$) and other common placeholder patterns
 - Provides clear instructions on how to fix issues
 - Integrated into `npm start` as a pre-start hook
 
 **Files Created:**
-- `scripts/startup-check.js` - Startup validation script
+- `scripts/startup-check.js` - Startup validation script with placeholder detection
 
 **Files Modified:**
 - `package.json` - Added `prestart` hook to run validation
+- `.env.caprover` - Added critical warnings about replacing placeholders
 
 ### 3. Production Setup Documentation ✅
 
@@ -181,13 +183,25 @@ curl https://your-domain.com/api/health
 
 ### Issue: "500 Internal Server Error" on admin panel
 
+**Most Common Cause:** Unreplaced CapRover placeholders in environment variables!
+
 **Quick Fix:**
 ```bash
-# 1. Check database health
-curl https://your-domain.com/api/health
-
-# 2. If unhealthy, verify DATABASE_URL
+# 1. FIRST: Validate environment (checks for placeholders!)
 npm run validate:env
+
+# Common errors and fixes:
+# ❌ NEXTAUTH_URL contains placeholders like $$cap_appname$$.$$cap_root_domain$$
+#    → Replace with: https://damdayvillage.com
+#
+# ❌ DATABASE_URL contains $$cap_database_url$$
+#    → Replace with: postgresql://user:pass@host:5432/db
+#
+# ❌ NEXTAUTH_SECRET contains $$cap_nextauth_secret$$ or is too short
+#    → Generate: openssl rand -base64 32
+
+# 2. Check database health
+curl https://your-domain.com/api/health
 
 # 3. Verify admin user exists
 npm run admin:verify

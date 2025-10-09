@@ -5,12 +5,18 @@
  * Validates that all required environment variables are set for production deployment
  */
 
-const chalk = require('chalk') || { 
-  green: (s) => s, 
-  red: (s) => s, 
-  yellow: (s) => s, 
-  blue: (s) => s 
-};
+const chalk = (() => {
+  try {
+    return require('chalk');
+  } catch {
+    return {
+      green: (s) => s,
+      red: (s) => s,
+      yellow: (s) => s,
+      blue: (s) => s,
+    };
+  }
+})();
 
 // Required environment variables for production
 const REQUIRED_VARS = [
@@ -34,6 +40,25 @@ const NO_DUMMY_VALUES = [
   { var: 'NEXTAUTH_SECRET', dummyValue: 'dummy-secret-for-build-only-not-secure' },
   { var: 'NEXTAUTH_SECRET', dummyValue: 'your-nextauth-secret-key' },
 ];
+
+/**
+ * Check if a value contains unreplaced placeholders
+ */
+function hasPlaceholders(value) {
+  if (!value) return false;
+  
+  const placeholderPatterns = [
+    /\$\$cap_[^$]+\$\$/,     // CapRover placeholders like $$cap_appname$$
+    /\$\{[^}]+\}/,           // Template literals like ${VARIABLE}
+    /your-[a-z-]+/i,         // Patterns like your-domain, your-secret
+    /change-me/i,            // Common placeholder text
+    /example\./i,            // example.com patterns
+    /placeholder/i,          // Placeholder text
+    /replace-this/i,         // Replace-this patterns
+  ];
+  
+  return placeholderPatterns.some(pattern => pattern.test(value));
+}
 
 function validateEnvironment() {
   console.log(chalk.blue('\n🔍 Validating production environment...\n'));
@@ -90,7 +115,15 @@ function validateEnvironment() {
   // Check database URL format
   if (process.env.DATABASE_URL) {
     const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('postgres://')) {
+    
+    // Check for unreplaced placeholders (but allow dummy:dummy for build)
+    if (hasPlaceholders(dbUrl) && !dbUrl.includes('dummy:dummy')) {
+      const maskedUrl = dbUrl.replace(/:([^@]+)@/, ':****@');
+      console.log(chalk.red(`\n❌ DATABASE_URL: Contains unreplaced placeholders: ${maskedUrl}`));
+      console.log(chalk.yellow('   Detected placeholder pattern (e.g., $$cap_*$$)'));
+      console.log(chalk.yellow('   Must be replaced with actual database credentials'));
+      hasErrors = true;
+    } else if (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('postgres://')) {
       console.log(chalk.red('\n❌ DATABASE_URL: Invalid format (should start with postgresql:// or postgres://)'));
       hasErrors = true;
     } else if (dbUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
@@ -102,7 +135,14 @@ function validateEnvironment() {
   // Check NEXTAUTH_URL format
   if (process.env.NEXTAUTH_URL) {
     const authUrl = process.env.NEXTAUTH_URL;
-    if (process.env.NODE_ENV === 'production' && !authUrl.startsWith('https://')) {
+    
+    // Check for unreplaced placeholders
+    if (hasPlaceholders(authUrl)) {
+      console.log(chalk.red(`\n❌ NEXTAUTH_URL: Contains unreplaced placeholders: ${authUrl}`));
+      console.log(chalk.yellow('   Detected placeholder pattern (e.g., $$cap_*$$, your-domain, etc.)'));
+      console.log(chalk.yellow('   Must be replaced with actual domain like: https://damdayvillage.com'));
+      hasErrors = true;
+    } else if (process.env.NODE_ENV === 'production' && !authUrl.startsWith('https://')) {
       console.log(chalk.red('\n❌ NEXTAUTH_URL: Should use HTTPS in production'));
       hasErrors = true;
     } else if (authUrl.startsWith('http://localhost')) {
