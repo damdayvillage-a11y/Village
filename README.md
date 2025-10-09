@@ -9,8 +9,8 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 
 **Quick Deploy to CapRover:**
 1. 📖 Read the [Quick Fix Guide](./docs/QUICK_FIX_GUIDE.md) (15-minute deployment)
-2. ⚠️ **CRITICAL:** [Deployment Validation Guide](./docs/DEPLOYMENT_VALIDATION.md) - Prevent 500 errors!
-3. 📋 Follow the [Production Deployment Checklist](./docs/PRODUCTION_DEPLOYMENT_CHECKLIST.md)
+2. ⚠️ **CRITICAL:** [Quick Validation Guide](./QUICK_VALIDATION_GUIDE.md) - 30-second check to prevent 500 errors!
+3. 📋 [Deployment Validation Guide](./docs/DEPLOYMENT_VALIDATION.md) - Complete validation checklist
 4. 🚀 See [DEPLOYMENT_FIX_SUMMARY.md](./DEPLOYMENT_FIX_SUMMARY.md) for all fixes
 
 **Key Features:**
