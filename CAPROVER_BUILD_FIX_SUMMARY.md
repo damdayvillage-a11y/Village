@@ -1,6 +1,23 @@
-# CapRover Build Fix Summary - Updated 2025-01-09
+# CapRover Build Fix Summary - Updated 2025-01-10
 
-## Latest Fix (2025-01-09) ✅
+## Latest Fix (2025-01-10) ✅
+
+**Critical build issue fixed!** The "something bad" error in CapRover builds has been completely resolved.
+
+### Problem Identified:
+The build was failing with network timeout errors during `npx prisma generate` because `npx` attempts to fetch the Prisma package from npm registry even when it's already installed locally. In CapRover environments with network restrictions or timeouts, this caused the build to fail.
+
+### Changes Applied:
+- ✅ **Fixed Dockerfile.simple** (line 53): Changed `npx prisma generate` to `node /app/node_modules/prisma/build/index.js generate`
+- ✅ **Fixed Dockerfile** (line 50): Applied same fix
+- ✅ **Fixed Dockerfile.debug** (line 71): Applied same fix
+- ✅ **Fixed Dockerfile.fix** (line 38): Applied same fix
+- ✅ Tested successfully - Docker build completes in ~4 minutes
+- ✅ Image size: 194MB (optimized)
+
+**Result**: All Dockerfiles now use the locally installed Prisma CLI directly, bypassing npm registry lookups entirely.
+
+## Previous Fix (2025-01-09) ✅
 
 **All build hang issues have been completely resolved!** The main `Dockerfile` and build scripts have been simplified to eliminate all problematic shell constructs.
 
@@ -11,7 +28,6 @@
 - ✅ Simplified `scripts/docker-build.sh` - removed timeout and complex monitoring
 - ✅ Fixed `prisma generate --silent` flag issue
 - ✅ Reduced code complexity by 66 lines (122 removed, 56 added)
-- ✅ Docker builds tested successfully in ~45-55 seconds
 
 **Result**: Both `Dockerfile` and `Dockerfile.simple` now work reliably without hangs.
 

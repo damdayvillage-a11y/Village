@@ -70,7 +70,7 @@ echo "✅ Dependencies already installed, proceeding with build..."
 echo "🔧 Ensuring Prisma client is generated..."
 if [ ! -d "node_modules/.prisma" ]; then
   echo "📝 Generating Prisma client..."
-  npx prisma generate
+  node node_modules/prisma/build/index.js generate
 else
   echo "✅ Prisma client already exists"
 fi
