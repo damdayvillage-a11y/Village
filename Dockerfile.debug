@@ -68,7 +68,7 @@ RUN echo "📁 Source Code Information:" && \
 RUN echo "🔧 Generating Prisma client with debug info..." && \
     echo "   Prisma schema: $(test -f prisma/schema.prisma && echo 'Present' || echo 'Missing')" && \
     echo "   Timestamp: $(date '+%Y-%m-%d %H:%M:%S UTC')" && \
-    npx prisma generate && \
+    node /app/node_modules/prisma/build/index.js generate && \
     echo "✅ Prisma client generated at: $(date '+%Y-%m-%d %H:%M:%S UTC')"
 
 # Use debug build script

@@ -35,7 +35,7 @@ COPY . .
 
 # Generate Prisma client
 RUN echo "🔧 Generating Prisma client..." && \
-    npx prisma generate && \
+    node /app/node_modules/prisma/build/index.js generate && \
     echo "✅ Prisma client generated"
 
 # Build with simplified approach - no complex monitoring

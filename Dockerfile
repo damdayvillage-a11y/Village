@@ -47,7 +47,7 @@ COPY . .
 # Generate Prisma client
 RUN echo "🔧 Generating Prisma client..." && \
     echo "⏰ Timestamp: $(date '+%Y-%m-%d %H:%M:%S')" && \
-    npx prisma generate && \
+    node /app/node_modules/prisma/build/index.js generate && \
     echo "✅ Prisma client generated successfully!"
 
 # Build the application (no timeout to avoid hangs)

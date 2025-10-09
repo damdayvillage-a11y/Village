@@ -50,7 +50,7 @@ COPY . .
 # Generate Prisma client
 RUN echo "🔧 Generating Prisma client..." && \
     echo "Prisma generation start: $(date)" && \
-    npx prisma generate && \
+    node /app/node_modules/prisma/build/index.js generate && \
     echo "Prisma generation complete: $(date)"
 
 # Build the application
