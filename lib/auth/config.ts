@@ -162,7 +162,7 @@ export const authOptions: NextAuthOptions = {
         }
         
         // Check if user is verified for credentials login
-        if (!user.verified) {
+        if ('verified' in user && !user.verified) {
           // Return error URL to redirect to error page with specific message
           return '/auth/error?error=Verification';
         }
@@ -185,8 +185,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       // Add custom fields to JWT token
       if (user) {
-        token.role = user.role;
-        token.verified = user.verified;
+        token.role = 'role' in user ? user.role : UserRole.GUEST;
+        token.verified = 'verified' in user ? user.verified : false;
         token.userId = user.id;
       }
       
@@ -201,18 +201,18 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       try {
         // Add custom fields to session
-        if (token) {
-          session.user.id = token.userId as string;
-          session.user.role = token.role as UserRole;
-          session.user.verified = token.verified as boolean;
-          session.user.provider = token.provider as string;
+        if (token && session.user) {
+          (session.user as any).id = token.userId as string;
+          (session.user as any).role = token.role as UserRole;
+          (session.user as any).verified = token.verified as boolean;
+          (session.user as any).provider = token.provider as string;
         }
         
         // Update last login timestamp (non-blocking, fails gracefully)
-        if (session.user?.id) {
+        if (session.user && 'id' in session.user) {
           try {
             await db.user.update({
-              where: { id: session.user.id },
+              where: { id: (session.user as any).id },
               data: { lastLogin: new Date() },
             });
           } catch (error) {
