@@ -142,7 +142,9 @@ NEXTAUTH_SECRET=[32+ character random string]
 DATABASE_URL=postgresql://[user]:[pass]@[host]:[port]/[db]
 ```
 
-## 🔑 Default Admin Credentials
+## 🔑 Admin Panel Access
+
+### Default Admin Credentials
 
 After running the database seed (`npm run db:seed`), you can log in with:
 
@@ -150,6 +152,7 @@ After running the database seed (`npm run db:seed`), you can log in with:
 - Email: `admin@damdayvillage.org` 
 - Password: `Admin@123`
 - Role: Admin (full access to admin panel)
+- Access at: `https://your-domain.com/admin-panel`
 
 **Host Account:**
 - Email: `host@damdayvillage.org`
@@ -157,6 +160,30 @@ After running the database seed (`npm run db:seed`), you can log in with:
 - Role: Host (can manage homestays and bookings)
 
 ⚠️ **Security Note**: Change these default passwords immediately in production!
+
+### Troubleshooting Admin Panel
+
+If you encounter a 500 error when accessing the admin panel:
+
+1. **Check database connection:**
+   ```bash
+   curl https://your-domain.com/api/health
+   ```
+
+2. **Validate environment variables:**
+   ```bash
+   npm run validate:env
+   ```
+
+3. **Verify admin user exists:**
+   ```bash
+   npm run admin:verify
+   ```
+
+4. **See detailed troubleshooting:**
+   - [ADMIN_PANEL_SETUP.md](./ADMIN_PANEL_SETUP.md) - Complete setup and troubleshooting guide
+   - [docs/PRODUCTION_SETUP_GUIDE.md](./docs/PRODUCTION_SETUP_GUIDE.md) - Production deployment guide
+   - [docs/AUTH_ERROR_HANDLING.md](./docs/AUTH_ERROR_HANDLING.md) - Authentication error handling
 
 ### Build Optimizations
 ```bash

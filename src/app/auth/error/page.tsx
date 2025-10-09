@@ -27,7 +27,7 @@ function AuthErrorContent() {
       case 'Configuration':
         return {
           message: 'Server Configuration Error',
-          details: 'There is a problem with the server configuration. Please contact the administrator.'
+          details: 'There is a problem with the server configuration. This usually means the database is not accessible or environment variables are not set correctly. Please contact the administrator.'
         };
       case 'AccessDenied':
         return {
@@ -78,6 +78,11 @@ function AuthErrorContent() {
         return {
           message: 'Invalid Credentials',
           details: 'The email or password you entered is incorrect. Please try again.'
+        };
+      case 'DatabaseError':
+        return {
+          message: 'Database Connection Error',
+          details: 'Unable to connect to the database. This may be a temporary issue. Please try again in a moment, or contact the administrator if the problem persists.'
         };
       case 'SessionRequired':
         return {

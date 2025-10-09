@@ -209,7 +209,10 @@ export const authOptions: NextAuthOptions = {
         }
         
         // Update last login timestamp (non-blocking, fails gracefully)
-        if (session.user && 'id' in session.user) {
+        // Only attempt if database is likely available (not a dummy URL)
+        if (session.user && 'id' in session.user && 
+            process.env.DATABASE_URL && 
+            !process.env.DATABASE_URL.includes('dummy:dummy')) {
           try {
             await db.user.update({
               where: { id: (session.user as any).id },
