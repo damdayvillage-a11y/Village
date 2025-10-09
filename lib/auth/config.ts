@@ -53,39 +53,53 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email and password required');
         }
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
-        });
+        try {
+          const user = await db.user.findUnique({
+            where: { email: credentials.email },
+          });
 
-        if (!user || !user.password) {
-          throw new Error('Invalid credentials');
+          if (!user || !user.password) {
+            throw new Error('Invalid credentials');
+          }
+
+          const isValidPassword = await verifyPassword(
+            credentials.password,
+            user.password
+          );
+
+          if (!isValidPassword) {
+            throw new Error('Invalid credentials');
+          }
+
+          if (!user.verified) {
+            throw new Error('Please verify your email before logging in');
+          }
+
+          if (!user.active) {
+            throw new Error('Account has been deactivated');
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            avatar: user.avatar,
+            verified: user.verified,
+          };
+        } catch (error) {
+          // If it's a validation error we threw, rethrow it
+          if (error instanceof Error && (
+            error.message === 'Invalid credentials' ||
+            error.message === 'Please verify your email before logging in' ||
+            error.message === 'Account has been deactivated'
+          )) {
+            throw error;
+          }
+          // For database connection errors, provide a generic message
+          console.error('Database error during authentication:', error);
+          throw new Error('Unable to authenticate. Database connection failed.');
         }
-
-        const isValidPassword = await verifyPassword(
-          credentials.password,
-          user.password
-        );
-
-        if (!isValidPassword) {
-          throw new Error('Invalid credentials');
-        }
-
-        if (!user.verified) {
-          throw new Error('Please verify your email before logging in');
-        }
-
-        if (!user.active) {
-          throw new Error('Account has been deactivated');
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          avatar: user.avatar,
-          verified: user.verified,
-        };
       },
     }),
     
@@ -171,12 +185,17 @@ export const authOptions: NextAuthOptions = {
         session.user.provider = token.provider as string;
       }
       
-      // Update last login timestamp
+      // Update last login timestamp (non-blocking, fails gracefully)
       if (session.user?.id) {
-        await db.user.update({
-          where: { id: session.user.id },
-          data: { lastLogin: new Date() },
-        });
+        try {
+          await db.user.update({
+            where: { id: session.user.id },
+            data: { lastLogin: new Date() },
+          });
+        } catch (error) {
+          // Log but don't fail the session if database update fails
+          console.warn('Failed to update last login timestamp:', error);
+        }
       }
       
       return session;
@@ -188,14 +207,19 @@ export const authOptions: NextAuthOptions = {
       console.log(`User ${user.email} signed in via ${account?.provider}`);
       
       if (isNewUser) {
-        // Set default role for new users
-        await db.user.update({
-          where: { id: user.id },
-          data: { 
-            role: UserRole.GUEST,
-            verified: account?.provider !== 'credentials', // Auto-verify OAuth users
-          },
-        });
+        try {
+          // Set default role for new users
+          await db.user.update({
+            where: { id: user.id },
+            data: { 
+              role: UserRole.GUEST,
+              verified: account?.provider !== 'credentials', // Auto-verify OAuth users
+            },
+          });
+        } catch (error) {
+          // Log but don't fail the sign in if database update fails
+          console.warn('Failed to update new user role:', error);
+        }
       }
     },
     
