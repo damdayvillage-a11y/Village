@@ -4,12 +4,46 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 
 ## 🚀 Quick Start
 
-### Local Development
+### Prerequisites
+- Node.js 18+ and npm
+- PostgreSQL 14+ (running locally or accessible remotely)
+
+### Local Development Setup
+
+**Option 1: Automated Setup (Recommended)**
 ```bash
+npm run setup
+```
+This script will:
+- Create `.env` file if it doesn't exist
+- Check PostgreSQL installation and status
+- Create the database
+- Install dependencies
+- Generate Prisma client
+- Push database schema
+- Seed initial data (including admin user)
+- Verify admin setup
+
+**Option 2: Manual Setup**
+```bash
+# 1. Create .env file (copy from .env.example and update)
+cp .env.example .env
+
+# 2. Ensure PostgreSQL is running and create database
+createdb smart_village_db
+
+# 3. Install dependencies
 npm install
+
+# 4. Generate Prisma client and setup database
 npm run db:generate
+npm run db:push
 npm run db:seed
-npm run admin:verify  # Verify admin setup
+
+# 5. Verify admin setup
+npm run admin:verify
+
+# 6. Start development server
 npm run dev
 ```
 
@@ -54,6 +88,7 @@ docker build -f Dockerfile.debug -t village-app .
 
 ## 📖 Documentation
 
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions (500 errors, login issues, database setup)
 - **[Admin Setup Guide](docs/ADMIN_SETUP.md)** - Complete admin credentials and setup guide
 - **[CapRover Troubleshooting Guide](docs/CAPROVER_TROUBLESHOOTING.md)** - Fix build hangs and deployment issues
 - **[Docker Build Fix Guide](docs/DOCKER_BUILD_FIX.md)** - Technical details of the build fixes
