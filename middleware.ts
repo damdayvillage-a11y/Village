@@ -3,6 +3,26 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { UserRole } from '@prisma/client';
 
+// Force HTTPS redirect in production
+function forceHTTPS(request: NextRequest): NextResponse | null {
+  // Only enforce HTTPS in production
+  if (process.env.NODE_ENV !== 'production') {
+    return null;
+  }
+
+  // Check if request is already HTTPS
+  const proto = request.headers.get('x-forwarded-proto');
+  const host = request.headers.get('host');
+  
+  if (proto === 'http' && host) {
+    const url = request.nextUrl.clone();
+    url.protocol = 'https:';
+    return NextResponse.redirect(url, 301);
+  }
+  
+  return null;
+}
+
 // Define protected routes and their required roles/permissions
 const PROTECTED_ROUTES = {
   // Admin routes
@@ -62,6 +82,12 @@ function getRequiredRoles(path: string): UserRole[] | null {
 
 export default withAuth(
   function middleware(req) {
+    // Force HTTPS in production
+    const httpsRedirect = forceHTTPS(req);
+    if (httpsRedirect) {
+      return httpsRedirect;
+    }
+
     const token = req.nextauth.token;
     const { pathname } = req.nextUrl;
     
@@ -98,6 +124,11 @@ export default withAuth(
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set('X-XSS-Protection', '1; mode=block');
     
+    // Force HTTPS in production
+    if (process.env.NODE_ENV === 'production') {
+      response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+    }
+    
     // CSP header
     response.headers.set(
       'Content-Security-Policy',
@@ -108,6 +139,7 @@ export default withAuth(
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: https:",
         "connect-src 'self'",
+        "frame-ancestors 'none'",
       ].join('; ')
     );
     

@@ -7,7 +7,17 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    // Get session with error handling
+    let session;
+    try {
+      session = await getServerSession(authOptions);
+    } catch (authError) {
+      console.error('Auth error:', authError);
+      return NextResponse.json({ 
+        error: 'Authentication service unavailable',
+        details: 'Unable to verify session. Please try again.' 
+      }, { status: 503 });
+    }
     
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -37,7 +47,7 @@ export async function GET(request: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json({ 
       error: 'Internal server error',
-      details: errorMessage 
+      details: process.env.NODE_ENV === 'development' ? errorMessage : 'An unexpected error occurred'
     }, { status: 500 });
   }
 }

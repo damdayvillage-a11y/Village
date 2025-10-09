@@ -5,16 +5,27 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
+// Determine if we're in a build or runtime environment
+const isBuildTime = process.env.DATABASE_URL === 'postgresql://dummy:dummy@localhost:5432/dummy' ||
+                    process.env.CI === 'true' && !process.env.DATABASE_URL;
+
+// Configure logging based on environment
+const logConfig = process.env.NODE_ENV === 'production' 
+  ? ['error', 'warn'] 
+  : ['query', 'error', 'warn'];
+
 export const prisma = 
   globalThis.prisma ??
   new PrismaClient({
-    log: ['query'],
+    log: logConfig as any,
+    errorFormat: 'minimal',
   });
 
 export const db =
   globalThis.prisma ??
   new PrismaClient({
-    log: ['query'],
+    log: logConfig as any,
+    errorFormat: 'minimal',
   });
 
 if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
