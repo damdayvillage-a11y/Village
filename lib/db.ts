@@ -21,12 +21,8 @@ export const prisma =
     errorFormat: 'minimal',
   });
 
-export const db =
-  globalThis.prisma ??
-  new PrismaClient({
-    log: logConfig as any,
-    errorFormat: 'minimal',
-  });
+// Export db as an alias to prisma to maintain compatibility
+export const db = prisma;
 
 if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
 
