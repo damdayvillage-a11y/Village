@@ -34,62 +34,41 @@ fi
 echo "🔧 Generating Prisma client..."
 npx prisma generate
 
-# Build with enhanced monitoring and timeout protection
+# Build without timeout or complex pipes to avoid hangs
 echo "🏗️  Starting Next.js build with PWA optimizations..."
 echo "    This may take several minutes for PWA service worker generation..."
+echo "Start time: $(date)"
 
-# Function to monitor build progress
-monitor_build() {
-  while IFS= read -r line; do
-    echo "[BUILD] $line"
-    
-    # Check for PWA build stages
-    if echo "$line" | grep -q "PWA.*Compile server"; then
-      echo "[PWA] 📱 PWA server compilation started..."
-    elif echo "$line" | grep -q "PWA.*Compile client"; then
-      echo "[PWA] 🌐 PWA client compilation started..."
-    elif echo "$line" | grep -q "PWA.*Service worker"; then
-      echo "[PWA] ⚙️  Service worker generation in progress..."
-    elif echo "$line" | grep -q "Checking validity of types"; then
-      echo "[PWA] ✅ Type checking complete, PWA finalization next..."
-    elif echo "$line" | grep -q "Collecting page data"; then
-      echo "[PWA] 📄 Static page generation (including /offline)..."
-    elif echo "$line" | grep -q "Generating static pages"; then
-      echo "[PWA] 🎯 PWA build nearly complete..."
-    elif echo "$line" | grep -q "Finalizing page optimization"; then
-      echo "[PWA] 🚀 Build finalization in progress..."
-    fi
-  done
-}
+# Run build directly without timeout or monitoring loops
+npm run build
 
-# Run build with timeout and progress monitoring
-if timeout 1500 npm run build 2>&1 | monitor_build; then
-  echo "✅ Build completed successfully!"
-  
-  # Verify PWA files were generated
-  if [ -f "public/sw.js" ]; then
-    echo "✅ Service worker generated: $(wc -c < public/sw.js) bytes"
-  else
-    echo "⚠️  Service worker not found, but build succeeded"
-  fi
-  
-  if ls public/workbox-*.js 1> /dev/null 2>&1; then
-    echo "✅ Workbox files generated: $(ls public/workbox-*.js | wc -l) files"
-  else
-    echo "⚠️  Workbox files not found, but build succeeded"
-  fi
-  
-else
-  exit_code=$?
-  echo "❌ Build failed or timed out"
-  echo "Exit code: $exit_code"
+BUILD_EXIT_CODE=$?
+
+if [ $BUILD_EXIT_CODE -ne 0 ]; then
+  echo "❌ Build failed with exit code $BUILD_EXIT_CODE"
   
   # Show build artifacts for debugging
   echo "📁 Build artifacts check:"
   ls -la .next/ 2>/dev/null || echo "   No .next directory found"
   ls -la public/ 2>/dev/null || echo "   No public directory found"
   
-  exit $exit_code
+  exit $BUILD_EXIT_CODE
+fi
+
+echo "✅ Build completed successfully!"
+echo "End time: $(date)"
+
+# Verify PWA files were generated
+if [ -f "public/sw.js" ]; then
+  echo "✅ Service worker generated: $(wc -c < public/sw.js) bytes"
+else
+  echo "⚠️  Service worker not found, but build succeeded"
+fi
+
+if ls public/workbox-*.js 1> /dev/null 2>&1; then
+  echo "✅ Workbox files generated: $(ls public/workbox-*.js | wc -l) files"
+else
+  echo "⚠️  Workbox files not found, but build succeeded"
 fi
 
 echo "🎉 Docker build process completed successfully!"
