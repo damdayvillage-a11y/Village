@@ -25,7 +25,8 @@ function forceHTTPS(request: NextRequest): NextResponse | null {
 
 // Define protected routes and their required roles/permissions
 const PROTECTED_ROUTES = {
-  // Admin routes
+  // Admin routes - excluding login page
+  '/admin-panel': [UserRole.ADMIN],
   '/admin': [UserRole.ADMIN],
   '/admin/*': [UserRole.ADMIN],
   
@@ -155,11 +156,13 @@ export default withAuth(
           '/',
           '/about',
           '/contact',
+          '/login',
           '/auth/signin',
           '/auth/signup',
           '/auth/error',
           '/auth/verify-request',
           '/auth/unauthorized',
+          '/admin-panel/login',
           '/api/health',
           '/api/public/*',
         ];
