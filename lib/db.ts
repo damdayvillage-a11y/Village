@@ -90,6 +90,16 @@ export async function checkDatabaseHealth() {
     };
   }
 
+  // Check for unreplaced CapRover placeholders
+  if (process.env.DATABASE_URL.includes('$$cap_') || process.env.DATABASE_URL.includes('srv-captain--')) {
+    return {
+      status: 'unhealthy',
+      error: 'Invalid DATABASE_URL configuration',
+      help: 'DATABASE_URL contains CapRover placeholders ($$cap_* or srv-captain--*) that need to be replaced with actual database credentials in the CapRover dashboard.',
+      timestamp: new Date().toISOString()
+    };
+  }
+
   try {
     const startTime = Date.now();
     await prisma.$queryRaw`SELECT 1`;
@@ -105,7 +115,11 @@ export async function checkDatabaseHealth() {
     
     // Provide helpful error messages based on error type
     let helpfulMessage = 'Database connection failed.';
-    if (errorMessage.includes('ECONNREFUSED')) {
+    
+    // Check for CapRover placeholder or service name patterns
+    if (errorMessage.includes('srv-captain--') || errorMessage.includes('$$cap_')) {
+      helpfulMessage += ' The DATABASE_URL contains CapRover placeholders that need to be replaced with actual database credentials in the CapRover dashboard.';
+    } else if (errorMessage.includes('ECONNREFUSED')) {
       helpfulMessage += ' The database server is not accessible. Please check if PostgreSQL is running and the host/port are correct.';
     } else if (errorMessage.includes('ENOTFOUND')) {
       helpfulMessage += ' The database hostname could not be resolved. Please check the DATABASE_URL.';

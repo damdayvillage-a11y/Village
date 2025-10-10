@@ -12,6 +12,8 @@ interface HealthCheck {
       status: string;
       timestamp: string;
       error?: string;
+      help?: string;
+      message?: string;
     };
   };
 }
@@ -97,8 +99,10 @@ export default function DashboardPage() {
                     {health.services.database.status === 'healthy' ? '🗄️' : '❌'} {health.services.database.status}
                   </div>
                   <p className="mt-2 text-sm text-gray-500">Database</p>
-                  {health.services.database.error && (
-                    <p className="mt-1 text-xs text-red-600">{health.services.database.error}</p>
+                  {(health.services.database.help || health.services.database.message || health.services.database.error) && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {health.services.database.help || health.services.database.message || health.services.database.error}
+                    </p>
                   )}
                 </div>
 
