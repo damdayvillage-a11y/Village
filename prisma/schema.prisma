@@ -567,3 +567,31 @@ enum MessageType {
   AUDIO
   FILE
 }
+
+// ==================== CMS MODELS ====================
+
+model ContentBlock {
+  id       String      @id @default(cuid())
+  page     String      // Page identifier (e.g., 'home', 'about', 'contact')
+  type     BlockType   // Type of content block
+  position Int         // Order on the page
+  content  Json        // Flexible content storage
+  active   Boolean     @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([page, position])
+  @@map("content_blocks")
+}
+
+enum BlockType {
+  TEXT
+  IMAGE
+  HERO
+  STATS
+  GRID
+  CAROUSEL
+  VIDEO
+  TESTIMONIAL
+}

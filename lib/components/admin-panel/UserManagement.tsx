@@ -50,63 +50,19 @@ export function UserManagement({ onUserUpdate }: UserManagementProps) {
 
   const loadUsers = async () => {
     try {
-      // TODO: Replace with actual API call
-      const mockUsers: User[] = [
-        {
-          id: '1',
-          name: 'Sita Devi',
-          email: 'sita@damdayvillage.com',
-          role: 'HOST',
-          status: 'active',
-          avatar: '/avatars/sita.jpg',
-          createdAt: '2024-01-15T10:00:00Z',
-          lastLogin: '2024-01-20T14:30:00Z',
-          verified: true
-        },
-        {
-          id: '2',
-          name: 'Ram Singh',
-          email: 'ram@damdayvillage.com',
-          role: 'HOST',
-          status: 'active',
-          createdAt: '2024-01-10T09:00:00Z',
-          lastLogin: '2024-01-19T16:45:00Z',
-          verified: true
-        },
-        {
-          id: '3',
-          name: 'Priya Sharma',
-          email: 'priya@email.com',
-          role: 'GUEST',
-          status: 'active',
-          createdAt: '2024-01-18T12:00:00Z',
-          lastLogin: '2024-01-20T08:15:00Z',
-          verified: true
-        },
-        {
-          id: '4',
-          name: 'John Doe',
-          email: 'john@email.com',
-          role: 'GUEST',
-          status: 'inactive',
-          createdAt: '2024-01-05T15:30:00Z',
-          verified: false
-        },
-        {
-          id: '5',
-          name: 'Village Admin',
-          email: 'admin@damdayvillage.com',
-          role: 'ADMIN',
-          status: 'active',
-          createdAt: '2023-12-01T10:00:00Z',
-          lastLogin: '2024-01-20T18:00:00Z',
-          verified: true
-        }
-      ];
+      // Load users from API
+      const response = await fetch('/api/admin/users');
       
-      setUsers(mockUsers);
+      if (!response.ok) {
+        throw new Error('Failed to load users');
+      }
+      
+      const data = await response.json();
+      setUsers(data.users || []);
     } catch (error) {
       console.error('Failed to load users:', error);
+      // Set empty array on error
+      setUsers([]);
     } finally {
       setIsLoading(false);
     }
@@ -123,23 +79,71 @@ export function UserManagement({ onUserUpdate }: UserManagementProps) {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      await onUserUpdate(userId, { role: newRole as any });
+      // Update user via API
+      const response = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          updates: { role: newRole },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user role');
+      }
+
+      const data = await response.json();
+      
+      // Update local state
       setUsers(prev => prev.map(user => 
         user.id === userId ? { ...user, role: newRole as any } : user
       ));
+
+      // Call parent callback if provided
+      if (onUserUpdate) {
+        await onUserUpdate(userId, { role: newRole as any });
+      }
     } catch (error) {
       console.error('Failed to update user role:', error);
+      alert('Failed to update user role. Please try again.');
     }
   };
 
   const handleStatusChange = async (userId: string, newStatus: string) => {
     try {
-      await onUserUpdate(userId, { status: newStatus as any });
+      // Update user via API
+      const response = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          updates: { status: newStatus },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user status');
+      }
+
+      const data = await response.json();
+      
+      // Update local state
       setUsers(prev => prev.map(user => 
         user.id === userId ? { ...user, status: newStatus as any } : user
       ));
+
+      // Call parent callback if provided
+      if (onUserUpdate) {
+        await onUserUpdate(userId, { status: newStatus as any });
+      }
     } catch (error) {
       console.error('Failed to update user status:', error);
+      alert('Failed to update user status. Please try again.');
     }
   };
 
