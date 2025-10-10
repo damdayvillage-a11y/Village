@@ -46,64 +46,78 @@ export function ContentEditor({ page, onSave }: ContentEditorProps) {
 
   const loadPageContent = async () => {
     try {
-      // TODO: Load actual page content from API
-      // For now, use mock data
-      const mockBlocks: ContentBlock[] = [
-        {
-          id: '1',
-          type: 'hero',
-          content: {
-            title: 'Welcome to Smart Carbon-Free Village',
-            subtitle: 'Experience Damday Village in Pithoragarh - a pioneering carbon-neutral, culturally-rich, and technologically progressive model village nestled at 2,100m elevation in the pristine Kumaon Himalayas.',
-            backgroundImage: '/hero-bg.jpg',
-            ctaText: 'Explore Digital Twin',
-            ctaLink: '/digital-twin'
-          },
-          position: 0,
-          page
-        },
-        {
-          id: '2',
-          type: 'stats',
-          content: {
-            stats: [
-              { label: 'Solar Grid', value: '45kW Active', color: 'green' },
-              { label: 'Air Quality', value: 'Excellent (AQI: 18)', color: 'blue' },
-              { label: 'Temperature', value: '22°C', color: 'purple' }
-            ]
-          },
-          position: 1,
-          page
-        },
-        {
-          id: '3',
-          type: 'grid',
-          content: {
-            title: 'Available Services',
-            subtitle: 'Explore our range of sustainable tourism and community development services',
-            items: [
-              {
-                title: 'Homestay Booking',
-                description: 'Authentic village accommodations with local families',
-                price: '₹2,500-3,500/night',
-                icon: 'home'
-              },
-              {
-                title: 'Local Marketplace', 
-                description: 'Handcrafted products from village artisans',
-                price: '25+ Products',
-                icon: 'shop'
-              }
-            ]
-          },
-          position: 2,
-          page
-        }
-      ];
+      // Load actual page content from API
+      const response = await fetch(`/api/admin/content?page=${encodeURIComponent(page)}`);
       
-      setBlocks(mockBlocks);
+      if (!response.ok) {
+        throw new Error('Failed to load content');
+      }
+      
+      const data = await response.json();
+      
+      // If no blocks exist, use default blocks for the page
+      if (data.blocks && data.blocks.length > 0) {
+        setBlocks(data.blocks);
+      } else {
+        // Default blocks for new pages
+        const defaultBlocks: ContentBlock[] = [
+          {
+            id: 'new-1',
+            type: 'hero',
+            content: {
+              title: 'Welcome to Smart Carbon-Free Village',
+              subtitle: 'Experience Damday Village in Pithoragarh - a pioneering carbon-neutral, culturally-rich, and technologically progressive model village nestled at 2,100m elevation in the pristine Kumaon Himalayas.',
+              backgroundImage: '/hero-bg.jpg',
+              ctaText: 'Explore Digital Twin',
+              ctaLink: '/digital-twin'
+            },
+            position: 0,
+            page
+          },
+          {
+            id: 'new-2',
+            type: 'stats',
+            content: {
+              stats: [
+                { label: 'Solar Grid', value: '45kW Active', color: 'green' },
+                { label: 'Air Quality', value: 'Excellent (AQI: 18)', color: 'blue' },
+                { label: 'Temperature', value: '22°C', color: 'purple' }
+              ]
+            },
+            position: 1,
+            page
+          },
+          {
+            id: 'new-3',
+            type: 'grid',
+            content: {
+              title: 'Available Services',
+              subtitle: 'Explore our range of sustainable tourism and community development services',
+              items: [
+                {
+                  title: 'Homestay Booking',
+                  description: 'Authentic village accommodations with local families',
+                  price: '₹2,500-3,500/night',
+                  icon: 'home'
+                },
+                {
+                  title: 'Local Marketplace', 
+                  description: 'Handcrafted products from village artisans',
+                  price: '25+ Products',
+                  icon: 'shop'
+                }
+              ]
+            },
+            position: 2,
+            page
+          }
+        ];
+        setBlocks(defaultBlocks);
+      }
     } catch (error) {
       console.error('Failed to load page content:', error);
+      // Set empty blocks on error
+      setBlocks([]);
     }
   };
 
@@ -118,10 +132,32 @@ export function ContentEditor({ page, onSave }: ContentEditorProps) {
 
   const handleSave = async () => {
     try {
-      await onSave(blocks);
+      // Save blocks to API
+      const response = await fetch('/api/admin/content', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ blocks }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save content');
+      }
+
+      const data = await response.json();
+      
+      // Update blocks with saved data
+      setBlocks(data.blocks);
       setUnsavedChanges(false);
+      
+      // Call parent callback if provided
+      if (onSave) {
+        await onSave(data.blocks);
+      }
     } catch (error) {
       console.error('Failed to save content:', error);
+      alert('Failed to save content. Please try again.');
     }
   };
 
