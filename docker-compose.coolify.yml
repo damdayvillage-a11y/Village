@@ -1,0 +1,82 @@
+version: '3.8'
+
+# Docker Compose for Coolify Deployment
+# This file can be used for local testing before deploying to Coolify
+# Or imported directly into Coolify as a Docker Compose project
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: village-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: villagedb
+      POSTGRES_USER: villageuser
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-changeme123}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U villageuser -d villagedb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - village-network
+
+  # Village Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    container_name: village-app
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      # Core Configuration
+      NODE_ENV: production
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-generate-a-secure-secret-minimum-32-characters}
+      DATABASE_URL: postgresql://villageuser:${DATABASE_PASSWORD:-changeme123}@database:5432/villagedb
+      
+      # Build Optimization
+      NEXT_TELEMETRY_DISABLED: 1
+      GENERATE_SOURCEMAP: false
+      CI: true
+      
+      # Optional Services (uncomment to use)
+      # STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      # STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      # RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      # RAZORPAY_SECRET: ${RAZORPAY_SECRET}
+      # GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      # GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      # GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      # GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      # EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST}
+      # EMAIL_FROM: ${EMAIL_FROM}
+      # MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+    ports:
+      - "80:80"
+      - "3000:80"  # Alternative port mapping
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - village-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  village-network:
+    driver: bridge

@@ -2,14 +2,29 @@
 
 A futuristic platform for Damday Village featuring carbon footprint tracking, IoT integrations, tourism booking, and sustainable living solutions.
 
-## 🎉 Production Ready - CapRover Deployment Fixed
+## 🎉 Production Ready - Deployment Fixed
 
 ✅ **All "something bad" errors resolved** - Build time: ~2 minutes, Image size: 194MB  
-✅ **Latest Fix (2025-10-10)**: All deployment issues fixed with proper implementations!  
-✅ **NEW:** Admin panel diagnostics and auto-recovery features added!
+✅ **Latest Update (2025-01-10)**: All deployment issues fixed with proper implementations!  
+✅ **NEW:** Coolify deployment support with comprehensive guides!  
+✅ **Admin panel diagnostics and auto-recovery features**
 
 **📋 What Was Fixed:** See [FIXES_SUMMARY.md](./FIXES_SUMMARY.md) for complete details of all fixes
 
+**🚀 Deployment Options:**
+
+### Coolify (Recommended) 🌟
+1. ⚡ **[Quick Start Guide](./COOLIFY_QUICK_START.md)** - Deploy in 15 minutes
+2. 📖 **[Complete Deployment Guide](./COOLIFY_DEPLOYMENT_GUIDE.md)** - Full Coolify deployment instructions
+3. 🔄 **[Migration from CapRover](./CAPROVER_TO_COOLIFY_MIGRATION.md)** - Migrate from CapRover to Coolify
+4. 📚 **[Environment Variables Reference](./ENVIRONMENT_VARIABLES.md)** - All environment variables explained
+
+### CapRover (Legacy Support)
+1. 🔥 [CapRover Quick Fix](./CAPROVER_QUICK_FIX.md) - 3-step fix for "something bad" errors (5 minutes)
+2. 📖 [Complete Deployment Guide](./CAPROVER_DEPLOYMENT_GUIDE.md) - Full CapRover deployment instructions
+3. ⚠️ **CRITICAL:** [Environment Check](./CAPROVER_ENV_CHECK.md) - Prevent 500 errors before deploying
+4. 🩺 [Admin 500 Error Fix](./ADMIN_500_ERROR_FIX.md) - Comprehensive diagnostics for admin panel issues
+5. 🔧 [Troubleshooting Guide](./docs/CAPROVER_TROUBLESHOOTING.md) - Solve any build issues
 **🚀 Quick Deploy to CapRover:**
 1. 🆘 **ADMIN PANEL 500 ERROR?** [CapRover Admin Panel Fix](./CAPROVER_ADMIN_PANEL_FIX.md) - Complete fix for login issues
 2. 🔥 [CapRover Quick Fix](./CAPROVER_QUICK_FIX.md) - 3-step fix for "something bad" errors (5 minutes)
@@ -78,26 +93,49 @@ npm run admin:verify
 npm run dev
 ```
 
-### CapRover Deployment (Production)
+### Production Deployment
 
 **✅ All Issues Fixed (2025-01-10)**: Build hangs, admin panel 500 errors, SSL/HTTPS enforcement - all resolved!
 
-**Quick Deployment (15 minutes):**
-1. Read [Quick Fix Guide](./docs/QUICK_FIX_GUIDE.md)
-2. Set environment variables in CapRover (see guide)
-3. Enable SSL/HTTPS
-4. Deploy!
+#### Coolify Deployment (Recommended) 🌟
+
+**Quick Start (15 minutes):**
+1. Follow [Coolify Quick Start Guide](./COOLIFY_QUICK_START.md)
+2. Create PostgreSQL database in Coolify
+3. Deploy application from GitHub
+4. Set environment variables (see guide)
+5. Run migrations and seed data
+6. Done! No admin panel 500 errors! ✅
+
+**Why Coolify?**
+- ✅ No placeholder variable issues
+- ✅ Built-in database backups
+- ✅ Better UI and monitoring
+- ✅ Automatic SSL/HTTPS
+- ✅ Simpler configuration
 
 **Required Environment Variables:**
 ```env
 NODE_ENV=production
-NEXTAUTH_URL=https://damdayvillage.com
+NEXTAUTH_URL=https://your-domain.com
 NEXTAUTH_SECRET=[generate: openssl rand -base64 32]
-DATABASE_URL=postgresql://user:pass@host:port/db
+DATABASE_URL=postgresql://user:pass@village-db:5432/villagedb
 NEXT_TELEMETRY_DISABLED=1
 CI=true
-CAPROVER_BUILD=true
 ```
+
+**Full Documentation:**
+- [Complete Coolify Deployment Guide](./COOLIFY_DEPLOYMENT_GUIDE.md)
+- [Migration from CapRover](./CAPROVER_TO_COOLIFY_MIGRATION.md)
+- [Environment Variables Reference](./ENVIRONMENT_VARIABLES.md)
+
+#### CapRover Deployment (Legacy Support)
+
+**Quick Deployment:**
+1. Read [CapRover Quick Fix Guide](./CAPROVER_QUICK_FIX.md)
+2. Set environment variables (replace ALL `$$cap_*$$` placeholders!)
+3. Enable SSL/HTTPS
+4. Deploy!
 
 **captain-definition** (already configured):
 ```json
