@@ -160,6 +160,42 @@ function checkStartupConfiguration() {
     }
   }
 
+  // Test database connectivity (optional, non-blocking)
+  if (process.env.DATABASE_URL && 
+      !process.env.DATABASE_URL.includes('dummy:dummy') &&
+      !hasPlaceholders(process.env.DATABASE_URL)) {
+    console.log(chalk.blue('\nTesting database connectivity...'));
+    
+    // Import and test connection (with timeout)
+    const testConnection = async () => {
+      try {
+        const { PrismaClient } = require('@prisma/client');
+        const prisma = new PrismaClient();
+        
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timeout')), 5000)
+        );
+        
+        const connectPromise = prisma.$queryRaw`SELECT 1`;
+        
+        await Promise.race([connectPromise, timeoutPromise]);
+        await prisma.$disconnect();
+        
+        console.log(chalk.green('✅ Database connection successful!'));
+        return true;
+      } catch (error) {
+        const errorMsg = error.message || 'Unknown error';
+        console.log(chalk.yellow(`⚠️  Database connection test failed: ${errorMsg}`));
+        console.log(chalk.yellow('   App will start but database operations may fail.'));
+        console.log(chalk.yellow('   Please verify DATABASE_URL and ensure PostgreSQL is running.'));
+        return false;
+      }
+    };
+    
+    // Run test asynchronously (don't block startup)
+    testConnection().catch(() => {});
+  }
+
   // Print summary
   console.log(chalk.blue('\n' + '='.repeat(60) + '\n'));
 
@@ -168,10 +204,18 @@ function checkStartupConfiguration() {
     criticalErrors.forEach(error => {
       console.log(chalk.red(`   • ${error}`));
     });
-    console.log(chalk.yellow('\n📚 For help, see: docs/PRODUCTION_SETUP_GUIDE.md\n'));
+    console.log(chalk.yellow('\n📚 For help, see:'));
+    console.log(chalk.yellow('   • docs/AUTH_ERROR_HANDLING.md'));
+    console.log(chalk.yellow('   • ADMIN_PANEL_SETUP.md'));
+    console.log(chalk.yellow('   • PRODUCTION_READINESS.md\n'));
     
     if (nodeEnv === 'production') {
       console.log(chalk.red('🛑 Cannot start in production mode with these errors.\n'));
+      console.log(chalk.yellow('💡 Quick fixes:'));
+      console.log(chalk.yellow('   1. Replace all $$cap_*$$ placeholders with actual values'));
+      console.log(chalk.yellow('   2. Generate NEXTAUTH_SECRET: openssl rand -base64 32'));
+      console.log(chalk.yellow('   3. Set NEXTAUTH_URL to your actual domain (e.g., https://damdayvillage.com)'));
+      console.log(chalk.yellow('   4. Configure DATABASE_URL with real PostgreSQL credentials\n'));
       process.exit(1);
     } else {
       console.log(chalk.yellow('⚠️  Starting anyway (development mode)...\n'));

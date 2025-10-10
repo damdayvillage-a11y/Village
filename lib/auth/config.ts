@@ -59,57 +59,84 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email and password required');
         }
 
-        try {
-          const user = await db.user.findUnique({
-            where: { email: credentials.email },
-          });
+        let retries = 3;
+        let lastError: Error | null = null;
 
-          if (!user || !user.password) {
-            throw new Error('Invalid credentials');
-          }
+        // Retry logic for transient database errors
+        for (let attempt = 1; attempt <= retries; attempt++) {
+          try {
+            const user = await db.user.findUnique({
+              where: { email: credentials.email },
+            });
 
-          const isValidPassword = await verifyPassword(
-            credentials.password,
-            user.password
-          );
+            if (!user || !user.password) {
+              throw new Error('Invalid credentials');
+            }
 
-          if (!isValidPassword) {
-            throw new Error('Invalid credentials');
-          }
+            const isValidPassword = await verifyPassword(
+              credentials.password,
+              user.password
+            );
 
-          if (!user.verified) {
-            throw new Error('Please verify your email before logging in');
-          }
+            if (!isValidPassword) {
+              throw new Error('Invalid credentials');
+            }
 
-          if (!user.active) {
-            throw new Error('Account has been deactivated');
-          }
+            if (!user.verified) {
+              throw new Error('Please verify your email before logging in');
+            }
 
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            avatar: user.avatar,
-            verified: user.verified,
-          };
-        } catch (error) {
-          // If it's a validation error we threw, rethrow it
-          if (error instanceof Error && (
-            error.message === 'Invalid credentials' ||
-            error.message === 'Please verify your email before logging in' ||
-            error.message === 'Account has been deactivated'
-          )) {
-            throw error;
+            if (!user.active) {
+              throw new Error('Account has been deactivated');
+            }
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+              avatar: user.avatar,
+              verified: user.verified,
+            };
+          } catch (error) {
+            lastError = error instanceof Error ? error : new Error('Unknown error');
+            
+            // If it's a validation error we threw, don't retry - just fail
+            if (lastError.message === 'Invalid credentials' ||
+                lastError.message === 'Please verify your email before logging in' ||
+                lastError.message === 'Account has been deactivated' ||
+                lastError.message === 'Email and password required') {
+              throw lastError;
+            }
+
+            // For database connection errors, retry if we have attempts left
+            const errorMsg = lastError.message;
+            const isTransientError = errorMsg.includes('connect') || 
+                                    errorMsg.includes('ECONNREFUSED') || 
+                                    errorMsg.includes('timeout') ||
+                                    errorMsg.includes('ETIMEDOUT') ||
+                                    errorMsg.includes('ENOTFOUND');
+
+            if (isTransientError && attempt < retries) {
+              console.warn(`Auth attempt ${attempt} failed, retrying...`, errorMsg);
+              // Wait before retry (exponential backoff)
+              await new Promise(resolve => setTimeout(resolve, attempt * 500));
+              continue;
+            }
+
+            // Log error for debugging but don't expose internals to user
+            console.error('Database error during authentication:', lastError);
+            
+            if (isTransientError) {
+              throw new Error('Database connection failed. Please try again or contact support.');
+            }
+            
+            throw new Error('Unable to authenticate. Please try again later.');
           }
-          // For database connection errors, provide a more helpful message
-          console.error('Database error during authentication:', error);
-          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-          if (errorMsg.includes('connect') || errorMsg.includes('ECONNREFUSED') || errorMsg.includes('timeout')) {
-            throw new Error('Database connection failed. Please contact support.');
-          }
-          throw new Error('Unable to authenticate. Please try again later.');
         }
+
+        // Should not reach here, but just in case
+        throw lastError || new Error('Authentication failed after retries');
       },
     }),
     
@@ -212,15 +239,26 @@ export const authOptions: NextAuthOptions = {
         // Only attempt if database is likely available (not a dummy URL)
         if (session.user && 'id' in session.user && 
             process.env.DATABASE_URL && 
-            !process.env.DATABASE_URL.includes('dummy:dummy')) {
+            !process.env.DATABASE_URL.includes('dummy:dummy') &&
+            !process.env.DATABASE_URL.includes('$$cap_')) {
+          
+          // Use a short timeout to prevent hanging
+          const updatePromise = db.user.update({
+            where: { id: (session.user as any).id },
+            data: { lastLogin: new Date() },
+          });
+          
+          // Set a timeout for the update operation
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Update timeout')), 2000)
+          );
+          
           try {
-            await db.user.update({
-              where: { id: (session.user as any).id },
-              data: { lastLogin: new Date() },
-            });
+            await Promise.race([updatePromise, timeoutPromise]);
           } catch (error) {
             // Log but don't fail the session if database update fails
-            console.warn('Failed to update last login timestamp:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            console.warn('Failed to update last login timestamp:', errorMsg);
           }
         }
         

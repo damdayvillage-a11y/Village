@@ -14,17 +14,70 @@ const logConfig = process.env.NODE_ENV === 'production'
   ? ['error', 'warn'] 
   : ['query', 'error', 'warn'];
 
+// Enhanced Prisma client configuration with connection pooling and timeouts
 export const prisma = 
   globalThis.prisma ??
   new PrismaClient({
     log: logConfig as any,
     errorFormat: 'minimal',
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
   });
 
 // Export db as an alias to prisma to maintain compatibility
 export const db = prisma;
 
 if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
+
+// Connection helper with retry logic
+let connectionAttempts = 0;
+const MAX_CONNECTION_ATTEMPTS = 3;
+
+export async function ensureDatabaseConnection(): Promise<boolean> {
+  // Skip connection check during build
+  if (isBuildTime || !process.env.DATABASE_URL || 
+      process.env.DATABASE_URL.includes('dummy:dummy') ||
+      process.env.DATABASE_URL.includes('$$cap_')) {
+    return false;
+  }
+
+  while (connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
+    try {
+      await prisma.$connect();
+      console.log('✅ Database connection established');
+      connectionAttempts = 0; // Reset on success
+      return true;
+    } catch (error) {
+      connectionAttempts++;
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      console.warn(`Database connection attempt ${connectionAttempts} failed:`, errorMsg);
+      
+      if (connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
+        console.error('❌ Failed to connect to database after maximum retries');
+        return false;
+      }
+      
+      // Exponential backoff
+      const delay = Math.min(1000 * Math.pow(2, connectionAttempts - 1), 5000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  return false;
+}
+
+// Graceful disconnect
+export async function disconnectDatabase(): Promise<void> {
+  try {
+    await prisma.$disconnect();
+    console.log('Database disconnected');
+  } catch (error) {
+    console.error('Error disconnecting from database:', error);
+  }
+}
 
 // Health check function
 export async function checkDatabaseHealth() {

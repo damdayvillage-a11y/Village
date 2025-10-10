@@ -55,22 +55,56 @@ function AdminLoginContent() {
       });
 
       if (result?.error) {
-        setError('Invalid admin credentials');
-      } else if (result?.ok) {
-        // Verify user has admin role
-        const session = await fetch('/api/auth/session').then(res => res.json());
-        
-        if (session?.user?.role === 'ADMIN') {
-          router.push('/admin-panel');
+        // Provide more specific error messages
+        if (result.error.includes('Database connection failed')) {
+          setError('Service temporarily unavailable. Please try again in a moment.');
+        } else if (result.error.includes('credentials')) {
+          setError('Invalid admin credentials. Please check your email and password.');
         } else {
-          setError('Access denied. Admin privileges required.');
-          // Sign out non-admin users
-          await fetch('/api/auth/signout', { method: 'POST' });
+          setError('Unable to sign in. Please try again or contact support.');
+        }
+        console.error('Sign in error:', result.error);
+      } else if (result?.ok) {
+        // Verify user has admin role with retry
+        let retries = 3;
+        let sessionChecked = false;
+        
+        for (let i = 0; i < retries && !sessionChecked; i++) {
+          try {
+            const sessionResponse = await fetch('/api/auth/session');
+            
+            if (!sessionResponse.ok) {
+              throw new Error('Session fetch failed');
+            }
+            
+            const session = await sessionResponse.json();
+            
+            if (session?.user?.role === 'ADMIN') {
+              router.push('/admin-panel');
+              sessionChecked = true;
+            } else if (session?.user) {
+              setError('Access denied. Admin privileges required.');
+              // Sign out non-admin users
+              await fetch('/api/auth/signout', { method: 'POST' });
+              sessionChecked = true;
+            } else if (i === retries - 1) {
+              setError('Session validation failed. Please try logging in again.');
+            }
+          } catch (sessionError) {
+            if (i < retries - 1) {
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
+            } else {
+              console.error('Session verification error:', sessionError);
+              setError('Unable to verify session. Please try again.');
+            }
+          }
         }
       }
     } catch (error) {
-      setError('An error occurred during sign in');
-      console.error('Admin login error:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Admin login error:', errorMsg);
+      setError('An unexpected error occurred. Please try again or contact support.');
     } finally {
       setIsLoading(false);
     }
