@@ -84,7 +84,7 @@ export default function UserPanelPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/signin?callbackUrl=/user-panel');
+      router.push('/login?callbackUrl=/user-panel');
       return;
     }
     

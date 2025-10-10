@@ -25,7 +25,8 @@ function forceHTTPS(request: NextRequest): NextResponse | null {
 
 // Define protected routes and their required roles/permissions
 const PROTECTED_ROUTES = {
-  // Admin routes
+  // Admin routes - excluding login page
+  '/admin-panel': [UserRole.ADMIN],
   '/admin': [UserRole.ADMIN],
   '/admin/*': [UserRole.ADMIN],
   
@@ -72,6 +73,25 @@ function matchRoute(path: string, pattern: string): boolean {
 }
 
 function getRequiredRoles(path: string): UserRole[] | null {
+  // Check if path is explicitly a public route first
+  const publicRoutes = [
+    '/',
+    '/about',
+    '/contact',
+    '/login',
+    '/auth/signin',
+    '/auth/signup',
+    '/auth/error',
+    '/auth/verify-request',
+    '/auth/unauthorized',
+    '/admin-panel/login',
+    '/api/health',
+  ];
+  
+  if (publicRoutes.includes(path) || path.startsWith('/api/public/')) {
+    return null;
+  }
+  
   for (const [pattern, roles] of Object.entries(PROTECTED_ROUTES)) {
     if (matchRoute(path, pattern)) {
       return [...roles]; // Create a mutable copy
@@ -155,11 +175,13 @@ export default withAuth(
           '/',
           '/about',
           '/contact',
+          '/login',
           '/auth/signin',
           '/auth/signup',
           '/auth/error',
           '/auth/verify-request',
           '/auth/unauthorized',
+          '/admin-panel/login',
           '/api/health',
           '/api/public/*',
         ];

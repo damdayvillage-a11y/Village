@@ -60,14 +60,15 @@ export default function AdminPanelPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/signin?callbackUrl=/admin-panel');
+      // Redirect to admin-specific login page
+      router.push('/admin-panel/login');
       return;
     }
     
     if (status === 'authenticated' && session) {
       // Check if user has admin permissions
       if (!session.user?.role || (!hasPermission(session.user, 'manage_users') && !hasPermission(session.user, 'manage_content'))) {
-        router.push('/auth/unauthorized');
+        router.push('/auth/unauthorized?error=AdminRequired');
         return;
       }
       
