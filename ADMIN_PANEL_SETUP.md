@@ -98,10 +98,29 @@ After running `npm run db:seed`:
    npm run admin:verify
    ```
    
-   If admin doesn't exist:
+   If admin doesn't exist, you have three options:
+   
+   **Option A - Automatic (Recommended):**
+   Visit or POST to: `https://your-domain.com/api/admin/init`
+   ```bash
+   curl -X POST https://your-domain.com/api/admin/init
+   ```
+   
+   **Option B - Database seed:**
    ```bash
    npm run db:seed
    ```
+   
+   **Option C - Manual using Prisma:**
+   ```bash
+   npx prisma studio
+   # Then manually create user with role=ADMIN
+   ```
+   
+   **Default Credentials** (after creation):
+   - Email: `admin@damdayvillage.org`
+   - Password: `Admin@123`
+   - ⚠️ **Change these immediately after first login!**
 
 4. **Check startup configuration:**
    ```bash

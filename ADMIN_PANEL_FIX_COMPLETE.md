@@ -214,16 +214,25 @@ npm run db:seed
 
 **Quick Fix:**
 ```bash
-# Verify admin user exists
+# Option 1: Auto-create admin user (NEW!)
+curl -X POST https://your-domain.com/api/admin/init
+# OR visit in browser: https://your-domain.com/api/admin/init
+
+# Option 2: Verify admin user exists
 npm run admin:verify
 
-# If not found, create it
+# Option 3: Create via database seed
 npm run db:seed
 
 # Default credentials:
 # Email: admin@damdayvillage.org
 # Password: Admin@123
+
+# ⚠️ Change password immediately after first login!
 ```
+
+**System Status Page (NEW!):**
+Visit `https://your-domain.com/admin-panel/status` to check all system diagnostics
 
 ### Issue: "Authentication Service Unavailable"
 
