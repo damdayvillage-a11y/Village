@@ -11,11 +11,13 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 **📋 What Was Fixed:** See [FIXES_SUMMARY.md](./FIXES_SUMMARY.md) for complete details of all fixes
 
 **🚀 Quick Deploy to CapRover:**
-1. 🔥 **NEW:** [CapRover Quick Fix](./CAPROVER_QUICK_FIX.md) - 3-step fix for "something bad" errors (5 minutes)
-2. 📖 [Complete Deployment Guide](./CAPROVER_DEPLOYMENT_GUIDE.md) - Full CapRover deployment instructions
-3. ⚠️ **CRITICAL:** [Environment Check](./CAPROVER_ENV_CHECK.md) - Prevent 500 errors before deploying
-4. 🩺 **NEW:** [Admin 500 Error Fix](./ADMIN_500_ERROR_FIX.md) - Comprehensive diagnostics for admin panel issues
-5. 🔧 [Troubleshooting Guide](./docs/CAPROVER_TROUBLESHOOTING.md) - Solve any build issues
+1. 🆘 **ADMIN PANEL 500 ERROR?** [CapRover Admin Panel Fix](./CAPROVER_ADMIN_PANEL_FIX.md) - Complete fix for login issues
+2. 🔥 [CapRover Quick Fix](./CAPROVER_QUICK_FIX.md) - 3-step fix for "something bad" errors (5 minutes)
+3. 📖 [Complete Deployment Guide](./CAPROVER_DEPLOYMENT_GUIDE.md) - Full CapRover deployment instructions
+4. ⚠️ **CRITICAL:** [Environment Check](./CAPROVER_ENV_CHECK.md) - Prevent 500 errors before deploying
+5. ⚡ [Quick Fix: Admin 500 Error](./QUICK_FIX_ADMIN_500.md) - 1-minute fix for login issues
+6. 🩺 [Complete Admin Fix Guide](./ADMIN_500_FIX_GUIDE.md) - Comprehensive diagnostics & auto-recovery
+7. 🔧 [Troubleshooting Guide](./docs/CAPROVER_TROUBLESHOOTING.md) - Solve any build issues
 
 **Key Features:**
 - ✅ All build issues fixed (no more hangs or "something bad" errors)

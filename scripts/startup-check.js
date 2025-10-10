@@ -164,7 +164,7 @@ function checkStartupConfiguration() {
   if (process.env.DATABASE_URL && 
       !process.env.DATABASE_URL.includes('dummy:dummy') &&
       !hasPlaceholders(process.env.DATABASE_URL)) {
-    console.log(chalk.blue('\nTesting database connectivity...'));
+    console.log(chalk.blue('\nTesting database connectivity and admin setup...'));
     
     // Import and test connection (with timeout)
     const testConnection = async () => {
@@ -179,9 +179,32 @@ function checkStartupConfiguration() {
         const connectPromise = prisma.$queryRaw`SELECT 1`;
         
         await Promise.race([connectPromise, timeoutPromise]);
-        await prisma.$disconnect();
         
         console.log(chalk.green('✅ Database connection successful!'));
+        
+        // Check if admin user exists (non-blocking warning)
+        try {
+          const adminUser = await prisma.user.findUnique({
+            where: { email: 'admin@damdayvillage.org' }
+          });
+          
+          if (!adminUser) {
+            console.log(chalk.yellow('⚠️  Admin user not found in database'));
+            console.log(chalk.yellow('   To create admin user, run: npm run db:seed'));
+            console.log(chalk.yellow('   Or visit: /api/admin/init to auto-create'));
+            console.log(chalk.yellow('   Default credentials: admin@damdayvillage.org / Admin@123'));
+            warnings.push('Admin user not found - run db:seed or visit /api/admin/init');
+          } else {
+            console.log(chalk.green('✅ Admin user exists'));
+            console.log(chalk.blue(`   Email: ${adminUser.email}`));
+            console.log(chalk.blue(`   Role: ${adminUser.role}`));
+          }
+        } catch (adminCheckError) {
+          console.log(chalk.yellow('⚠️  Could not verify admin user (database may need migration)'));
+          console.log(chalk.yellow('   Run: npx prisma migrate deploy'));
+        }
+        
+        await prisma.$disconnect();
         return true;
       } catch (error) {
         const errorMsg = error.message || 'Unknown error';
