@@ -37,6 +37,8 @@ function AdminLoginContent() {
         return 'Access denied. Admin privileges required.';
       case 'Unauthorized':
         return 'You do not have admin privileges.';
+      case 'Configuration':
+        return 'System configuration error. Please check the system status.';
       default:
         return 'An error occurred during sign in. Please try again.';
     }
@@ -132,9 +134,23 @@ function AdminLoginContent() {
         
         <div className="bg-white rounded-lg shadow-2xl p-8">
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-              <AlertTriangle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
-              <p className="text-red-800 text-sm">{error}</p>
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-red-800 text-sm">{error}</p>
+                  {(error.includes('Service temporarily unavailable') || 
+                    error.includes('configuration') || 
+                    error.includes('contact support')) && (
+                    <Link 
+                      href="/admin-panel/status" 
+                      className="mt-2 inline-block text-sm text-purple-600 hover:text-purple-700 underline font-medium"
+                    >
+                      Check System Status
+                    </Link>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
