@@ -119,7 +119,7 @@ export async function checkDatabaseHealth() {
     // Check for CapRover placeholder or service name patterns
     if (errorMessage.includes('srv-captain--') || errorMessage.includes('$$cap_')) {
       helpfulMessage += ' The DATABASE_URL contains CapRover placeholders that need to be replaced with actual database credentials in the CapRover dashboard.';
-    } else if (errorMessage.includes('ECONNREFUSED')) {
+    } else if (errorMessage.includes('ECONNREFUSED') || errorMessage.includes("Can't reach database server")) {
       helpfulMessage += ' The database server is not accessible. Please check if PostgreSQL is running and the host/port are correct.';
     } else if (errorMessage.includes('ENOTFOUND')) {
       helpfulMessage += ' The database hostname could not be resolved. Please check the DATABASE_URL.';
