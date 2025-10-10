@@ -22,6 +22,25 @@ const chalk = (() => {
   }
 })();
 
+/**
+ * Check if a value contains unreplaced placeholders
+ */
+function hasPlaceholders(value) {
+  if (!value) return false;
+  
+  const placeholderPatterns = [
+    /\$\$cap_[^$]+\$\$/,     // CapRover placeholders like $$cap_appname$$
+    /\$\{[^}]+\}/,           // Template literals like ${VARIABLE}
+    /your-[a-z-]+/i,         // Patterns like your-domain, your-secret
+    /change-me/i,            // Common placeholder text
+    /example\./i,            // example.com patterns
+    /placeholder/i,          // Placeholder text
+    /replace-this/i,         // Replace-this patterns
+  ];
+  
+  return placeholderPatterns.some(pattern => pattern.test(value));
+}
+
 function checkStartupConfiguration() {
   console.log(chalk.blue('\n🚀 Running startup configuration check...\n'));
 
@@ -39,12 +58,22 @@ function checkStartupConfiguration() {
     console.log(chalk.yellow('   This is required for authentication to work.'));
     console.log(chalk.yellow('   Example: NEXTAUTH_URL=https://damdayvillage.com'));
   } else {
-    console.log(chalk.green(`✅ NEXTAUTH_URL: ${process.env.NEXTAUTH_URL}`));
+    const authUrl = process.env.NEXTAUTH_URL;
     
-    // Warn if using http in production
-    if (nodeEnv === 'production' && process.env.NEXTAUTH_URL.startsWith('http://')) {
-      warnings.push('NEXTAUTH_URL uses HTTP in production (should use HTTPS)');
-      console.log(chalk.yellow('   ⚠️  Warning: Using HTTP in production (HTTPS recommended)'));
+    // Check for unreplaced placeholders
+    if (hasPlaceholders(authUrl)) {
+      criticalErrors.push('NEXTAUTH_URL contains unreplaced placeholders');
+      console.log(chalk.red(`❌ NEXTAUTH_URL: Contains placeholders: ${authUrl}`));
+      console.log(chalk.yellow('   Detected unreplaced placeholder pattern (e.g., $$cap_*$$).'));
+      console.log(chalk.yellow('   Please replace with actual domain: https://damdayvillage.com'));
+    } else {
+      console.log(chalk.green(`✅ NEXTAUTH_URL: ${authUrl}`));
+      
+      // Warn if using http in production
+      if (nodeEnv === 'production' && authUrl.startsWith('http://')) {
+        warnings.push('NEXTAUTH_URL uses HTTP in production (should use HTTPS)');
+        console.log(chalk.yellow('   ⚠️  Warning: Using HTTP in production (HTTPS recommended)'));
+      }
     }
   }
 
@@ -94,8 +123,16 @@ function checkStartupConfiguration() {
   } else {
     const dbUrl = process.env.DATABASE_URL;
     
+    // Check for unreplaced placeholders
+    if (hasPlaceholders(dbUrl) && !dbUrl.includes('dummy:dummy')) {
+      criticalErrors.push('DATABASE_URL contains unreplaced placeholders');
+      const maskedUrl = dbUrl.replace(/:([^@]+)@/, ':****@');
+      console.log(chalk.red(`❌ DATABASE_URL: Contains placeholders: ${maskedUrl}`));
+      console.log(chalk.yellow('   Detected unreplaced placeholder pattern (e.g., $$cap_*$$).'));
+      console.log(chalk.yellow('   Please replace with actual database credentials.'));
+    }
     // Check for dummy database
-    if (dbUrl.includes('dummy:dummy')) {
+    else if (dbUrl.includes('dummy:dummy')) {
       if (nodeEnv === 'production') {
         criticalErrors.push('DATABASE_URL is using dummy credentials in production');
         console.log(chalk.red('❌ DATABASE_URL: Using DUMMY credentials'));
@@ -127,7 +164,7 @@ function checkStartupConfiguration() {
   console.log(chalk.blue('\n' + '='.repeat(60) + '\n'));
 
   if (criticalErrors.length > 0) {
-    console.log(chalk.red.bold('❌ CRITICAL ERRORS FOUND:\n'));
+    console.log(chalk.red('❌ CRITICAL ERRORS FOUND:\n'));
     criticalErrors.forEach(error => {
       console.log(chalk.red(`   • ${error}`));
     });

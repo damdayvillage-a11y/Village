@@ -5,49 +5,39 @@
  * Validates environment and starts the Next.js server
  */
 
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 const fs = require('fs');
-
-// Environment validation
-const requiredEnvVars = [
-  'NODE_ENV',
-  'NEXTAUTH_URL',
-  'NEXTAUTH_SECRET',
-];
-
-const optionalEnvVars = [
-  'DATABASE_URL',
-  'STRIPE_SECRET_KEY',
-  'GOOGLE_CLIENT_ID',
-  'MQTT_BROKER_URL'
-];
+const path = require('path');
 
 console.log('🚀 Starting Smart Carbon-Free Village application...');
 
-// Check required environment variables
-let missingRequired = [];
-requiredEnvVars.forEach(envVar => {
-  if (!process.env[envVar]) {
-    missingRequired.push(envVar);
+// Run comprehensive startup validation
+console.log('🔍 Running startup configuration check...');
+const validationScript = path.join(__dirname, 'startup-check.js');
+
+// Check if validation script exists
+if (fs.existsSync(validationScript)) {
+  const validationResult = spawnSync('node', [validationScript], {
+    stdio: 'inherit',
+    env: process.env
+  });
+
+  if (validationResult.error) {
+    console.error('❌ Failed to run validation script:', validationResult.error);
+    process.exit(1);
   }
-});
 
-if (missingRequired.length > 0) {
-  console.error('❌ Missing required environment variables:');
-  missingRequired.forEach(envVar => console.error(`   - ${envVar}`));
-  process.exit(1);
+  if (validationResult.status !== 0) {
+    console.error('❌ Startup validation failed!');
+    console.error('   Please fix the configuration errors above before starting the application.');
+    process.exit(1);
+  }
+
+  console.log('✅ Startup validation passed!');
+} else {
+  console.warn('⚠️  Warning: startup-check.js not found, skipping validation');
+  console.warn('   This may lead to runtime errors if environment is misconfigured');
 }
-
-// Log optional environment variables status
-console.log('📊 Environment configuration:');
-requiredEnvVars.forEach(envVar => {
-  console.log(`   ✅ ${envVar}: configured`);
-});
-
-optionalEnvVars.forEach(envVar => {
-  const status = process.env[envVar] ? '✅ configured' : '⚠️  not set';
-  console.log(`   ${status}: ${envVar}`);
-});
 
 // Set defaults
 process.env.PORT = process.env.PORT || '80';

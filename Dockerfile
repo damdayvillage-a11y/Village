@@ -78,6 +78,16 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Create scripts directory and copy startup validation scripts
+RUN mkdir -p scripts
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/start.js ./scripts/
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/startup-check.js ./scripts/
+
+# Verify scripts were copied
+RUN echo "Verifying startup scripts:" && \
+    ls -la scripts/ && \
+    echo "Scripts verification complete"
+
 USER nextjs
 
 EXPOSE 80
@@ -85,4 +95,5 @@ EXPOSE 80
 ENV PORT=80
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Use start.js which runs validation before starting server
+CMD ["node", "scripts/start.js"]
