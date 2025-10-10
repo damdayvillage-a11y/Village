@@ -14,7 +14,7 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 1. 🔥 **NEW:** [CapRover Quick Fix](./CAPROVER_QUICK_FIX.md) - 3-step fix for "something bad" errors (5 minutes)
 2. 📖 [Complete Deployment Guide](./CAPROVER_DEPLOYMENT_GUIDE.md) - Full CapRover deployment instructions
 3. ⚠️ **CRITICAL:** [Environment Check](./CAPROVER_ENV_CHECK.md) - Prevent 500 errors before deploying
-4. 🩺 **NEW:** [Admin 500 Error Fix](./ADMIN_500_ERROR_FIX.md) - Comprehensive diagnostics for admin panel issues
+4. 🩺 **NEW:** [Admin 500 Error Fix](./ADMIN_500_FIX_GUIDE.md) - Comprehensive diagnostics & auto-recovery
 5. 🔧 [Troubleshooting Guide](./docs/CAPROVER_TROUBLESHOOTING.md) - Solve any build issues
 
 **Key Features:**
