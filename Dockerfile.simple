@@ -34,20 +34,23 @@ RUN echo "🔧 Configuring npm for CapRover..." && \
     npm config set fund false && \
     npm config set update-notifier false && \
     npm config set audit false && \
-    npm config set loglevel warn && \
+    npm config set loglevel error && \
+    npm config set progress false && \
     echo "✅ NPM configured successfully"
 
-# Install dependencies with verbose output for debugging hangs
+# Install dependencies - simple and clean to avoid hangs
+# Removed --verbose to prevent output buffering issues
+# Removed --prefer-offline as it doesn't help with empty cache
 RUN echo "📦 Installing dependencies..." && \
     echo "Start time: $(date)" && \
-    npm ci --include=dev --no-audit --no-fund --verbose && \
+    npm ci --include=dev --no-audit --no-fund && \
     echo "Dependencies installed at: $(date)" && \
     echo "node_modules size: $(du -sh node_modules)"
 
 # Copy source files
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma client - use direct node path to avoid npx network calls
 RUN echo "🔧 Generating Prisma client..." && \
     echo "Prisma generation start: $(date)" && \
     node /app/node_modules/prisma/build/index.js generate && \
