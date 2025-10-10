@@ -5,7 +5,8 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 ## 🎉 Production Ready - CapRover Deployment Fixed
 
 ✅ **All "something bad" errors resolved** - Build time: ~2 minutes, Image size: 194MB  
-✅ **Latest Fix (2025-10-10)**: All deployment issues fixed with proper implementations!
+✅ **Latest Fix (2025-10-10)**: All deployment issues fixed with proper implementations!  
+✅ **NEW:** Admin panel diagnostics and auto-recovery features added!
 
 **📋 What Was Fixed:** See [FIXES_SUMMARY.md](./FIXES_SUMMARY.md) for complete details of all fixes
 
@@ -13,7 +14,8 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 1. 🔥 **NEW:** [CapRover Quick Fix](./CAPROVER_QUICK_FIX.md) - 3-step fix for "something bad" errors (5 minutes)
 2. 📖 [Complete Deployment Guide](./CAPROVER_DEPLOYMENT_GUIDE.md) - Full CapRover deployment instructions
 3. ⚠️ **CRITICAL:** [Environment Check](./CAPROVER_ENV_CHECK.md) - Prevent 500 errors before deploying
-4. 🔧 [Troubleshooting Guide](./docs/CAPROVER_TROUBLESHOOTING.md) - Solve any build issues
+4. 🩺 **NEW:** [Admin 500 Error Fix](./ADMIN_500_ERROR_FIX.md) - Comprehensive diagnostics for admin panel issues
+5. 🔧 [Troubleshooting Guide](./docs/CAPROVER_TROUBLESHOOTING.md) - Solve any build issues
 
 **Key Features:**
 - ✅ All build issues fixed (no more hangs or "something bad" errors)
@@ -21,6 +23,8 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 - ✅ Environment validation prevents startup with placeholder values
 - ✅ Build completes reliably in ~2 minutes
 - ✅ Admin panel working (no 500 errors with correct config)
+- ✅ **NEW:** System status page (`/admin-panel/status`) for diagnostics
+- ✅ **NEW:** Auto-recovery API for missing admin user
 - ✅ Comprehensive error messages guide you to fixes
 - ✅ HTTPS/SSL enforced automatically
 
@@ -178,25 +182,45 @@ After running the database seed (`npm run db:seed`), you can log in with:
 
 If you encounter a 500 error when accessing the admin panel:
 
-1. **Check database connection:**
+**🩺 NEW: Use the System Status Page**
+
+Visit `https://your-domain.com/admin-panel/status` for comprehensive diagnostics:
+- ✅ Real-time health checks for all services
+- 🔍 Environment variable validation
+- 💾 Database connectivity tests
+- 👤 Admin user verification
+- 📋 Actionable recommendations with fix commands
+
+**Quick Diagnostics Commands:**
+
+1. **Check system status via web:**
+   - Navigate to: `/admin-panel/status`
+   - Or use API: `curl https://your-domain.com/api/auth/status`
+
+2. **Create admin user if missing:**
    ```bash
-   curl https://your-domain.com/api/health
+   # Via API (automatic)
+   curl -X POST https://your-domain.com/api/admin/init
+   
+   # Via CLI (manual)
+   npm run db:seed
    ```
 
-2. **Validate environment variables:**
+3. **Validate environment variables:**
    ```bash
    npm run validate:env
    ```
 
-3. **Verify admin user exists:**
+4. **Verify admin user exists:**
    ```bash
    npm run admin:verify
    ```
 
-4. **See detailed troubleshooting:**
-   - [ADMIN_PANEL_SETUP.md](./ADMIN_PANEL_SETUP.md) - Complete setup and troubleshooting guide
-   - [docs/PRODUCTION_SETUP_GUIDE.md](./docs/PRODUCTION_SETUP_GUIDE.md) - Production deployment guide
-   - [docs/AUTH_ERROR_HANDLING.md](./docs/AUTH_ERROR_HANDLING.md) - Authentication error handling
+**📚 Detailed Documentation:**
+- 🩺 **[ADMIN_500_ERROR_FIX.md](./ADMIN_500_ERROR_FIX.md)** - Comprehensive admin panel diagnostics
+- [ADMIN_PANEL_SETUP.md](./ADMIN_PANEL_SETUP.md) - Complete setup and troubleshooting guide
+- [docs/PRODUCTION_SETUP_GUIDE.md](./docs/PRODUCTION_SETUP_GUIDE.md) - Production deployment guide
+- [docs/AUTH_ERROR_HANDLING.md](./docs/AUTH_ERROR_HANDLING.md) - Authentication error handling
 
 ### Build Optimizations
 ```bash
