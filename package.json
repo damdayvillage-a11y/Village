@@ -30,6 +30,7 @@
     "db:seed": "npx tsx scripts/seed.ts",
     "admin:verify": "node scripts/verify-admin.js",
     "validate:env": "node scripts/validate-production-env.js",
+    "diagnose": "./scripts/diagnose-production.sh",
     "device-sim": "ts-node tools/device-sim.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

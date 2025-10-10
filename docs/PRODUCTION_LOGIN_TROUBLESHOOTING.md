@@ -32,8 +32,12 @@ npm run validate:env
 **Problem**: Cannot connect to PostgreSQL database.
 
 ```bash
-# Check if database is accessible
+# Quick diagnostic (recommended)
+npm run diagnose https://damdayvillage.com
+
+# Or check manually
 curl https://damdayvillage.com/api/health
+curl https://damdayvillage.com/api/auth/status
 ```
 
 Expected response:
