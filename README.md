@@ -199,6 +199,132 @@ NEXTAUTH_SECRET=[32+ character random string]
 DATABASE_URL=postgresql://[user]:[pass]@[host]:[port]/[db]
 ```
 
+## 🤖 Automatic Deployment using Copilot Agent
+
+### DigitalOcean Production Deployment
+
+This repository includes automated CI/CD deployment to a DigitalOcean server using GitHub Actions. The deployment pipeline provides:
+
+#### Features
+- ✅ **Automated deployments** on push to `main` branch
+- ✅ **SSH connectivity testing** before deployment
+- ✅ **Docker health checks** for service verification
+- ✅ **Automatic rollback** on deployment failures
+- ✅ **Zero-downtime deployments** with Docker Compose
+- ✅ **Manual deployment trigger** via GitHub Actions UI
+
+#### Deployment Workflow
+
+The deployment process (`/.github/workflows/deploy.yml`) consists of two jobs:
+
+**1. Server Connectivity Test (`server-test`)**
+- Verifies SSH access to the server
+- Checks Docker daemon availability
+- Validates deployment directory structure
+
+**2. Application Deployment (`deploy`)**
+- Clones/updates repository on the server
+- Creates environment configuration
+- Builds Docker containers with latest code
+- Performs health checks on deployed services
+- Rolls back automatically on failures
+- Provides comprehensive deployment logs
+
+#### Quick Deployment
+
+**Manual Trigger:**
+1. Go to GitHub Actions tab
+2. Select "Deploy to DigitalOcean" workflow
+3. Click "Run workflow" on main branch
+4. Monitor deployment progress in real-time
+
+**Automatic Trigger:**
+- Push commits to `main` branch
+- Deployment starts automatically
+
+#### Accessing the Deployed Application
+
+After successful deployment:
+- **Application URL**: `http://142.93.208.86:3000`
+- **Health Check**: `http://142.93.208.86:3000/api/health`
+- **Admin Panel**: `http://142.93.208.86:3000/admin-panel/login`
+
+#### Monitoring Deployments
+
+**Check deployment status:**
+```bash
+# SSH into the server
+ssh deployer@142.93.208.86
+
+# View container status
+sudo docker ps
+
+# View application logs
+sudo docker logs village-app
+
+# Follow logs in real-time
+sudo docker logs -f village-app
+
+# Check service health
+curl http://localhost:3000/api/health
+```
+
+**Health Check Script:**
+The repository includes a health check script at `scripts/healthcheck.sh`:
+```bash
+# Run health check (max 30 attempts, 2s between attempts)
+./scripts/healthcheck.sh http://142.93.208.86:3000 30 2
+```
+
+#### Required GitHub Secrets
+
+The deployment workflow requires these secrets to be configured in your repository:
+
+- `DO_HOST`: DigitalOcean server IP (142.93.208.86)
+- `DO_USER`: SSH user with Docker permissions (deployer)
+- `SSH_PRIVATE_KEY`: Private SSH key for authentication
+- `KNOWN_HOSTS`: SSH known hosts fingerprint
+- `GIT_TOKEN`: GitHub personal access token for private repo access
+- `DATABASE_PASSWORD`: PostgreSQL database password
+- `NEXTAUTH_SECRET`: NextAuth.js secret key
+
+#### Deployment Architecture
+
+```
+GitHub Actions Runner
+    ↓ SSH Connection
+DigitalOcean Server (142.93.208.86)
+    ↓ Docker Compose
+├── village-app (port 3000:80)
+│   └── Next.js Application
+└── village-db (port 5432)
+    └── PostgreSQL Database
+```
+
+#### Troubleshooting Deployments
+
+**Deployment fails with SSH error:**
+- Verify `SSH_PRIVATE_KEY` secret is correctly set
+- Check `KNOWN_HOSTS` contains the server fingerprint
+- Ensure `deployer` user has sudo + Docker privileges
+
+**Health check fails:**
+- Check container logs: `sudo docker logs village-app`
+- Verify environment variables are set correctly
+- Ensure port 3000 is not blocked by firewall
+
+**Rollback needed:**
+The workflow automatically attempts rollback on failures. To manually rollback:
+```bash
+ssh deployer@142.93.208.86
+cd /home/deployer/apps/village
+sudo docker compose down
+sudo docker tag village-app:rollback village-app:latest
+sudo docker compose up -d
+```
+
+---
+
 ## 🔑 Admin Panel Access
 
 ### Default Admin Credentials
