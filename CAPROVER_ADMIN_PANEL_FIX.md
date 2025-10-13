@@ -3,6 +3,8 @@
 ## 🚨 Problem
 After deploying to CapRover, you can access the homepage but get **500 Internal Server Error** when trying to login to the admin panel at `/admin-panel/login`.
 
+**🆘 QUICK HELP:** Visit `https://your-domain.com/help/admin-500` in your browser for instant diagnostics and fix guide!
+
 ## ✅ Root Cause
 The admin panel 500 error happens because:
 1. **Environment variables in CapRover have placeholders** (like `$$cap_appname$$`) that were not replaced
@@ -201,9 +203,10 @@ All checks should show ✅ (green checkmarks).
 ### Issue 1: Still Getting 500 Error
 
 **Diagnosis:**
-Visit the status page to see what's wrong:
+Visit one of these pages in your browser to see what's wrong:
 ```
-https://your-actual-domain.com/admin-panel/status
+https://your-actual-domain.com/help/admin-500        # User-friendly fix guide
+https://your-actual-domain.com/admin-panel/status    # Technical system status
 ```
 
 **Common Issues:**

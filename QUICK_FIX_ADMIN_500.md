@@ -5,9 +5,10 @@
 ## 🚀 Fastest Fix (1 Minute)
 
 ### Step 1: Check System Status
-Visit this URL in your browser:
+Visit one of these URLs in your browser:
 ```
-https://your-domain.com/admin-panel/status
+https://your-domain.com/help/admin-500        # User-friendly fix guide
+https://your-domain.com/admin-panel/status    # Technical system status
 ```
 
 You'll see:

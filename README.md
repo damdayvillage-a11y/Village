@@ -9,6 +9,11 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 ✅ **NEW:** Coolify deployment support with comprehensive guides!  
 ✅ **Admin panel diagnostics and auto-recovery features**
 
+**🚨 Getting Admin Panel 500 Error?**
+- 🔗 Visit your app's `/help/admin-500` page for instant diagnostics
+- 🔗 Check `/admin-panel/status` for system health  
+- 🔗 Or see [Quick Fix Guide](./QUICK_FIX_ADMIN_500.md) | [Complete Fix](./CAPROVER_ADMIN_PANEL_FIX.md)
+
 **📋 What Was Fixed:** See [FIXES_SUMMARY.md](./FIXES_SUMMARY.md) for complete details of all fixes
 
 **🚀 Deployment Options:**
