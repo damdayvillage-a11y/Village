@@ -2,57 +2,41 @@
 
 A futuristic platform for Damday Village featuring carbon footprint tracking, IoT integrations, tourism booking, and sustainable living solutions.
 
-## 🎉 Production Ready - Deployment Fixed
+## 🎉 Production Ready
 
-✅ **All "something bad" errors resolved** - Build time: ~2 minutes, Image size: 194MB  
-✅ **Latest Update (2025-01-10)**: All deployment issues fixed with proper implementations!  
-✅ **NEW:** Coolify deployment support with comprehensive guides!  
-✅ **Admin panel diagnostics and auto-recovery features**
+✅ **All deployment issues resolved** - Build time: ~2 minutes, Image size: 194MB  
+✅ **Complete CapRover deployment guide** with database setup and troubleshooting  
+✅ **Admin panel diagnostics** with multi-language support (English & Hindi)  
+✅ **Auto-recovery features** for common deployment issues
 
-**🚨 Getting Admin Panel 500 Error?**
-- 🔗 **[INSTANT HELP →](./ADMIN_500_QUICK_HELP.md)** One-page quick reference
-- 🌐 Visit your app's `/help/admin-500` (English) or `/help/admin-500-hi` (हिंदी) for guided diagnostics
-- 📊 Check `/admin-panel/status` for live system health  
-- 📚 See [Complete Fix Guide](./CAPROVER_ADMIN_PANEL_FIX.md) | [Quick Reference](./QUICK_FIX_ADMIN_500.md)
+## 🚀 Quick Start - CapRover Deployment
 
-**📋 What Was Fixed:** See [FIXES_SUMMARY.md](./FIXES_SUMMARY.md) for complete details of all fixes
+**📖 Complete Guide:** [CAPGUIDE.md](./CAPGUIDE.md) - Everything you need to deploy to CapRover
 
-**🚀 Deployment Options:**
+### Quick Steps
 
-### Coolify (Recommended) 🌟
-1. ⚡ **[Quick Start Guide](./COOLIFY_QUICK_START.md)** - Deploy in 15 minutes
-2. 📖 **[Complete Deployment Guide](./COOLIFY_DEPLOYMENT_GUIDE.md)** - Full Coolify deployment instructions
-3. 🔄 **[Migration from CapRover](./CAPROVER_TO_COOLIFY_MIGRATION.md)** - Migrate from CapRover to Coolify
-4. 📚 **[Environment Variables Reference](./ENVIRONMENT_VARIABLES.md)** - All environment variables explained
+1. **Deploy PostgreSQL** on CapRover
+2. **Create app** and configure environment variables (see CAPGUIDE.md)
+3. **Deploy** from GitHub or CLI
+4. **Run migrations:** `npx prisma migrate deploy`
+5. **Create admin user:** Visit `https://your-domain.com/api/admin/init`
+6. **Login:** `admin@damdayvillage.org` / `Admin@123` (change password!)
 
-### CapRover (Legacy Support)
-1. 🔥 [CapRover Quick Fix](./CAPROVER_QUICK_FIX.md) - 3-step fix for "something bad" errors (5 minutes)
-2. 📖 [Complete Deployment Guide](./CAPROVER_DEPLOYMENT_GUIDE.md) - Full CapRover deployment instructions
-3. ⚠️ **CRITICAL:** [Environment Check](./CAPROVER_ENV_CHECK.md) - Prevent 500 errors before deploying
-4. 🩺 [Admin 500 Error Fix](./ADMIN_500_ERROR_FIX.md) - Comprehensive diagnostics for admin panel issues
-5. 🔧 [Troubleshooting Guide](./docs/CAPROVER_TROUBLESHOOTING.md) - Solve any build issues
-**🚀 Quick Deploy to CapRover:**
-1. 🆘 **ADMIN PANEL 500 ERROR?** [CapRover Admin Panel Fix](./CAPROVER_ADMIN_PANEL_FIX.md) - Complete fix for login issues
-2. 🔥 [CapRover Quick Fix](./CAPROVER_QUICK_FIX.md) - 3-step fix for "something bad" errors (5 minutes)
-3. 📖 [Complete Deployment Guide](./CAPROVER_DEPLOYMENT_GUIDE.md) - Full CapRover deployment instructions
-4. ⚠️ **CRITICAL:** [Environment Check](./CAPROVER_ENV_CHECK.md) - Prevent 500 errors before deploying
-5. ⚡ [Quick Fix: Admin 500 Error](./QUICK_FIX_ADMIN_500.md) - 1-minute fix for login issues
-6. 🩺 [Complete Admin Fix Guide](./ADMIN_500_FIX_GUIDE.md) - Comprehensive diagnostics & auto-recovery
-7. 🔧 [Troubleshooting Guide](./docs/CAPROVER_TROUBLESHOOTING.md) - Solve any build issues
+### 🆘 Getting Errors?
 
-**Key Features:**
-- ✅ All build issues fixed (no more hangs or "something bad" errors)
-- ✅ Prisma generation optimized (no network timeouts)
-- ✅ Environment validation prevents startup with placeholder values
-- ✅ Build completes reliably in ~2 minutes
-- ✅ Admin panel working (no 500 errors with correct config)
-- ✅ **NEW:** System status page (`/admin-panel/status`) for diagnostics
-- ✅ **NEW:** Auto-recovery API for missing admin user
-- ✅ Comprehensive error messages guide you to fixes
-- ✅ HTTPS/SSL enforced automatically
+- **500 Error?** Visit `/help/admin-500` (English) or `/help/admin-500-hi` (हिंदी) on your deployed app
+- **Need diagnostics?** Check `/admin-panel/status` for system health
+- **See full guide:** [CAPGUIDE.md](./CAPGUIDE.md) has complete troubleshooting
 
-**⚠️ Important:** Application validates environment on startup and **refuses to start** if placeholders like `$$cap_appname$$` are detected.  
-**Fix:** Replace ALL `$$cap_*$$` placeholders with actual values in CapRover dashboard! See [Quick Fix Guide](./CAPROVER_QUICK_FIX.md).
+### Key Features
+
+- ✅ Production-ready build (2 min build time)
+- ✅ Complete database schema with TimescaleDB support
+- ✅ Environment validation (prevents startup with invalid config)
+- ✅ Multi-language admin panel (English & Hindi)
+- ✅ Auto-recovery for missing admin user
+- ✅ Comprehensive error messages
+- ✅ HTTPS/SSL enforced
 
 ## 🚀 Quick Start
 

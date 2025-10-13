@@ -232,8 +232,7 @@ function checkStartupConfiguration() {
     console.log(chalk.yellow('\n📚 For help, see:'));
     console.log(chalk.yellow('   • Visit /help/admin-500 in your browser for instant diagnostics'));
     console.log(chalk.yellow('   • Check /admin-panel/status for system health'));
-    console.log(chalk.yellow('   • CAPROVER_ADMIN_PANEL_FIX.md - Complete fix guide'));
-    console.log(chalk.yellow('   • QUICK_FIX_ADMIN_500.md - Quick reference\n'));
+    console.log(chalk.yellow('   • CAPGUIDE.md - Complete CapRover deployment guide\n'));
     
     if (nodeEnv === 'production') {
       console.log(chalk.red('🛑 Cannot start in production mode with these errors.\n'));

@@ -217,23 +217,12 @@ export default function Admin500HelpPage() {
             <div className="space-y-2 text-sm">
               <div>
                 <a 
-                  href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPROVER_ADMIN_PANEL_FIX.md"
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPGUIDE.md"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1"
                 >
-                  Complete CapRover Fix Guide
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-              <div>
-                <a 
-                  href="https://github.com/damdayvillage-a11y/Village/blob/main/QUICK_FIX_ADMIN_500.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1"
-                >
-                  Quick Fix Reference
+                  Complete CapRover Deployment Guide
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
@@ -245,6 +234,17 @@ export default function Admin500HelpPage() {
                   className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1"
                 >
                   General Troubleshooting Guide
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              <div>
+                <a 
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/ENVIRONMENT_VARIABLES.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1"
+                >
+                  Environment Variables Reference
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>

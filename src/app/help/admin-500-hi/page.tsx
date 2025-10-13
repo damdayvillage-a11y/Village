@@ -227,23 +227,23 @@ export default function Admin500HelpPageHindi() {
               </div>
               <div>
                 <a 
-                  href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPROVER_ADMIN_PANEL_FIX.md"
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPGUIDE.md"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1"
                 >
-                  Complete CapRover Fix Guide
+                  Complete CapRover Deployment Guide
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
               <div>
                 <a 
-                  href="https://github.com/damdayvillage-a11y/Village/blob/main/QUICK_FIX_ADMIN_500.md"
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/TROUBLESHOOTING.md"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1"
                 >
-                  Quick Fix Reference
+                  General Troubleshooting Guide
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
