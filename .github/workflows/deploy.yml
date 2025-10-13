@@ -1,0 +1,233 @@
+name: Deploy to DigitalOcean
+
+# Trigger workflow on push to main branch or manual dispatch
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_health_check:
+        description: 'Skip health check after deployment'
+        required: false
+        default: 'false'
+
+jobs:
+  # Job 1: Test SSH connectivity and Docker access
+  server-test:
+    name: Server Connectivity Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        run: |
+          # Create SSH directory
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Add SSH private key
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Add known hosts
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Test SSH Connection
+        run: |
+          echo "🔍 Testing SSH connection to ${{ secrets.DO_HOST }}..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "whoami"
+          echo "✅ SSH connection successful"
+
+      - name: Test Docker Access
+        run: |
+          echo "🐳 Testing Docker access..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "docker ps"
+          echo "✅ Docker access confirmed"
+
+      - name: Check Deployment Directory
+        run: |
+          echo "📂 Checking deployment directory..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "ls -la /home/deployer/apps/village || echo 'Directory does not exist yet'"
+          echo "✅ Directory check complete"
+
+  # Job 2: Deploy application
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: server-test
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Setup SSH
+        run: |
+          # Create SSH directory
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Add SSH private key
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Add known hosts
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Prepare Deployment Directory
+        run: |
+          echo "📂 Preparing deployment directory on server..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'ENDSSH'
+            # Create deployment directory if it doesn't exist
+            sudo mkdir -p /home/deployer/apps/village
+            sudo chown -R deployer:deployer /home/deployer/apps/village
+            echo "✅ Deployment directory ready"
+          ENDSSH
+
+      - name: Clone/Update Repository on Server
+        run: |
+          echo "📥 Cloning/updating repository on server..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} bash << EOF
+            cd /home/deployer/apps
+
+            # Check if repository exists
+            if [ -d "village/.git" ]; then
+              echo "Repository exists, pulling latest changes..."
+              cd village
+              git fetch origin
+              git reset --hard origin/main
+              git clean -fd
+            else
+              echo "Cloning repository for the first time..."
+              # Clone using token authentication for private repo
+              git clone https://${{ secrets.GIT_TOKEN }}@github.com/damdayvillage-a11y/Village.git village
+              cd village
+            fi
+
+            echo "✅ Repository updated to latest commit: \$(git rev-parse --short HEAD)"
+          EOF
+
+      - name: Create Environment File
+        run: |
+          echo "🔧 Creating environment file on server..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "cd /home/deployer/apps/village && cat > .env << 'EOF'
+          DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+          NEXTAUTH_URL=http://142.93.208.86:3000
+          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+          EOF"
+          echo "✅ Environment file created"
+
+      - name: Stop Existing Containers (for rollback safety)
+        run: |
+          echo "🛑 Stopping existing containers..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'ENDSSH'
+            cd /home/deployer/apps/village
+
+            # Tag current running image for rollback if it exists
+            CURRENT_IMAGE=$(sudo docker ps -q -f name=village-app)
+            if [ ! -z "$CURRENT_IMAGE" ]; then
+              echo "Tagging current image for potential rollback..."
+              sudo docker commit village-app village-app:rollback || true
+            fi
+
+            # Stop containers gracefully
+            sudo docker compose down || true
+            echo "✅ Containers stopped"
+          ENDSSH
+
+      - name: Build and Start Containers
+        run: |
+          echo "🐳 Building and starting Docker containers..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'ENDSSH'
+            cd /home/deployer/apps/village
+
+            # Build and start containers in detached mode
+            sudo docker compose up -d --build
+
+            echo "✅ Containers started"
+          ENDSSH
+
+      - name: Wait for Application Startup
+        run: |
+          echo "⏳ Waiting for application to start (10 seconds)..."
+          sleep 10
+
+      - name: Verify Service Health
+        if: github.event.inputs.skip_health_check != 'true'
+        run: |
+          echo "🏥 Verifying service health..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'ENDSSH'
+            cd /home/deployer/apps/village
+
+            # Check if containers are running
+            if ! sudo docker ps | grep -q village-app; then
+              echo "❌ Container is not running!"
+              echo "📋 Container logs:"
+              sudo docker logs village-app || true
+              exit 1
+            fi
+
+            # Try health check
+            if curl -f -s http://localhost:3000/api/health > /dev/null; then
+              echo "✅ Health check passed!"
+              curl -s http://localhost:3000/api/health | head -20
+            else
+              echo "❌ Health check failed!"
+              echo "📋 Container logs:"
+              sudo docker logs village-app | tail -50
+              exit 1
+            fi
+          ENDSSH
+
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed, attempting rollback..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'ENDSSH'
+            cd /home/deployer/apps/village
+
+            # Check if rollback image exists
+            if sudo docker images | grep -q village-app.*rollback; then
+              echo "🔄 Rolling back to previous image..."
+              sudo docker compose down
+              sudo docker tag village-app:rollback village-app:latest
+              sudo docker compose up -d
+              echo "✅ Rollback completed"
+            else
+              echo "⚠️ No rollback image available"
+              echo "📋 Printing logs for debugging:"
+              sudo docker logs village-app | tail -100 || true
+            fi
+          ENDSSH
+
+      - name: Print Deployment Status
+        if: always()
+        run: |
+          echo "📊 Deployment Status Report"
+          echo "================================"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'ENDSSH'
+            echo "🐳 Docker Containers:"
+            sudo docker ps -a | grep village || echo "No village containers found"
+            echo ""
+            echo "📋 Recent Logs (last 20 lines):"
+            sudo docker logs village-app --tail 20 2>&1 || echo "Could not fetch logs"
+            echo ""
+            echo "🌐 Service Status:"
+            curl -s -I http://localhost:3000 || echo "Service not responding on port 3000"
+          ENDSSH
+
+      - name: Deployment Success Summary
+        if: success()
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo ""
+          echo "Application URL: http://142.93.208.86:3000"
+          echo "Health Check: http://142.93.208.86:3000/api/health"
+          echo ""
+          echo "To access the admin panel:"
+          echo "  URL: http://142.93.208.86:3000/admin-panel/login"
+          echo ""
+          echo "To check logs: ssh ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} 'sudo docker logs village-app'"
