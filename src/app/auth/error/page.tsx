@@ -27,7 +27,7 @@ function AuthErrorContent() {
       case 'Configuration':
         return {
           message: 'Server Configuration Error',
-          details: 'There is a problem with the server configuration. This usually means the database is not accessible or environment variables are not set correctly. Please contact the administrator.'
+          details: 'There is a problem with the server configuration. This usually means the database is not accessible or environment variables are not set correctly.'
         };
       case 'AccessDenied':
         return {
@@ -125,6 +125,16 @@ function AuthErrorContent() {
             </div>
 
             <div className="pt-4 space-y-3">
+              {(errorMessage === 'Server Configuration Error' || errorMessage === 'Database Connection Error') && (
+                <Link 
+                  href="/admin-panel/status"
+                  className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                >
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  View System Status & Diagnostics
+                </Link>
+              )}
+              
               <Link 
                 href="/auth/signin"
                 className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -143,6 +153,15 @@ function AuthErrorContent() {
             </div>
 
             <div className="pt-4 border-t border-gray-200">
+              {(errorMessage === 'Server Configuration Error' || errorMessage === 'Database Connection Error') && (
+                <p className="text-xs text-gray-600 text-center mb-2">
+                  📖 See the{' '}
+                  <Link href="/help/admin-500" className="text-purple-600 hover:text-purple-500 underline font-medium">
+                    Admin 500 Error Fix Guide
+                  </Link>
+                  {' '}for detailed troubleshooting steps
+                </p>
+              )}
               <p className="text-xs text-gray-500 text-center">
                 If this problem persists, please contact support at{' '}
                 <a href="mailto:support@damdayvillage.com" className="text-primary-600 hover:text-primary-500">
