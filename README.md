@@ -10,9 +10,10 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 ✅ **Admin panel diagnostics and auto-recovery features**
 
 **🚨 Getting Admin Panel 500 Error?**
-- 🔗 Visit your app's `/help/admin-500` page for instant diagnostics
-- 🔗 Check `/admin-panel/status` for system health  
-- 🔗 Or see [Quick Fix Guide](./QUICK_FIX_ADMIN_500.md) | [Complete Fix](./CAPROVER_ADMIN_PANEL_FIX.md)
+- 🔗 **[INSTANT HELP →](./ADMIN_500_QUICK_HELP.md)** One-page quick reference
+- 🌐 Visit your app's `/help/admin-500` (English) or `/help/admin-500-hi` (हिंदी) for guided diagnostics
+- 📊 Check `/admin-panel/status` for live system health  
+- 📚 See [Complete Fix Guide](./CAPROVER_ADMIN_PANEL_FIX.md) | [Quick Reference](./QUICK_FIX_ADMIN_500.md)
 
 **📋 What Was Fixed:** See [FIXES_SUMMARY.md](./FIXES_SUMMARY.md) for complete details of all fixes
 
