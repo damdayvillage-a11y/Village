@@ -90,7 +90,7 @@ jobs:
       - name: Clone/Update Repository on Server
         run: |
           echo "📥 Cloning/updating repository on server..."
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'ENDSSH'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} bash << EOF
             cd /home/deployer/apps
 
             # Check if repository exists
@@ -107,24 +107,18 @@ jobs:
               cd village
             fi
 
-            echo "✅ Repository updated to latest commit: $(git rev-parse --short HEAD)"
-          ENDSSH
+            echo "✅ Repository updated to latest commit: \$(git rev-parse --short HEAD)"
+          EOF
 
       - name: Create Environment File
         run: |
           echo "🔧 Creating environment file on server..."
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'ENDSSH'
-            cd /home/deployer/apps/village
-
-            # Create .env file with production values
-            cat > .env << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "cd /home/deployer/apps/village && cat > .env << 'EOF'
           DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
           NEXTAUTH_URL=http://142.93.208.86:3000
           NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-          EOF
-
-            echo "✅ Environment file created"
-          ENDSSH
+          EOF"
+          echo "✅ Environment file created"
 
       - name: Stop Existing Containers (for rollback safety)
         run: |
