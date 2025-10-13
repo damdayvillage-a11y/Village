@@ -44,6 +44,10 @@ NEXTAUTH_SECRET=$$cap_nextauth_secret$$
 NEXTAUTH_URL=https://damdayvillage.com
 
 # Your actual PostgreSQL connection
+# For CapRover internal PostgreSQL service (note: srv-captain--postgres is the correct internal service name)
+DATABASE_URL=postgresql://damdiyal:Damdiyal@975635@srv-captain--postgres:5432/villagedb
+
+# OR for external database
 DATABASE_URL=postgresql://villageuser:securepass@db-host:5432/village_db
 
 # Generate with: openssl rand -base64 32

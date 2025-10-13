@@ -90,12 +90,13 @@ export async function checkDatabaseHealth() {
     };
   }
 
-  // Check for unreplaced CapRover placeholders
-  if (process.env.DATABASE_URL.includes('$$cap_') || process.env.DATABASE_URL.includes('srv-captain--')) {
+  // Check for unreplaced CapRover placeholders ($$cap_*$$)
+  // Note: srv-captain-- is the valid CapRover internal service naming pattern, not a placeholder
+  if (process.env.DATABASE_URL.includes('$$cap_')) {
     return {
       status: 'unhealthy',
       error: 'Invalid DATABASE_URL configuration',
-      help: 'DATABASE_URL contains CapRover placeholders ($$cap_* or srv-captain--*) that need to be replaced with actual database credentials in the CapRover dashboard.',
+      help: 'DATABASE_URL contains unreplaced CapRover placeholders ($$cap_*$$) that need to be replaced with actual database credentials in the CapRover dashboard.',
       timestamp: new Date().toISOString()
     };
   }
@@ -116,9 +117,9 @@ export async function checkDatabaseHealth() {
     // Provide helpful error messages based on error type
     let helpfulMessage = 'Database connection failed.';
     
-    // Check for CapRover placeholder or service name patterns
-    if (errorMessage.includes('srv-captain--') || errorMessage.includes('$$cap_')) {
-      helpfulMessage += ' The DATABASE_URL contains CapRover placeholders that need to be replaced with actual database credentials in the CapRover dashboard.';
+    // Check for CapRover placeholder patterns (not srv-captain-- which is valid)
+    if (errorMessage.includes('$$cap_')) {
+      helpfulMessage += ' The DATABASE_URL contains unreplaced CapRover placeholders ($$cap_*$$) that need to be replaced with actual database credentials in the CapRover dashboard.';
     } else if (errorMessage.includes('ECONNREFUSED') || errorMessage.includes("Can't reach database server")) {
       helpfulMessage += ' The database server is not accessible. Please check if PostgreSQL is running and the host/port are correct.';
     } else if (errorMessage.includes('ENOTFOUND')) {
