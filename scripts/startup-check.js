@@ -190,10 +190,12 @@ function checkStartupConfiguration() {
           
           if (!adminUser) {
             console.log(chalk.yellow('⚠️  Admin user not found in database'));
-            console.log(chalk.yellow('   To create admin user, run: npm run db:seed'));
-            console.log(chalk.yellow('   Or visit: /api/admin/init to auto-create'));
+            console.log(chalk.yellow('   To create admin user:'));
+            console.log(chalk.yellow('   • Visit: https://your-domain.com/api/admin/init (easiest)'));
+            console.log(chalk.yellow('   • Or run: npm run db:seed'));
             console.log(chalk.yellow('   Default credentials: admin@damdayvillage.org / Admin@123'));
-            warnings.push('Admin user not found - run db:seed or visit /api/admin/init');
+            console.log(chalk.yellow('   📖 See: https://your-domain.com/help/admin-500 for full guide'));
+            warnings.push('Admin user not found - visit /api/admin/init or run db:seed');
           } else {
             console.log(chalk.green('✅ Admin user exists'));
             console.log(chalk.blue(`   Email: ${adminUser.email}`));
@@ -228,9 +230,10 @@ function checkStartupConfiguration() {
       console.log(chalk.red(`   • ${error}`));
     });
     console.log(chalk.yellow('\n📚 For help, see:'));
-    console.log(chalk.yellow('   • docs/AUTH_ERROR_HANDLING.md'));
-    console.log(chalk.yellow('   • ADMIN_PANEL_SETUP.md'));
-    console.log(chalk.yellow('   • PRODUCTION_READINESS.md\n'));
+    console.log(chalk.yellow('   • Visit /help/admin-500 in your browser for instant diagnostics'));
+    console.log(chalk.yellow('   • Check /admin-panel/status for system health'));
+    console.log(chalk.yellow('   • CAPROVER_ADMIN_PANEL_FIX.md - Complete fix guide'));
+    console.log(chalk.yellow('   • QUICK_FIX_ADMIN_500.md - Quick reference\n'));
     
     if (nodeEnv === 'production') {
       console.log(chalk.red('🛑 Cannot start in production mode with these errors.\n'));
@@ -238,7 +241,10 @@ function checkStartupConfiguration() {
       console.log(chalk.yellow('   1. Replace all $$cap_*$$ placeholders with actual values'));
       console.log(chalk.yellow('   2. Generate NEXTAUTH_SECRET: openssl rand -base64 32'));
       console.log(chalk.yellow('   3. Set NEXTAUTH_URL to your actual domain (e.g., https://damdayvillage.com)'));
-      console.log(chalk.yellow('   4. Configure DATABASE_URL with real PostgreSQL credentials\n'));
+      console.log(chalk.yellow('   4. Configure DATABASE_URL with real PostgreSQL credentials'));
+      console.log(chalk.yellow('\n🔗 After fixing and deploying, visit these URLs:'));
+      console.log(chalk.yellow('   • https://your-domain.com/help/admin-500 - Fix guide'));
+      console.log(chalk.yellow('   • https://your-domain.com/api/admin/init - Create admin user\n'));
       process.exit(1);
     } else {
       console.log(chalk.yellow('⚠️  Starting anyway (development mode)...\n'));
