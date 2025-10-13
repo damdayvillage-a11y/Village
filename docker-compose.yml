@@ -42,12 +42,12 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://142.93.208.86:3000}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-generate-a-secure-secret-minimum-32-characters}
       DATABASE_URL: postgresql://villageuser:${DATABASE_PASSWORD:-changeme123}@database:5432/villagedb
-      
+
       # Build Optimization
       NEXT_TELEMETRY_DISABLED: 1
       GENERATE_SOURCEMAP: false
       CI: true
-      
+
       # Optional Services (uncomment to use)
       # STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       # STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
