@@ -22,6 +22,9 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 5. **Create admin user:** Visit `https://your-domain.com/api/admin/init`
 6. **Login:** `admin@damdayvillage.org` / `Admin@123` (change password!)
 
+**📚 Additional Resources:**
+- 🗄️ [Database Setup Guide](./CAPROVER_DATABASE_SETUP.md) - Configure PostgreSQL connection for CapRover (srv-captain--postgres support)
+
 ### 🆘 Getting Errors?
 
 - **500 Error?** Visit `/help/admin-500` (English) or `/help/admin-500-hi` (हिंदी) on your deployed app
