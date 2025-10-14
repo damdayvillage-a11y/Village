@@ -3,12 +3,17 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Accept build arguments from CapRover (optional)
+ARG DATABASE_URL
+ARG CAPROVER_GIT_COMMIT_SHA
+
 # Set Node.js memory limit and optimization flags for build
 ENV NODE_OPTIONS="--max-old-space-size=4096 --max-semi-space-size=1024"
 ENV UV_THREADPOOL_SIZE=64
 
 # Set build-time environment variables early
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+# Use ARG value if provided, otherwise use dummy default
+ENV DATABASE_URL=${DATABASE_URL:-"postgresql://dummy:dummy@localhost:5432/dummy"}
 ENV NEXTAUTH_SECRET="dummy-secret-for-build"
 ENV NEXTAUTH_URL="http://localhost:3000"
 ENV NODE_ENV=production
