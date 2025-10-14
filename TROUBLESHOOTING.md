@@ -66,6 +66,35 @@ npm ERR! errno ECONNRESET
 
 ---
 
+### Issue: Warning About Unconsumed Build Arguments
+
+**Symptoms:**
+```
+[Warning] One or more build-args [CAPROVER_GIT_COMMIT_SHA DATABASE_URL] were not consumed
+```
+
+**Cause:**
+CapRover passes build arguments that the Dockerfile doesn't declare with `ARG` instructions.
+
+**Solution:**
+This has been fixed in the latest version. All Dockerfiles now include:
+```dockerfile
+ARG DATABASE_URL
+ARG CAPROVER_GIT_COMMIT_SHA
+ENV DATABASE_URL=${DATABASE_URL:-"postgresql://dummy:dummy@localhost:5432/dummy"}
+```
+
+**To Apply the Fix:**
+1. Pull the latest changes from the repository
+2. Redeploy your application
+3. The warning should no longer appear
+
+**Documentation:**
+- See `docs/DOCKER_BUILD_ARGS_FIX.md` for details
+- See `docs/TESTING_BUILD_ARGS.md` for testing procedures
+
+---
+
 ### Issue: TypeScript Compilation Errors
 
 **Symptoms:**
