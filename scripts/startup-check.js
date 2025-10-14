@@ -90,7 +90,9 @@ function checkStartupConfiguration() {
     const dummyValues = [
       'dummy-secret-for-build',
       'dummy-secret-for-build-only-not-secure',
+      'dummy-secret-for-build-only-not-secure-min32chars',
       'your-nextauth-secret-key',
+      'change-this-to-a-random-secret-min-32-chars',
       'change-me',
       'secret',
     ];
