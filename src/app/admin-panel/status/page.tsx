@@ -265,17 +265,26 @@ export default function AdminStatusPage() {
               )}
 
               {/* Help Documentation */}
-              {systemCheck.help && (
+              {(systemCheck.help || !systemCheck.healthy) && (
                 <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
                   <h3 className="font-semibold text-gray-900 mb-2">Need Help?</h3>
-                  <p className="text-sm text-gray-700 mb-2">{systemCheck.help}</p>
-                  <div className="flex gap-2">
+                  {systemCheck.help && (
+                    <p className="text-sm text-gray-700 mb-3">{systemCheck.help}</p>
+                  )}
+                  <div className="flex flex-wrap gap-2">
                     <Link 
-                      href="/docs/PRODUCTION_LOGIN_TROUBLESHOOTING.md" 
-                      className="text-sm text-purple-600 hover:text-purple-700 underline"
+                      href="/help/admin-500" 
+                      className="text-sm px-3 py-1.5 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
                     >
-                      View Troubleshooting Guide
+                      View Fix Guide
                     </Link>
+                    <a 
+                      href="/api/admin/init" 
+                      target="_blank"
+                      className="text-sm px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                    >
+                      Create Admin User
+                    </a>
                   </div>
                 </div>
               )}
