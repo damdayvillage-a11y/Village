@@ -295,81 +295,156 @@ Migration engine error: ...
 
 ## 🔐 Authentication Issues
 
-### Issue: 500 Error on Admin Panel Login
+### Issue: 500 Error on Admin Panel Login or NextAuth Routes
 
 **Symptoms:**
 - Homepage works fine
 - `/admin-panel/login` shows 500 Internal Server Error
-- No error message displayed
+- `/api/auth/signin` returns 500 error
+- No error message displayed or "Authentication error" shown
+
+**Root Cause:**
+A 500 error means your Next.js backend route (e.g., `/api/auth/[...nextauth]`) is throwing an unhandled exception.
+
+**Most Likely Causes:**
+
+1. ❌ **Missing environment variable for authentication** (like `NEXTAUTH_SECRET`, `NEXTAUTH_URL`)
+2. ❌ **Invalid NEXTAUTH_SECRET** (too short, contains placeholders, or dummy values)
+3. ❌ **Prisma model mismatch** (if database schema changed)
+4. ❌ **Database connection failure** (wrong credentials or database not accessible)
+5. ❌ **Missing admin user** (database is empty)
 
 **Solutions:**
 
-1. **Check Environment Variables:**
+1. **Check NEXTAUTH_SECRET (CRITICAL):**
    ```bash
-   # In app terminal
-   echo $NEXTAUTH_URL
-   # Should be: https://your-actual-domain.com
-   
+   # In app terminal or environment variables
    echo $NEXTAUTH_SECRET
-   # Should be: 32+ character string
+   # Must be at least 32 characters
+   # Must NOT be: dummy-secret-for-build, your-nextauth-secret-key, etc.
    
-   echo $DATABASE_URL
-   # Should be: postgresql://...
+   # Generate a proper secret:
+   openssl rand -base64 32
+   # Example output: BAWGc+0joocoP+7LA8EEExs+I9eDh5vQeog4vhyku7g=
+   
+   # Set it in your environment variables and restart
    ```
 
-2. **Validate Configuration:**
+2. **Check NEXTAUTH_URL:**
+   ```bash
+   echo $NEXTAUTH_URL
+   # Should be: https://your-actual-domain.com (NOT localhost in production)
+   # Should NOT contain: $$cap_appname$$ or other placeholders
+   ```
+
+3. **Check DATABASE_URL:**
+   ```bash
+   echo $DATABASE_URL
+   # Should be: postgresql://user:password@host:5432/database
+   # Should NOT contain: dummy:dummy or $$cap_ placeholders
+   ```
+
+4. **Validate Configuration (Quick Check):**
    ```bash
    # Visit diagnostic endpoint
-   curl https://your-domain.com/api/admin/check-env
+   curl https://your-domain.com/api/auth/status
    
-   # Should show all green
+   # Should show:
+   # - nextauth_secret: { valid: true, length: 44+ }
+   # - database: { connected: true, admin_exists: true }
    ```
 
-3. **Check Migrations:**
+5. **Check Migrations:**
    ```bash
    npx prisma migrate status
    # All migrations should be applied
+   
+   # If not applied:
+   npx prisma migrate deploy
    ```
 
-4. **Check Admin User:**
+6. **Check Admin User:**
    ```bash
    npm run admin:verify
    # Should confirm admin exists
+   
+   # If admin doesn't exist:
+   npm run db:seed
+   # Creates admin user with default credentials:
+   # Email: admin@damdayvillage.org
+   # Password: Admin@123
    ```
 
-5. **Check Logs:**
+7. **Check Application Logs:**
    - Coolify: Application → Logs
    - CapRover: App → App Logs
-   - Look for specific error messages
+   - Look for specific error messages like:
+     - "NEXTAUTH_SECRET is required"
+     - "Invalid secret"
+     - "Can't reach database server"
+     - "Prisma Client not initialized"
+
+**Quick Fix Checklist:**
+- [ ] NEXTAUTH_SECRET is set and is 32+ characters (use `openssl rand -base64 32`)
+- [ ] NEXTAUTH_URL is set to your actual domain (e.g., `https://yourdomain.com`)
+- [ ] DATABASE_URL is set with real credentials (not dummy:dummy)
+- [ ] Database is accessible from the application
+- [ ] Database migrations are applied (`npx prisma migrate deploy`)
+- [ ] Admin user exists (`npm run db:seed` if needed)
+- [ ] Application has been restarted after setting environment variables
 
 ---
 
-### Issue: "NEXTAUTH_URL" Error
+### Issue: "MissingSecretError" or "NEXTAUTH_SECRET" Error
 
 **Symptoms:**
 ```
 [auth][error] MissingSecretError: Please define a `NEXTAUTH_SECRET`
+```
+Or:
+```
+Error: NEXTAUTH_SECRET is required
 ```
 
 **Solutions:**
 
 1. **Set NEXTAUTH_SECRET:**
    ```bash
-   # Generate new secret
+   # Generate new secret (this creates a 44-character base64 string)
    openssl rand -base64 32
    
+   # Example output:
+   # BAWGc+0joocoP+7LA8EEExs+I9eDh5vQeog4vhyku7g=
+   
    # Add to environment variables
-   NEXTAUTH_SECRET=your-generated-secret-here
+   NEXTAUTH_SECRET=BAWGc+0joocoP+7LA8EEExs+I9eDh5vQeog4vhyku7g=
    ```
 
-2. **Verify Length:**
-   - Must be minimum 32 characters
-   - Random and unpredictable
-   - Different from development
+2. **Verify Requirements:**
+   - ✅ Must be minimum 32 characters (base64 encoding produces 44 chars from 32 bytes)
+   - ✅ Must be random and unpredictable
+   - ✅ Must be different for each environment (dev, staging, production)
+   - ❌ Must NOT be: "dummy-secret-for-build", "your-nextauth-secret-key", or any placeholder
 
-3. **Restart Application:**
+3. **Common Mistakes to Avoid:**
+   ```bash
+   # ❌ WRONG - Too short (26 chars)
+   NEXTAUTH_SECRET=your-nextauth-secret-key
+   
+   # ❌ WRONG - Dummy value (22 chars)
+   NEXTAUTH_SECRET=dummy-secret-for-build
+   
+   # ❌ WRONG - Still a placeholder
+   NEXTAUTH_SECRET=change-this-to-a-random-secret
+   
+   # ✅ CORRECT - Generated with openssl (44 chars)
+   NEXTAUTH_SECRET=BAWGc+0joocoP+7LA8EEExs+I9eDh5vQeog4vhyku7g=
+   ```
+
+4. **Restart Application:**
    - After setting, redeploy or restart app
    - Changes take effect after restart
+   - Verify with: `curl https://your-domain.com/api/auth/status`
 
 ---
 
