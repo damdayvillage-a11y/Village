@@ -24,6 +24,7 @@
     "format:check": "prettier --check .",
     "setup": "./scripts/setup-local.sh",
     "setup:production": "./scripts/setup-production-db.sh",
+    "db:check": "node scripts/check-database-setup.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
