@@ -1,9 +1,10 @@
 import mqtt from 'mqtt';
 import { v4 as uuidv4 } from 'uuid';
-import { SAMPLE_DEVICES, DeviceConfig } from './sample-devices';
+import { SAMPLE_DEVICES, type DeviceConfig } from './sample-devices';
 
 // Re-export for backward compatibility
-export { SAMPLE_DEVICES, DeviceConfig };
+export { SAMPLE_DEVICES };
+export type { DeviceConfig };
 
 export interface TelemetryData {
   deviceId: string;
