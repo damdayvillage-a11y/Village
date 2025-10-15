@@ -247,28 +247,39 @@ export const authOptions: NextAuthOptions = {
         
         // Update last login timestamp (non-blocking, fails gracefully)
         // Only attempt if database is likely available (not a dummy URL)
+        // Update at most once per hour to avoid connection pool exhaustion
         if (session.user && 'id' in session.user && 
             process.env.DATABASE_URL && 
             !process.env.DATABASE_URL.includes('dummy:dummy') &&
             !process.env.DATABASE_URL.includes('$$cap_')) {
           
-          // Use a short timeout to prevent hanging
-          const updatePromise = db.user.update({
-            where: { id: (session.user as any).id },
-            data: { lastLogin: new Date() },
-          });
+          // Only update if the token doesn't have a recent lastLoginUpdate timestamp
+          // or if more than 1 hour has passed since last update
+          const lastUpdate = token.lastLoginUpdate as number | undefined;
+          const now = Date.now();
+          const oneHour = 60 * 60 * 1000;
           
-          // Set a timeout for the update operation
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Update timeout')), 2000)
-          );
-          
-          try {
-            await Promise.race([updatePromise, timeoutPromise]);
-          } catch (error) {
-            // Log but don't fail the session if database update fails
-            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-            console.warn('Failed to update last login timestamp:', errorMsg);
+          if (!lastUpdate || now - lastUpdate > oneHour) {
+            // Use a short timeout to prevent hanging
+            const updatePromise = db.user.update({
+              where: { id: (session.user as any).id },
+              data: { lastLogin: new Date() },
+            });
+            
+            // Set a timeout for the update operation
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Update timeout')), 2000)
+            );
+            
+            try {
+              await Promise.race([updatePromise, timeoutPromise]);
+              // Store the update timestamp in the token (will be persisted on next token update)
+              (token as any).lastLoginUpdate = now;
+            } catch (error) {
+              // Log but don't fail the session if database update fails
+              const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+              console.warn('Failed to update last login timestamp:', errorMsg);
+            }
           }
         }
         
