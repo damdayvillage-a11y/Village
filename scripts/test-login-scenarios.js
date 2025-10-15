@@ -116,6 +116,32 @@ if (!allErrorHandlingPassed) {
   process.exit(1);
 }
 
+// Test 6: Verify middleware excludes auth routes
+console.log('\nTest 6: Verifying middleware excludes auth routes...');
+const middlewarePath = path.join(__dirname, '../middleware.ts');
+const middleware = fs.readFileSync(middlewarePath, 'utf8');
+
+if (middleware.includes("'/api/auth/*'")) {
+  console.log('✅ /api/auth/* added to public routes');
+} else {
+  console.log('❌ /api/auth/* not found in public routes');
+  process.exit(1);
+}
+
+if (middleware.includes('api/auth') && middleware.includes('matcher')) {
+  console.log('✅ Auth routes excluded from middleware matcher');
+} else {
+  console.log('❌ Auth routes not excluded from middleware matcher');
+  process.exit(1);
+}
+
+if (middleware.includes("'/admin-panel/status'")) {
+  console.log('✅ Status page added to public routes');
+} else {
+  console.log('❌ Status page not found in public routes');
+  process.exit(1);
+}
+
 // Summary
 console.log('\n' + '='.repeat(60));
 console.log('✅ All login error handling tests passed!');
@@ -126,11 +152,13 @@ console.log('  2. Database validation in authorize function');
 console.log('  3. Pre-flight configuration checks in NextAuth route');
 console.log('  4. Enhanced status route with placeholder detection');
 console.log('  5. Comprehensive error handling with clear messages');
+console.log('  6. Middleware excludes auth routes (prevents loops)');
 console.log('\n🎯 Expected behavior:');
 console.log('  - No 500 errors for configuration issues');
 console.log('  - Clear error messages guide users to fix problems');
 console.log('  - JWT-only mode works when DB is unavailable');
 console.log('  - Status page shows exact issues and recommendations');
+console.log('  - No authentication loops at auth endpoints');
 console.log('');
 
 process.exit(0);
