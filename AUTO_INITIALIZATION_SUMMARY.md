@@ -136,6 +136,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modu
 **Admin User:**
 - Email: `admin@damdayvillage.org`
 - Password: `Admin@123` (or `ADMIN_DEFAULT_PASSWORD` env var)
+  - ⚠️ **SECURITY WARNING:** This is a well-known default password
+  - ⚠️ **MUST BE CHANGED** immediately after first login
+  - See application logs after startup for the actual password used
 - Role: `ADMIN`
 - Verified: `true`
 - Active: `true`
@@ -143,10 +146,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modu
 **Host User:**
 - Email: `host@damdayvillage.org`
 - Password: `Host@123` (or `HOST_DEFAULT_PASSWORD` env var)
+  - ⚠️ **SECURITY WARNING:** This is a well-known default password
+  - ⚠️ **MUST BE CHANGED** immediately after first login
+  - See application logs after startup for the actual password used
 - Role: `HOST`
 - Verified: `true`
 - Active: `true`
 - Phone: `+91-9876543210`
+
+**Note on Default Passwords:** These default passwords are intentionally simple and well-documented to enable first-time setup without SSH access. They are the same as those used in `scripts/seed.ts` for development. The application displays a prominent warning to change these passwords immediately after first login. For production deployments, it is recommended to set `ADMIN_DEFAULT_PASSWORD` and `HOST_DEFAULT_PASSWORD` environment variables to more secure values.
 
 ### Security Considerations
 
