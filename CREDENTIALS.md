@@ -191,11 +191,12 @@ caprover deploy
 ### 7. First Login
 
 1. Visit: `https://your-domain.com/admin-panel/login`
-2. Login with default admin credentials (created by seed script):
-   - Email: `admin@damdayvillage.org`
-   - Password: `Admin@123`
+2. Login with default admin credentials (hardcoded in seed script):
+   - Email: `admin@damdayvillage.org` (from scripts/seed.ts)
+   - Password: `Admin@123` (from scripts/seed.ts)
 3. **⚠️ CRITICAL: Immediately change the password to a strong, unique password!**
 4. These are well-known default credentials and pose a security risk if not changed
+5. To use different email addresses, modify `scripts/seed.ts` before deployment
 
 ### 8. Clean Up Environment Variables
 

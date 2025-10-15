@@ -7,6 +7,12 @@ const db = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding Smart Carbon-Free Village database...');
 
+  // Configuration: Change these values before deployment if needed
+  const ADMIN_EMAIL = 'admin@damdayvillage.org';
+  const ADMIN_PASSWORD = 'Admin@123';
+  const HOST_EMAIL = 'host@damdayvillage.org';
+  const HOST_PASSWORD = 'Host@123';
+
   // Create Damday Village
   const village = await db.village.upsert({
     where: { id: 'damday-village-001' },
@@ -30,14 +36,13 @@ async function main() {
   console.log('✅ Created village:', village.name);
 
   // Create sample users
-  const adminPassword = 'Admin@123'; // Default admin password
-  const hashedAdminPassword = await hashPassword(adminPassword);
+  const hashedAdminPassword = await hashPassword(ADMIN_PASSWORD);
   
   const adminUser = await db.user.upsert({
-    where: { email: 'admin@damdayvillage.org' },
+    where: { email: ADMIN_EMAIL },
     update: {},
     create: {
-      email: 'admin@damdayvillage.org',
+      email: ADMIN_EMAIL,
       name: 'Village Administrator',
       role: 'ADMIN',
       password: hashedAdminPassword,
@@ -49,14 +54,13 @@ async function main() {
     }
   });
 
-  const hostPassword = 'Host@123'; // Default host password
-  const hashedHostPassword = await hashPassword(hostPassword);
+  const hashedHostPassword = await hashPassword(HOST_PASSWORD);
   
   const hostUser = await db.user.upsert({
-    where: { email: 'host@damdayvillage.org' },
+    where: { email: HOST_EMAIL },
     update: {},
     create: {
-      email: 'host@damdayvillage.org',
+      email: HOST_EMAIL,
       name: 'Raj Singh',
       role: 'HOST',
       password: hashedHostPassword,
@@ -72,10 +76,11 @@ async function main() {
   console.log('✅ Created users:', adminUser.name, 'and', hostUser.name);
   console.log('');
   console.log('🔑 Default Login Credentials:');
-  console.log('   Admin Email: admin@damdayvillage.org');
-  console.log('   Admin Password: Admin@123');
-  console.log('   Host Email: host@damdayvillage.org');  
-  console.log('   Host Password: Host@123');
+  console.log(`   Admin Email: ${ADMIN_EMAIL}`);
+  console.log(`   Admin Password: ${ADMIN_PASSWORD}`);
+  console.log(`   Host Email: ${HOST_EMAIL}`);  
+  console.log(`   Host Password: ${HOST_PASSWORD}`);
+  console.log('   ⚠️  CHANGE THESE PASSWORDS IMMEDIATELY AFTER FIRST LOGIN!');
   console.log('');
 
   // Create sample homestay
@@ -224,8 +229,9 @@ async function main() {
   console.log('- 1 Community Project');
   console.log('- 3 Marketplace Products');
   console.log('\n🔑 Login with these credentials:');
-  console.log('   Admin: admin@damdayvillage.org / Admin@123');
-  console.log('   Host: host@damdayvillage.org / Host@123');
+  console.log(`   Admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+  console.log(`   Host: ${HOST_EMAIL} / ${HOST_PASSWORD}`);
+  console.log('\n⚠️  IMPORTANT: Change these default passwords immediately after first login!');
 }
 
 function getDeviceSchema(deviceType: string) {

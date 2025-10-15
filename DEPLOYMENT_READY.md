@@ -257,17 +257,19 @@ The application creates default accounts with well-known credentials during the 
 
 Failure to change these passwords represents a severe security risk.
 
-### Default Admin Account (Created by seed script)
+### Default Admin Account (Hardcoded in seed script)
 ```
-Email: admin@damdayvillage.org
-Password: Admin@123
+Email: admin@damdayvillage.org (hardcoded in scripts/seed.ts)
+Password: Admin@123 (hardcoded in scripts/seed.ts)
 ```
 
-### Default Host Account (Created by seed script)
+### Default Host Account (Hardcoded in seed script)
 ```
-Email: host@damdayvillage.org
-Password: Host@123
+Email: host@damdayvillage.org (hardcoded in scripts/seed.ts)
+Password: Host@123 (hardcoded in scripts/seed.ts)
 ```
+
+**Note**: These email addresses are hardcoded in the application's seed script (`scripts/seed.ts`). If you need different email addresses, you must modify the seed script before deployment or create additional admin users after initial setup.
 
 **Post-Login Actions Required:**
 1. Login with default credentials
