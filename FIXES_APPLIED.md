@@ -111,6 +111,7 @@ npm run db:seed
 ### Step 1: System Status देखें
 ```
 Visit: https://your-domain.com/admin-panel/status
+(Replace 'your-domain.com' with your actual domain, e.g., village.captain.yourdomain.com)
 ```
 
 अगर सब green (✅) है, तो आप ready हैं!

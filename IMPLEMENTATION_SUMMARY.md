@@ -106,7 +106,11 @@ npm run caprover:diagnose [domain]
 
 **package.json** - Added new command:
 ```json
-"caprover:diagnose": "node scripts/caprover-diagnostic.js"
+{
+  "scripts": {
+    "caprover:diagnose": "node scripts/caprover-diagnostic.js"
+  }
+}
 ```
 
 ---
