@@ -129,15 +129,26 @@ Once connected, initialize the schema and seed data:
 # Access your app's container in CapRover
 # Then run:
 
+# Option 1: Use the automated setup script (RECOMMENDED)
+npm run setup:production
+
+# Option 2: Run commands manually
 # Generate Prisma client
 npm run db:generate
 
-# Run migrations
+# Deploy migrations to create database schema
+npm run db:migrate:deploy
+# OR
 npx prisma migrate deploy
 
 # Seed initial data (creates admin user)
 npm run db:seed
+
+# Verify admin setup
+npm run admin:verify
 ```
+
+**Important:** The database migrations MUST be deployed before seeding. The migrations create all the necessary tables including the `users` table required for the admin user.
 
 ## 🔍 Validation
 
