@@ -2,9 +2,45 @@
 
 This document provides the initialization commands for automated database setup and seeding in CapRover.
 
-## Quick Setup via Environment Variables (Recommended)
+## Automatic Initialization (Recommended - No SSH Required!)
 
-The easiest way to initialize the application is using environment variables. This approach is non-blocking and handles initialization automatically on container startup.
+**NEW:** The application now automatically creates admin and host users on startup if they don't exist!
+
+### Step 1: Deploy
+
+Simply deploy the application via GitHub or CapRover CLI. The container will automatically:
+1. Check database connectivity
+2. **Auto-create admin user** if missing (email: admin@damdayvillage.org, password: Admin@123)
+3. **Auto-create host user** if missing (email: host@damdayvillage.org, password: Host@123)
+4. Start the Next.js server
+
+**No SSH commands needed!** The admin user is created automatically during startup.
+
+### Step 2: Verify
+
+After deployment completes:
+```bash
+# Check health endpoint
+curl https://your-domain.com/api/health
+
+# Expected output includes:
+# "database": {"status": "healthy", ...}
+# "admin": {"status": "healthy", "exists": true, ...}
+```
+
+### Step 3: Login and Change Password
+
+Login with default credentials:
+- Admin: admin@damdayvillage.org / Admin@123
+- Host: host@damdayvillage.org / Host@123
+
+⚠️ **IMPORTANT:** Change these passwords immediately after first login!
+
+---
+
+## Manual Initialization via Environment Variables (Alternative)
+
+If you prefer to use environment variables to trigger seeding (which also creates sample data like homestays, products, etc.):
 
 ### Step 1: Set Environment Variables
 
@@ -20,7 +56,7 @@ RUN_SEED=true
 
 Deploy the application via GitHub or CapRover CLI. The container will automatically:
 1. Run database migrations
-2. Seed the database with admin user and sample data
+2. Seed the database with admin user, host user, and sample data
 3. Start the Next.js server
 
 ### Step 3: Verify
@@ -47,9 +83,13 @@ RUN_SEED=false
 # Or remove these variables entirely
 ```
 
-## Manual Initialization (Alternative)
+---
 
-If you prefer manual control, leave `RUN_MIGRATIONS` and `RUN_SEED` unset or false, and run commands manually after deployment.
+## Manual Initialization via SSH (Advanced)
+
+**Note:** This is rarely needed now that automatic initialization is enabled. Only use if automatic initialization fails.
+
+If you need manual control, you can run commands manually after deployment via SSH.
 
 ### Get Container Shell Access
 

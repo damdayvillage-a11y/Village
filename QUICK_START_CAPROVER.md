@@ -63,21 +63,31 @@ CAPROVER_BUILD=true
 
 ---
 
-## Step 3: Create Admin User
+## Step 3: Wait for Automatic Initialization
 
-After deployment completes, **open your browser** and visit:
+**NEW:** Admin and host users are created automatically! 🎉
+
+After deployment completes:
+1. The application automatically checks database connectivity
+2. **Admin user is auto-created** if it doesn't exist (email: admin@damdayvillage.org, password: Admin@123)
+3. **Host user is auto-created** if it doesn't exist (email: host@damdayvillage.org, password: Host@123)
+
+**No manual steps needed!** Just wait for the deployment to finish (2-3 minutes).
+
+### Verify Setup (Optional)
+
+You can verify the setup by visiting:
 
 ```
-https://your-domain.com/api/admin/init
+https://your-domain.com/api/admin/verify-setup
 ```
 
 You should see:
 ```json
 {
-  "success": true,
-  "message": "Admin user created successfully",
-  "credentials": {
-    "email": "admin@damdayvillage.org",
+  "adminExists": true,
+  "configured": true,
+  "email": "admin@damdayvillage.org",
     "password": "Admin@123"
   }
 }

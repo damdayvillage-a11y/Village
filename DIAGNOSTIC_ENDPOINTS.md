@@ -2,6 +2,19 @@
 
 This document lists all available diagnostic endpoints and tools for troubleshooting your deployment.
 
+## 🆕 Automatic Admin User Creation
+
+**NEW:** The application now automatically creates admin and host users on startup if they don't exist!
+
+When the application starts:
+1. ✅ Database connection is verified
+2. ✅ Admin user is automatically created if missing (email: admin@damdayvillage.org, password: Admin@123)
+3. ✅ Host user is automatically created if missing (email: host@damdayvillage.org, password: Host@123)
+
+**No SSH or manual commands needed!** Just deploy and login.
+
+⚠️ **Important:** Change default passwords immediately after first login.
+
 ---
 
 ## 🌐 Browser-Accessible Endpoints

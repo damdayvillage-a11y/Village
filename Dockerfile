@@ -92,6 +92,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
+# Copy bcryptjs for startup script (used for auto-creating admin user)
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
+
 # Create scripts directory and copy startup validation scripts
 RUN mkdir -p scripts
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/start.js ./scripts/
