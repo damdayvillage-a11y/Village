@@ -32,10 +32,10 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 
 ### 🆘 Getting Errors?
 
-- **500 Error on Login?** Check [Production Database Fix](./PRODUCTION_DATABASE_FIX.md) - Most common issue: database tables not created
-- **Tables don't exist?** Run: `npm run setup:production` in your container
-- **Need diagnostics?** Check `/api/auth/status` for system health
-- **See full guide:** [CAPGUIDE.md](./CAPGUIDE.md) has complete troubleshooting
+- **🚨 500 Error on Login?** → [Quick Fix Guide](./QUICKFIX_PRODUCTION_LOGIN.md) (2 minutes)
+- **📖 Detailed troubleshooting** → [Production Database Fix](./PRODUCTION_DATABASE_FIX.md)
+- **🔍 Need diagnostics?** Run: `npm run db:check` or visit `/api/auth/status`
+- **📚 Complete guide** → [CAPGUIDE.md](./CAPGUIDE.md) has full troubleshooting
 
 ### Key Features
 
