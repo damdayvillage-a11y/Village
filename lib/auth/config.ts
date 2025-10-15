@@ -288,7 +288,7 @@ export const authOptions: NextAuthOptions = {
             // Note: We don't update token.lastLoginUpdate here to avoid race conditions
             // Token mutations should only happen in the JWT callback (not session callback)
             // The lastLoginUpdate timestamp will be refreshed when the user signs in again
-            // (see JWT callback lines 237-239 where it's set on sign-in/sign-up triggers)
+            // (see JWT callback where trigger === 'signIn' || trigger === 'signUp')
           }
         }
         
