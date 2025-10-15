@@ -217,6 +217,17 @@ export default function Admin500HelpPage() {
             <div className="space-y-2 text-sm">
               <div>
                 <a 
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPROVER_500_FIX_GUIDE.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1 font-semibold"
+                >
+                  ⭐ Complete 500 Error Fix Guide (Step-by-Step)
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              <div>
+                <a 
                   href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPGUIDE.md"
                   target="_blank"
                   rel="noopener noreferrer"

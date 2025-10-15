@@ -4,6 +4,15 @@ Complete guide for deploying the Smart Carbon-Free Village application to CapRov
 
 ---
 
+## 🚀 Quick Links
+
+- **[Quick Start Guide](./QUICK_START_CAPROVER.md)** - Fast track deployment (recommended for first-time users)
+- **[500 Error Fix Guide](./CAPROVER_500_FIX_GUIDE.md)** - Complete troubleshooting for 500 errors (English)
+- **[500 Error Fix Guide (Hindi)](./CAPROVER_500_FIX_GUIDE_HINDI.md)** - समस्या समाधान गाइड (हिंदी में)
+- **[Diagnostic Endpoints](./DIAGNOSTIC_ENDPOINTS.md)** - All available diagnostic tools and endpoints
+
+---
+
 ## 📋 Table of Contents
 
 1. [Prerequisites](#prerequisites)
@@ -343,7 +352,13 @@ If using custom domain:
 
 ### Issue 1: "500 Internal Server Error" on Login
 
-**Diagnosis:**
+**⭐ NEW: Complete Fix Guides Available!**
+
+For comprehensive step-by-step solutions, see:
+- **[CAPROVER_500_FIX_GUIDE.md](./CAPROVER_500_FIX_GUIDE.md)** - Complete English guide
+- **[CAPROVER_500_FIX_GUIDE_HINDI.md](./CAPROVER_500_FIX_GUIDE_HINDI.md)** - संपूर्ण हिंदी गाइड
+
+**Quick Diagnosis:**
 Visit: `https://your-domain.com/help/admin-500` or `https://your-domain.com/admin-panel/status`
 
 **Common Causes:**
@@ -352,20 +367,41 @@ Visit: `https://your-domain.com/help/admin-500` or `https://your-domain.com/admi
    - Check App Configs for `$$cap_*$$` patterns
    - Replace with actual values
    - Save & Update
+   - **Fix Guide:** See [CAPROVER_500_FIX_GUIDE.md Phase 1](./CAPROVER_500_FIX_GUIDE.md#phase-1-verify-environment-variables-in-caprover)
 
 2. **Database not connected**
    - Verify DATABASE_URL is correct
    - Check PostgreSQL app is running in CapRover
-   - Test connection: `psql $DATABASE_URL` in container
+   - Test connection: `npm run db:test` in container
+   - **Fix Guide:** See [CAPROVER_500_FIX_GUIDE.md Phase 2](./CAPROVER_500_FIX_GUIDE.md#phase-2-verify-database-connection)
 
 3. **Admin user not created**
    - Visit: `https://your-domain.com/api/admin/init`
    - Or run: `npm run db:seed` in container
+   - **Fix Guide:** See [CAPROVER_500_FIX_GUIDE.md Phase 3](./CAPROVER_500_FIX_GUIDE.md#phase-3-createverify-admin-user)
 
 4. **NEXTAUTH_SECRET invalid**
    - Ensure it's 32+ characters
    - No dummy values like "change-me"
    - Generate new: `openssl rand -base64 32`
+   - **Fix Guide:** See [CAPROVER_500_FIX_GUIDE.md Step 1.2](./CAPROVER_500_FIX_GUIDE.md#step-12-replace-all-placeholders)
+
+**Diagnostic Tools:**
+```bash
+# Run comprehensive diagnostic
+npm run caprover:diagnose https://your-domain.com
+
+# Validate environment variables
+npm run validate:env
+
+# Verify admin user
+npm run admin:verify
+
+# Test database connection
+npm run db:test
+```
+
+See [DIAGNOSTIC_ENDPOINTS.md](./DIAGNOSTIC_ENDPOINTS.md) for complete list of tools.
 
 ### Issue 2: Build Fails
 

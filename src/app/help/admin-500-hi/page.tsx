@@ -217,6 +217,17 @@ export default function Admin500HelpPageHindi() {
             <h3 className="font-semibold text-gray-900 mb-3">और मदद चाहिए?</h3>
             <div className="space-y-2 text-sm">
               <div>
+                <a 
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPROVER_500_FIX_GUIDE_HINDI.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1 font-semibold"
+                >
+                  ⭐ संपूर्ण 500 Error समाधान गाइड (हिंदी में)
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              <div>
                 <Link 
                   href="/help/admin-500"
                   className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1"
