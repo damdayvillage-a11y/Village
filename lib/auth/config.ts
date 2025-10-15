@@ -219,7 +219,7 @@ export const authOptions: NextAuthOptions = {
       return `${baseUrl}/dashboard`;
     },
     
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       // Add custom fields to JWT token
       if (user) {
         token.role = 'role' in user ? user.role : UserRole.GUEST;
@@ -230,6 +230,12 @@ export const authOptions: NextAuthOptions = {
       // Handle OAuth account linking
       if (account) {
         token.provider = account.provider;
+      }
+      
+      // Update lastLoginUpdate timestamp when appropriate
+      // This happens on sign-in or when explicitly triggered by update
+      if (trigger === 'signIn' || trigger === 'signUp') {
+        token.lastLoginUpdate = Date.now();
       }
       
       return token;
@@ -260,7 +266,8 @@ export const authOptions: NextAuthOptions = {
           const oneHour = 60 * 60 * 1000;
           
           if (!lastUpdate || now - lastUpdate > oneHour) {
-            // Use a short timeout to prevent hanging
+            // Fire and forget - don't block the session response
+            // Use a short timeout to prevent hanging database connections
             const updatePromise = db.user.update({
               where: { id: session.user.id },
               data: { lastLogin: new Date() },
@@ -271,15 +278,15 @@ export const authOptions: NextAuthOptions = {
               setTimeout(() => reject(new Error('Update timeout')), 2000)
             );
             
-            try {
-              await Promise.race([updatePromise, timeoutPromise]);
-              // Store the update timestamp in the token (will be persisted on next token update)
-              token.lastLoginUpdate = now;
-            } catch (error) {
+            // Run update in background - don't await to avoid blocking
+            Promise.race([updatePromise, timeoutPromise]).catch(error => {
               // Log but don't fail the session if database update fails
               const errorMsg = error instanceof Error ? error.message : 'Unknown error';
               console.warn('Failed to update last login timestamp:', errorMsg);
-            }
+            });
+            
+            // Note: The token update will happen naturally on the next sign-in
+            // We can't safely mutate token here to avoid race conditions
           }
         }
         
