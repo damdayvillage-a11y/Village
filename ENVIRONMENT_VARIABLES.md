@@ -219,6 +219,29 @@ CI=true
 
 ---
 
+### SKIP_DB_DURING_BUILD
+
+**Description:** Skip database connection attempts during build  
+**Format:** true or false  
+**Default:** true  
+**Recommended:** true (to prevent build failures)
+
+```bash
+SKIP_DB_DURING_BUILD=true
+```
+
+**Purpose:** 
+- Prevents database connection attempts during Docker build
+- Allows builds to succeed when database is not available
+- Routes will use fallback sample data during build
+- Database connections work normally at runtime
+
+**When to use:**
+- Always set to `true` in CapRover and other container platforms
+- Set to `false` only if you need database access during build (rare)
+
+---
+
 ### TYPESCRIPT_NO_TYPE_CHECK
 
 **Description:** Skip TypeScript type checking during build  
