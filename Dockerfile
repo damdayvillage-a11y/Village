@@ -6,6 +6,7 @@ WORKDIR /app
 # Accept build arguments from CapRover (optional)
 ARG DATABASE_URL
 ARG CAPROVER_GIT_COMMIT_SHA
+ARG SKIP_DB_DURING_BUILD
 
 # Set Node.js memory limit and optimization flags for build
 # Reduced to 1GB for 2GB VPS compatibility (was 4GB)
@@ -26,6 +27,8 @@ ENV GENERATE_SOURCEMAP=false
 ENV DISABLE_ESLINT=true
 ENV TYPESCRIPT_NO_TYPE_CHECK=true
 ENV CAPROVER_BUILD=true
+# Skip database connection attempts during build
+ENV SKIP_DB_DURING_BUILD=${SKIP_DB_DURING_BUILD:-"true"}
 
 # Copy package files
 COPY package*.json ./
