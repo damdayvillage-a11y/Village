@@ -285,8 +285,10 @@ export const authOptions: NextAuthOptions = {
               console.warn('Failed to update last login timestamp:', errorMsg);
             });
             
-            // Note: The token update will happen naturally on the next sign-in
-            // We can't safely mutate token here to avoid race conditions
+            // Note: We don't update token.lastLoginUpdate here to avoid race conditions
+            // Token mutations should only happen in the JWT callback (not session callback)
+            // The lastLoginUpdate timestamp will be refreshed when the user signs in again
+            // (see JWT callback lines 237-239 where it's set on sign-in/sign-up triggers)
           }
         }
         
