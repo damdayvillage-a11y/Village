@@ -55,8 +55,10 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        // Validate credentials exist
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password required');
+          console.warn('Login attempt with missing credentials');
+          return null;
         }
 
         let retries = 3;
@@ -69,8 +71,10 @@ export const authOptions: NextAuthOptions = {
               where: { email: credentials.email },
             });
 
+            // Invalid credentials - user not found or no password
             if (!user || !user.password) {
-              throw new Error('Invalid credentials');
+              console.warn(`Login attempt for non-existent or passwordless user: ${credentials.email}`);
+              return null;
             }
 
             const isValidPassword = await verifyPassword(
@@ -78,18 +82,26 @@ export const authOptions: NextAuthOptions = {
               user.password
             );
 
+            // Invalid password
             if (!isValidPassword) {
-              throw new Error('Invalid credentials');
+              console.warn(`Invalid password for user: ${credentials.email}`);
+              return null;
             }
 
+            // User not verified
             if (!user.verified) {
-              throw new Error('Please verify your email before logging in');
+              console.warn(`Login attempt for unverified user: ${credentials.email}`);
+              return null;
             }
 
+            // User account deactivated
             if (!user.active) {
-              throw new Error('Account has been deactivated');
+              console.warn(`Login attempt for deactivated user: ${credentials.email}`);
+              return null;
             }
 
+            // Success - return user object
+            console.log(`Successful login for user: ${credentials.email}`);
             return {
               id: user.id,
               email: user.email,
@@ -100,17 +112,9 @@ export const authOptions: NextAuthOptions = {
             };
           } catch (error) {
             lastError = error instanceof Error ? error : new Error('Unknown error');
-            
-            // If it's a validation error we threw, don't retry - just fail
-            if (lastError.message === 'Invalid credentials' ||
-                lastError.message === 'Please verify your email before logging in' ||
-                lastError.message === 'Account has been deactivated' ||
-                lastError.message === 'Email and password required') {
-              throw lastError;
-            }
-
-            // For database connection errors, retry if we have attempts left
             const errorMsg = lastError.message;
+            
+            // Check if this is a transient database error that we should retry
             const isTransientError = errorMsg.includes('connect') || 
                                     errorMsg.includes('ECONNREFUSED') || 
                                     errorMsg.includes('timeout') ||
@@ -118,25 +122,31 @@ export const authOptions: NextAuthOptions = {
                                     errorMsg.includes('ENOTFOUND');
 
             if (isTransientError && attempt < retries) {
-              console.warn(`Auth attempt ${attempt} failed, retrying...`, errorMsg);
+              console.warn(`Auth attempt ${attempt} failed with transient error, retrying...`, errorMsg);
               // Wait before retry (exponential backoff)
               await new Promise(resolve => setTimeout(resolve, attempt * 500));
               continue;
             }
 
-            // Log error for debugging but don't expose internals to user
+            // Log error for debugging
             console.error('Database error during authentication:', lastError);
             
+            // For transient errors after all retries, throw to indicate system error
+            // This will result in a proper error being shown to the user
             if (isTransientError) {
-              throw new Error('Database connection failed. Please try again or contact support.');
+              throw new Error('Database connection failed. Please try again later.');
             }
             
-            throw new Error('Unable to authenticate. Please try again later.');
+            // For other unexpected errors, log and return null
+            // This prevents 500 errors for authentication failures
+            console.error('Unexpected error during authentication:', lastError);
+            return null;
           }
         }
 
-        // Should not reach here, but just in case
-        throw lastError || new Error('Authentication failed after retries');
+        // Exhausted retries with transient errors
+        console.error('Authentication failed after retries:', lastError);
+        return null;
       },
     }),
     
