@@ -8,7 +8,8 @@ ARG DATABASE_URL
 ARG CAPROVER_GIT_COMMIT_SHA
 
 # Set Node.js memory limit and optimization flags for build
-ENV NODE_OPTIONS="--max-old-space-size=4096 --max-semi-space-size=1024"
+# Reduced to 1GB for 2GB VPS compatibility (was 4GB)
+ENV NODE_OPTIONS="--max-old-space-size=1024 --max-semi-space-size=256"
 ENV UV_THREADPOOL_SIZE=64
 
 # Set build-time environment variables early
@@ -82,6 +83,11 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy Prisma schema and generated client for runtime
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 # Create scripts directory and copy startup validation scripts
 RUN mkdir -p scripts
