@@ -184,7 +184,7 @@ function checkStartupConfiguration() {
         
         console.log(chalk.green('✅ Database connection successful!'));
         
-        // Check if admin user exists (non-blocking warning)
+        // Check if admin user exists and auto-create if missing
         try {
           const adminUser = await prisma.user.findUnique({
             where: { email: 'admin@damdayvillage.org' }
@@ -192,16 +192,106 @@ function checkStartupConfiguration() {
           
           if (!adminUser) {
             console.log(chalk.yellow('⚠️  Admin user not found in database'));
-            console.log(chalk.yellow('   To create admin user:'));
-            console.log(chalk.yellow('   • Visit: https://your-domain.com/api/admin/init (easiest)'));
-            console.log(chalk.yellow('   • Or run: npm run db:seed'));
-            console.log(chalk.yellow('   Default credentials: admin@damdayvillage.org / Admin@123'));
-            console.log(chalk.yellow('   📖 See: https://your-domain.com/help/admin-500 for full guide'));
-            warnings.push('Admin user not found - visit /api/admin/init or run db:seed');
+            console.log(chalk.blue('🔧 Auto-creating admin user...'));
+            
+            try {
+              // Hash password using bcryptjs (available in production)
+              const bcryptjs = require('bcryptjs');
+              const adminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin@123';
+              const salt = await bcryptjs.genSalt(12);
+              const hashedPassword = await bcryptjs.hash(adminPassword, salt);
+              
+              // Create admin user
+              const newAdmin = await prisma.user.create({
+                data: {
+                  email: 'admin@damdayvillage.org',
+                  name: 'Village Administrator',
+                  role: 'ADMIN',
+                  password: hashedPassword,
+                  verified: true,
+                  active: true,
+                  preferences: {
+                    language: 'en',
+                    notifications: true,
+                  },
+                },
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                  role: true,
+                }
+              });
+              
+              console.log(chalk.green('✅ Admin user created successfully!'));
+              console.log(chalk.blue(`   Email: ${newAdmin.email}`));
+              console.log(chalk.blue(`   Role: ${newAdmin.role}`));
+              console.log(chalk.blue(`   Password: ${adminPassword}`));
+              console.log(chalk.yellow('   ⚠️  IMPORTANT: Change this password immediately after first login!'));
+            } catch (createError) {
+              console.log(chalk.red('❌ Failed to auto-create admin user:', createError.message));
+              console.log(chalk.yellow('   To create admin user manually:'));
+              console.log(chalk.yellow('   • Visit: https://your-domain.com/api/admin/init'));
+              console.log(chalk.yellow('   • Or run: npm run db:seed'));
+              warnings.push('Admin user creation failed - visit /api/admin/init or run db:seed');
+            }
           } else {
             console.log(chalk.green('✅ Admin user exists'));
             console.log(chalk.blue(`   Email: ${adminUser.email}`));
             console.log(chalk.blue(`   Role: ${adminUser.role}`));
+          }
+          
+          // Also check and create host user if missing
+          const hostUser = await prisma.user.findUnique({
+            where: { email: 'host@damdayvillage.org' }
+          });
+          
+          if (!hostUser) {
+            console.log(chalk.yellow('⚠️  Host user not found in database'));
+            console.log(chalk.blue('🔧 Auto-creating host user...'));
+            
+            try {
+              const bcryptjs = require('bcryptjs');
+              const hostPassword = process.env.HOST_DEFAULT_PASSWORD || 'Host@123';
+              const salt = await bcryptjs.genSalt(12);
+              const hashedPassword = await bcryptjs.hash(hostPassword, salt);
+              
+              // Create host user
+              const newHost = await prisma.user.create({
+                data: {
+                  email: 'host@damdayvillage.org',
+                  name: 'Raj Singh',
+                  role: 'HOST',
+                  password: hashedPassword,
+                  verified: true,
+                  active: true,
+                  phone: '+91-9876543210',
+                  preferences: {
+                    language: 'hi',
+                    notifications: true,
+                  },
+                },
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                  role: true,
+                }
+              });
+              
+              console.log(chalk.green('✅ Host user created successfully!'));
+              console.log(chalk.blue(`   Email: ${newHost.email}`));
+              console.log(chalk.blue(`   Role: ${newHost.role}`));
+              console.log(chalk.blue(`   Password: ${hostPassword}`));
+              console.log(chalk.yellow('   ⚠️  IMPORTANT: Change this password immediately after first login!'));
+            } catch (createError) {
+              console.log(chalk.red('❌ Failed to auto-create host user:', createError.message));
+              console.log(chalk.yellow('   You can create it manually via the admin panel after logging in'));
+            }
+          } else {
+            console.log(chalk.green('✅ Host user exists'));
+            console.log(chalk.blue(`   Email: ${hostUser.email}`));
+            console.log(chalk.blue(`   Role: ${hostUser.role}`));
           }
         } catch (adminCheckError) {
           console.log(chalk.yellow('⚠️  Could not verify admin user (database may need migration)'));
