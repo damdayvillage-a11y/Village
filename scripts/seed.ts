@@ -82,6 +82,11 @@ async function main() {
   console.log(`   Host Password: ${HOST_PASSWORD}`);
   console.log('   ⚠️  CHANGE THESE PASSWORDS IMMEDIATELY AFTER FIRST LOGIN!');
   console.log('');
+  console.log('⚠️  SECURITY WARNING:');
+  console.log('   These are DEFAULT passwords known publicly!');
+  console.log('   You MUST change them immediately after first login.');
+  console.log('   Leaving default passwords is a CRITICAL security vulnerability!');
+  console.log('');
 
   // Create sample homestay
   const homestay = await db.homestay.create({
@@ -229,6 +234,9 @@ async function main() {
   console.log('- 1 Community Project');
   console.log('- 3 Marketplace Products');
   console.log('\n🔑 Login with these credentials:');
+  console.log('   Admin: admin@damdayvillage.org / Admin@123');
+  console.log('   Host: host@damdayvillage.org / Host@123');
+  console.log('\n⚠️  CHANGE THESE PASSWORDS IMMEDIATELY IN PRODUCTION!');
   console.log(`   Admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
   console.log(`   Host: ${HOST_EMAIL} / ${HOST_PASSWORD}`);
   console.log('\n⚠️  IMPORTANT: Change these default passwords immediately after first login!');
