@@ -148,12 +148,14 @@ export default function AdminPanelPage() {
             <div className="flex-1">
               <h3 className="text-sm font-medium text-yellow-800">Statistics Unavailable</h3>
               <p className="text-sm text-yellow-700 mt-1">{statsError}</p>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => loadAdminData()}
-                className="mt-2 text-sm text-yellow-800 hover:text-yellow-900 underline font-medium"
+                className="mt-2 text-yellow-800 hover:text-yellow-900 underline font-medium p-0 h-auto"
               >
                 Retry Loading Statistics
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -239,10 +239,10 @@ export const authOptions: NextAuthOptions = {
       try {
         // Add custom fields to session
         if (token && session.user) {
-          (session.user as any).id = token.userId as string;
-          (session.user as any).role = token.role as UserRole;
-          (session.user as any).verified = token.verified as boolean;
-          (session.user as any).provider = token.provider as string;
+          session.user.id = token.userId;
+          session.user.role = token.role;
+          session.user.verified = token.verified;
+          session.user.provider = token.provider;
         }
         
         // Update last login timestamp (non-blocking, fails gracefully)
@@ -255,14 +255,14 @@ export const authOptions: NextAuthOptions = {
           
           // Only update if the token doesn't have a recent lastLoginUpdate timestamp
           // or if more than 1 hour has passed since last update
-          const lastUpdate = token.lastLoginUpdate as number | undefined;
+          const lastUpdate = token.lastLoginUpdate;
           const now = Date.now();
           const oneHour = 60 * 60 * 1000;
           
           if (!lastUpdate || now - lastUpdate > oneHour) {
             // Use a short timeout to prevent hanging
             const updatePromise = db.user.update({
-              where: { id: (session.user as any).id },
+              where: { id: session.user.id },
               data: { lastLogin: new Date() },
             });
             
@@ -274,7 +274,7 @@ export const authOptions: NextAuthOptions = {
             try {
               await Promise.race([updatePromise, timeoutPromise]);
               // Store the update timestamp in the token (will be persisted on next token update)
-              (token as any).lastLoginUpdate = now;
+              token.lastLoginUpdate = now;
             } catch (error) {
               // Log but don't fail the session if database update fails
               const errorMsg = error instanceof Error ? error.message : 'Unknown error';
