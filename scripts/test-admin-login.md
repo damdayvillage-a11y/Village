@@ -112,14 +112,21 @@ Expected output should include:
 
 ### Test Login API Directly (Invalid Credentials)
 ```bash
-# This should NOT return 500 error
+# Note: Testing the NextAuth API directly requires a CSRF token.
+# It's easier to test via the UI at /admin-panel/login
+# But if you need to test the API directly:
+
+# First, get a CSRF token
+CSRF_TOKEN=$(curl -s http://localhost:3000/api/auth/csrf | jq -r '.csrfToken')
+
+# Then use it to test login (this should NOT return 500 error)
 curl -X POST http://localhost:3000/api/auth/callback/credentials \
-  -H "Content-Type: application/json" \
-  -d '{"csrfToken": "test", "email": "fake@example.com", "password": "fake"}' \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=${CSRF_TOKEN}&email=fake@example.com&password=fake" \
   -v
 ```
 
-Expected: HTTP 200 or 401/403, but NOT 500
+Expected: HTTP 200 with JSON response indicating success or failure (but NOT 500)
 
 ### Check Admin User Exists
 ```bash

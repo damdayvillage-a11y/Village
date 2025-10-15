@@ -105,11 +105,17 @@ if (!user.active) {
 
 ### 1. Test with Invalid Credentials
 ```bash
+# Get CSRF token first
+CSRF_TOKEN=$(curl -s http://localhost:3000/api/auth/csrf | jq -r '.csrfToken')
+
+# Test login with invalid credentials
 curl -X POST http://localhost:3000/api/auth/callback/credentials \
-  -H "Content-Type: application/json" \
-  -d '{"email": "fake@example.com", "password": "wrongpass"}'
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=${CSRF_TOKEN}&email=fake@example.com&password=wrongpass"
 ```
-**Expected**: Should not return 500 error. Should return authentication failure.
+**Expected**: Should not return 500 error. Should return HTTP 200 with authentication failure response.
+
+**Note**: It's easier to test via the UI at `/admin-panel/login` rather than the API directly.
 
 ### 2. Test with Valid Admin Credentials
 ```bash
