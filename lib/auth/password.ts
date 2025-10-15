@@ -1,7 +1,9 @@
 import * as argon2 from 'argon2';
+import * as bcryptjs from 'bcryptjs';
 
 /**
  * Hash a password using Argon2id (most secure variant)
+ * Falls back to bcryptjs if Argon2 is not available (e.g., in Alpine Linux without build tools)
  */
 export async function hashPassword(password: string): Promise<string> {
   try {
@@ -12,20 +14,44 @@ export async function hashPassword(password: string): Promise<string> {
       parallelism: 4,    // 4 parallel threads
     });
   } catch (error) {
-    console.error('Password hashing failed:', error);
-    throw new Error('Failed to hash password');
+    console.warn('Argon2 hashing failed, falling back to bcryptjs:', error);
+    try {
+      // Fallback to bcryptjs (pure JavaScript, works on Alpine)
+      const salt = await bcryptjs.genSalt(12);
+      return await bcryptjs.hash(password, salt);
+    } catch (fallbackError) {
+      console.error('Password hashing failed with both Argon2 and bcryptjs:', fallbackError);
+      throw new Error('Failed to hash password');
+    }
   }
 }
 
 /**
  * Verify a password against its hash
+ * Automatically detects hash type and uses appropriate method
  */
 export async function verifyPassword(
   password: string,
   hashedPassword: string
 ): Promise<boolean> {
   try {
-    return await argon2.verify(hashedPassword, password);
+    // Argon2 hashes start with $argon2
+    if (hashedPassword.startsWith('$argon2')) {
+      return await argon2.verify(hashedPassword, password);
+    }
+    // bcrypt hashes start with $2a$, $2b$, or $2y$
+    else if (hashedPassword.match(/^\$2[aby]\$/)) {
+      return await bcryptjs.compare(password, hashedPassword);
+    }
+    else {
+      // Try argon2 first, fallback to bcrypt
+      try {
+        return await argon2.verify(hashedPassword, password);
+      } catch (argonError) {
+        console.warn('Argon2 verification failed, trying bcryptjs:', argonError);
+        return await bcryptjs.compare(password, hashedPassword);
+      }
+    }
   } catch (error) {
     console.error('Password verification failed:', error);
     return false;

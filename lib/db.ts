@@ -6,7 +6,8 @@ declare global {
 }
 
 // Determine if we're in a build or runtime environment
-const isBuildTime = process.env.DATABASE_URL === 'postgresql://dummy:dummy@localhost:5432/dummy' ||
+const isBuildTime = process.env.SKIP_DB_DURING_BUILD === 'true' ||
+                    process.env.DATABASE_URL === 'postgresql://dummy:dummy@localhost:5432/dummy' ||
                     process.env.CI === 'true' && !process.env.DATABASE_URL;
 
 // Configure logging based on environment
@@ -82,7 +83,9 @@ export async function disconnectDatabase(): Promise<void> {
 // Health check function
 export async function checkDatabaseHealth() {
   // Skip database check during build time
-  if (!process.env.DATABASE_URL || process.env.DATABASE_URL === 'postgresql://dummy:dummy@localhost:5432/dummy') {
+  if (process.env.SKIP_DB_DURING_BUILD === 'true' ||
+      !process.env.DATABASE_URL || 
+      process.env.DATABASE_URL === 'postgresql://dummy:dummy@localhost:5432/dummy') {
     return { 
       status: 'skip', 
       message: 'Database check skipped during build',

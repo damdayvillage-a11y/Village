@@ -7,27 +7,28 @@ WORKDIR /app
 # Accept build arguments from CapRover (optional)
 ARG DATABASE_URL
 ARG CAPROVER_GIT_COMMIT_SHA
+ARG BUILD_MEMORY_LIMIT=1024
 
 # Set Node.js memory and performance optimizations
-ENV NODE_OPTIONS="--max-old-space-size=4096 --max-semi-space-size=1024"
+# Configurable via BUILD_MEMORY_LIMIT ARG (default 1GB for 2GB VPS)
+ENV NODE_OPTIONS="--max-old-space-size=${BUILD_MEMORY_LIMIT} --max-semi-space-size=256"
 ENV UV_THREADPOOL_SIZE=64
 
 # Set build-time environment variables
 # These are dummy values for the build process only
 # Real values should be set in CapRover environment variables
-# Use ARG value if provided, otherwise use dummy default
 ENV DATABASE_URL=${DATABASE_URL:-"postgresql://dummy:dummy@localhost:5432/dummy"}
-ENV NEXTAUTH_SECRET="dummy-secret-for-build-only-not-secure"
+ENV NEXTAUTH_SECRET="dummy-secret-for-build-only-not-secure-min32chars"
 ENV NEXTAUTH_URL="http://localhost:3000"
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 ENV CI=true
 ENV DISABLE_ESLINT_PLUGIN=true
 ENV GENERATE_SOURCEMAP=false
 ENV DISABLE_ESLINT=true
 ENV TYPESCRIPT_NO_TYPE_CHECK=true
 ENV CAPROVER_BUILD=true
+ENV SKIP_DB_DURING_BUILD=true
 
 # Copy package files for dependency caching
 COPY package*.json ./
@@ -52,14 +53,30 @@ RUN echo "📦 Installing dependencies..." && \
     echo "Dependencies installed at: $(date)" && \
     echo "node_modules size: $(du -sh node_modules)"
 
+# Copy Prisma schema first for better caching
+COPY prisma ./prisma
+
+# Copy scripts directory (needed for seed.ts and other utilities)
+COPY scripts ./scripts
+
 # Copy source files
 COPY . .
 
 # Generate Prisma client - use direct node path to avoid npx network calls
 RUN echo "🔧 Generating Prisma client..." && \
     echo "Prisma generation start: $(date)" && \
-    node /app/node_modules/prisma/build/index.js generate && \
+    node /app/node_modules/prisma/build/index.js generate --schema=/app/prisma/schema.prisma && \
     echo "Prisma generation complete: $(date)"
+
+# Run database migrations during build (if DATABASE_URL is real, not dummy)
+# This will be skipped during build if using dummy DB, but can run in initialization command
+RUN if [ "$SKIP_DB_DURING_BUILD" != "true" ] && echo "$DATABASE_URL" | grep -qv "dummy:dummy"; then \
+      echo "🔄 Running database migrations..." && \
+      node /app/node_modules/prisma/build/index.js migrate deploy --schema=/app/prisma/schema.prisma && \
+      echo "✅ Migrations complete"; \
+    else \
+      echo "⏭️  Skipping migrations during build (will run via initialization command)"; \
+    fi
 
 # Build the application
 RUN echo "🏗️ Building application..." && \
@@ -89,11 +106,29 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy Prisma schema and generated client for runtime
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+
+# Copy scripts directory for runtime operations (seeding, validation, etc.)
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+
+# Copy package.json for runtime metadata
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
 # Verify copied files
 RUN echo "Production files verification:" && \
     ls -la && \
     echo "Public files:" && ls -la public/ | head -5 && \
-    echo "Static files:" && ls -la .next/static/ | head -5
+    echo "Static files:" && ls -la .next/static/ | head -5 && \
+    echo "Prisma schema:" && ls -la prisma/ && \
+    echo "Prisma client:" && ls -la node_modules/@prisma/ | head -5 && \
+    echo "Scripts:" && ls -la scripts/ | head -10
+
+# Copy entrypoint script
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 USER nextjs
 
@@ -102,5 +137,9 @@ EXPOSE 80
 ENV PORT=80
 ENV HOSTNAME="0.0.0.0"
 
-# Simple startup command
-CMD ["node", "server.js"]
+# Use entrypoint script that handles migrations and seeding
+# Can be controlled via environment variables:
+# - RUN_MIGRATIONS=true (to run migrations on startup)
+# - RUN_SEED=true (to seed database on startup)
+# - SKIP_ENV_VALIDATION=true (to skip startup validation)
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

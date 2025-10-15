@@ -85,8 +85,8 @@ models/
 contracts/artifacts/
 contracts/cache/
 
-# CapRover
-captain-definition
+# CapRover - keep captain-definition in repo for deployment
+# captain-definition
 
 # Monitoring
 .monitoring/
