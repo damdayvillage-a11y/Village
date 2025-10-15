@@ -77,6 +77,11 @@ async function main() {
   console.log('   Host Email: host@damdayvillage.org');  
   console.log('   Host Password: Host@123');
   console.log('');
+  console.log('⚠️  SECURITY WARNING:');
+  console.log('   These are DEFAULT passwords known publicly!');
+  console.log('   You MUST change them immediately after first login.');
+  console.log('   Leaving default passwords is a CRITICAL security vulnerability!');
+  console.log('');
 
   // Create sample homestay
   const homestay = await db.homestay.create({
@@ -226,6 +231,7 @@ async function main() {
   console.log('\n🔑 Login with these credentials:');
   console.log('   Admin: admin@damdayvillage.org / Admin@123');
   console.log('   Host: host@damdayvillage.org / Host@123');
+  console.log('\n⚠️  CHANGE THESE PASSWORDS IMMEDIATELY IN PRODUCTION!');
 }
 
 function getDeviceSchema(deviceType: string) {

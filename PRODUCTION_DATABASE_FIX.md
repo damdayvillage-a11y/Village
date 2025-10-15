@@ -111,9 +111,9 @@ Visit: `https://damdayvillage.com/admin-panel`
 
 Login with:
 - **Email:** `admin@damdayvillage.org`
-- **Password:** `Admin@123`
+- **Password:** `Admin@123` (default from seed script)
 
-**⚠️ IMPORTANT:** Change the password immediately after first login!
+**🔒 SECURITY CRITICAL:** This is a default password known publicly. You MUST change it immediately after first login! Leaving the default password is a major security vulnerability.
 
 ## 📋 For CapRover Users
 

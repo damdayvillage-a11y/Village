@@ -43,9 +43,11 @@ Visit: `https://your-domain.com/admin-panel`
 
 Login with:
 - **Email:** `admin@damdayvillage.org`
-- **Password:** `Admin@123`
+- **Password:** `Admin@123` (default password from seed script)
 
-🎉 **Success!** Change the password immediately after first login.
+🎉 **Success!** 
+
+⚠️ **SECURITY:** Change the password immediately after first login! This is a default password and should NEVER be used in production long-term.
 
 ## Alternative: Manual Steps
 
@@ -93,7 +95,9 @@ chmod +x scripts/*.sh
 Check your DATABASE_URL:
 ```bash
 echo $DATABASE_URL
-# Should NOT contain: dummy:dummy or $$cap_
+# Should NOT contain placeholder values like:
+#   - dummy:dummy (test/placeholder credentials)
+#   - $$cap_* (CapRover environment variable placeholders)
 ```
 
 ### Still not working?
@@ -152,5 +156,4 @@ Should show:
 ---
 
 **Estimated Time:** 2-5 minutes  
-**Success Rate:** 99%  
-**Last Updated:** 2025-10-15
+**Success Rate:** 99%
