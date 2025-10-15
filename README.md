@@ -18,9 +18,10 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 1. **Deploy PostgreSQL** on CapRover
 2. **Create app** and configure environment variables (see CAPGUIDE.md)
 3. **Deploy** from GitHub or CLI
-4. **Run migrations:** `npx prisma migrate deploy`
-5. **Create admin user:** Visit `https://your-domain.com/api/admin/init`
-6. **Login:** `admin@damdayvillage.org` / `Admin@123` (change password!)
+4. **Wait for startup** - Admin and host users are created automatically! 🎉
+5. **Login:** `admin@damdayvillage.org` / `Admin@123` (change password!)
+
+**No SSH commands needed!** The application automatically creates admin and host users on first startup.
 
 **📚 Additional Resources:**
 - 🗄️ [Database Setup Guide](./CAPROVER_DATABASE_SETUP.md) - Configure PostgreSQL connection for CapRover (srv-captain--postgres support)
@@ -37,6 +38,7 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 - ✅ Complete database schema with TimescaleDB support
 - ✅ Environment validation (prevents startup with invalid config)
 - ✅ Multi-language admin panel (English & Hindi)
+- ✅ **NEW:** Auto-creation of admin and host users on startup (no SSH needed!)
 - ✅ Auto-recovery for missing admin user
 - ✅ Comprehensive error messages
 - ✅ HTTPS/SSL enforced
