@@ -8,8 +8,21 @@ import { db } from '../db';
 import { verifyPassword } from './password';
 import { UserRole } from '@prisma/client';
 
+// Determine if we should use the database adapter
+// Skip adapter if DATABASE_URL is not configured, contains dummy values, or is a CapRover placeholder
+const shouldUseAdapter = () => {
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) return false;
+  if (dbUrl.includes('dummy:dummy')) return false;
+  if (dbUrl.includes('$$cap_')) return false;
+  if (process.env.SKIP_DB_DURING_BUILD === 'true') return false;
+  return true;
+};
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db),
+  // Conditionally use PrismaAdapter only when database is properly configured
+  // This prevents 500 errors when DB is unavailable and allows JWT-only mode for credentials
+  ...(shouldUseAdapter() ? { adapter: PrismaAdapter(db) } : {}),
   providers: [
     // OAuth Providers - only include if credentials are configured
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
@@ -59,6 +72,13 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) {
           console.warn('Login attempt with missing credentials');
           return null;
+        }
+
+        // Check if database is properly configured before attempting connection
+        const dbUrl = process.env.DATABASE_URL;
+        if (!dbUrl || dbUrl.includes('dummy:dummy') || dbUrl.includes('$$cap_')) {
+          console.error('Database not configured properly. Cannot authenticate.');
+          throw new Error('Database configuration error. Please check DATABASE_URL environment variable.');
         }
 
         let retries = 3;
