@@ -12,7 +12,7 @@ export interface DeviceConfig {
   };
   telemetryInterval: number; // milliseconds
   mqttTopic: string;
-}
+};
 
 export const SAMPLE_DEVICES: DeviceConfig[] = [
   {
