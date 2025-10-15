@@ -114,8 +114,8 @@ Ensure PostgreSQL database is created:
 # Connect to PostgreSQL container
 docker exec -it $(docker ps | grep srv-captain--postgres | awk '{print $1}') sh
 
-# Create database if it doesn't exist
-psql -U damdiyal -c "CREATE DATABASE villagedb;"
+# Create database if it doesn't exist (replace YOUR_DB_USER with your actual username)
+psql -U YOUR_DB_USER -c "CREATE DATABASE villagedb;"
 ```
 
 ### Seeding Fails with "Table does not exist"

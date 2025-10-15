@@ -84,8 +84,8 @@ In CapRover:
 1. Deploy PostgreSQL one-click app
 2. App name: `postgres`
 3. Database: `villagedb`
-4. Username: `damdiyal`
-5. Password: `Damdiyal@975635`
+4. Username: `YOUR_DB_USERNAME` (example: damdiyal)
+5. Password: `YOUR_SECURE_PASSWORD` (use a strong password)
 
 ### Step 2: Create Village Application
 
@@ -99,9 +99,10 @@ Required variables in CapRover → Apps → village → App Configs:
 
 ```bash
 NODE_ENV=production
-NEXTAUTH_URL=https://damdayvillage.com
+NEXTAUTH_URL=https://your-domain.com
 NEXTAUTH_SECRET=[Generate with: openssl rand -base64 32]
-DATABASE_URL=postgresql://damdiyal:Damdiyal%40975635@srv-captain--postgres:5432/villagedb
+DATABASE_URL=postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD@srv-captain--postgres:5432/villagedb
+# Note: Use URL encoding for special characters in password (@ becomes %40, # becomes %23, etc.)
 NEXT_TELEMETRY_DISABLED=1
 GENERATE_SOURCEMAP=false
 CI=true
@@ -130,11 +131,11 @@ caprover deploy
 ### Step 5: Verify Deployment
 
 1. Wait for build to complete (5-10 minutes)
-2. Check health: `curl https://damdayvillage.com/api/health`
-3. Verify admin panel: `https://damdayvillage.com/admin-panel/status`
-4. Login: `https://damdayvillage.com/admin-panel/login`
+2. Check health: `curl https://your-domain.com/api/health`
+3. Verify admin panel: `https://your-domain.com/admin-panel/status`
+4. Login: `https://your-domain.com/admin-panel/login`
    - Email: `admin@damdayvillage.org`
-   - Password: `Admin@123`
+   - Password: `Admin@123` (default - see security note below)
 
 ### Step 6: Post-Deployment
 
@@ -248,19 +249,32 @@ All indicators should be green (✅):
 
 ## 🔐 Default Credentials
 
-**⚠️ CHANGE IMMEDIATELY AFTER FIRST LOGIN!**
+**⚠️ CRITICAL SECURITY WARNING:**
 
-### Admin Account
+The application creates default accounts with well-known credentials during the seeding process. These are **ONLY for initial setup and testing**. 
+
+**YOU MUST CHANGE THESE PASSWORDS IMMEDIATELY AFTER FIRST LOGIN!**
+
+Failure to change these passwords represents a severe security risk.
+
+### Default Admin Account (Created by seed script)
 ```
 Email: admin@damdayvillage.org
 Password: Admin@123
 ```
 
-### Host Account
+### Default Host Account (Created by seed script)
 ```
 Email: host@damdayvillage.org
 Password: Host@123
 ```
+
+**Post-Login Actions Required:**
+1. Login with default credentials
+2. Navigate to profile/settings
+3. Change password to a strong, unique password
+4. Enable two-factor authentication if available
+5. Review and update user permissions
 
 ## 📚 Documentation Reference
 
