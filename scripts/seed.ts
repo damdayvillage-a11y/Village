@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { SAMPLE_DEVICES } from '../lib/device-simulator';
+import { SAMPLE_DEVICES } from '../lib/sample-devices';
 import { hashPassword } from '../lib/auth/password';
 
 const db = new PrismaClient();
