@@ -111,9 +111,10 @@ ISSUES FIXED
 ==========================================
 WARNINGS
 ==========================================
-⚠️  NEXTAUTH_SECRET exposed in ENV (line 21)
-    - This is acceptable for build-time dummy value
-    - Real secret should be set at runtime via CapRover
+⚠️  NEXTAUTH_SECRET exposed in ENV (Dockerfile.simple line 21)
+    - This is acceptable for build-time dummy value only
+    - Real secret MUST be set at runtime via CapRover environment variables
+    - Never commit real secrets to the repository
 
 ==========================================
 RECOMMENDATIONS
@@ -128,9 +129,11 @@ RECOMMENDATIONS
    docker stats
 
 3. Set real environment variables in CapRover:
-   - NEXTAUTH_SECRET (generated with: openssl rand -base64 32)
+   - NEXTAUTH_SECRET (generate securely: openssl rand -base64 32)
+     ⚠️ Store the generated secret safely and never commit it to repository
+     ⚠️ Use CapRover UI to set as environment variable
    - NEXTAUTH_URL (your actual domain)
-   - DATABASE_URL (actual database connection)
+   - DATABASE_URL (actual database connection with secure password)
 
 4. Run database migrations after first deploy:
    docker exec -it <container> npx prisma db push
