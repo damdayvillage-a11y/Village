@@ -6,6 +6,20 @@
 
 ---
 
+## 🆕 नई सुविधा: स्वचालित Admin User बनाना
+
+**अच्छी खबर!** अब application automatically admin और host users बनाती है जब database connected होता है!
+
+- ✅ Admin user automatically create हो जाता है (email: admin@damdayvillage.org, password: Admin@123)
+- ✅ Host user automatically create हो जाता है (email: host@damdayvillage.org, password: Host@123)
+- ✅ कोई SSH commands चलाने की जरूरत नहीं!
+
+बस deploy करें और application अपने आप users create कर देगी।
+
+⚠️ **महत्वपूर्ण:** पहली बार login करने के बाद तुरंत password बदलें!
+
+---
+
 ## 🚀 तुरंत समाधान (सबसे आम समस्याएं)
 
 ### स्टेप 1: पहले System Status देखें
@@ -20,7 +34,7 @@ https://your-domain.com/admin-panel/status
 1. **Environment variables में placeholders हैं** (जैसे `$$cap_appname$$`)
 2. **NEXTAUTH_SECRET set नहीं है या बहुत छोटा है**
 3. **DATABASE_URL सही से configured नहीं है**
-4. **Database में admin user exist नहीं करता**
+4. **Database में admin user exist नहीं करता** (अब automatically fix हो जाता है!)
 
 ---
 
@@ -154,6 +168,10 @@ https://your-domain.com/api/admin/init
 
 अगर यह दिखता है, तो admin user create हो गया! **Phase 4** पर जाएं।
 
+**नोट:** अब यह steps की जरूरत नहीं! Application automatically admin user create कर देती है।
+
+अगर फिर भी manually create करना चाहते हैं:
+
 #### Option B: CapRover Dashboard के माध्यम से
 
 1. CapRover में अपने app पर जाएं
@@ -165,7 +183,7 @@ https://your-domain.com/api/admin/init
    ```
 5. Complete होने का इंतजार करें ("✅ Admin user created" दिखना चाहिए)
 
-#### Option C: SSH के माध्यम से
+#### Option C: SSH के माध्यम से (अब जरूरी नहीं!)
 
 ```bash
 # CapRover server में SSH करें
