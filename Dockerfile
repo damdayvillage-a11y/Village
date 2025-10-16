@@ -92,8 +92,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
-# Copy bcryptjs for startup script (used for auto-creating admin user)
+# Copy bcryptjs and argon2 for password hashing (used for auth and startup script)
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/argon2 ./node_modules/argon2
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@phc ./node_modules/@phc
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/node-addon-api ./node_modules/node-addon-api
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/node-gyp-build ./node_modules/node-gyp-build
 
 # Create scripts directory and copy startup validation scripts
 RUN mkdir -p scripts
