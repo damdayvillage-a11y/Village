@@ -31,6 +31,8 @@ import { Avatar } from '@/lib/components/ui/Avatar';
 import { hasPermission } from '@/lib/auth/rbac';
 import { ContentEditor } from '@/lib/components/admin-panel/ContentEditor';
 import { UserManagement } from '@/lib/components/admin-panel/UserManagement';
+import { BookingManagement } from '@/lib/components/admin-panel/BookingManagement';
+import { ReviewManagement } from '@/lib/components/admin-panel/ReviewManagement';
 
 // Disable static generation for this page as it requires authentication
 export const dynamic = 'force-dynamic';
@@ -377,23 +379,38 @@ export default function AdminPanelPage() {
 
   const handleContentSave = async (blocks: any[]) => {
     try {
-      // TODO: Save to actual API endpoint
-      console.log('Saving content blocks:', blocks);
-      // Mock save delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/admin/content', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ blocks }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save content');
+      }
+
       alert('Content saved successfully!');
     } catch (error) {
       console.error('Failed to save content:', error);
-      alert('Failed to save content');
+      alert('Failed to save content. Please try again.');
     }
   };
 
   const handleUserUpdate = async (userId: string, updates: any) => {
     try {
-      // TODO: Call actual API endpoint
-      console.log('Updating user:', userId, updates);
-      // Mock update delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, updates }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
     } catch (error) {
       console.error('Failed to update user:', error);
       throw error;
@@ -421,20 +438,55 @@ export default function AdminPanelPage() {
         return renderContentEditor();
       case 'users':
         return renderUserManagement();
-      case 'pages':
-        return <div>Page Manager coming soon...</div>;
-      case 'complaints':
-        return <div>Complaints & Reviews management coming soon...</div>;
       case 'bookings':
-        return <div>Booking Management coming soon...</div>;
+        return <BookingManagement />;
+      case 'complaints':
+        return <ReviewManagement />;
+      case 'pages':
+        return (
+          <div className="text-center py-12">
+            <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-700 mb-2">Page Manager</h3>
+            <p className="text-gray-500 mb-4">Manage static pages and content blocks</p>
+            <p className="text-sm text-gray-400">Available in Phase 3</p>
+          </div>
+        );
       case 'marketplace':
-        return <div>Marketplace Admin coming soon...</div>;
+        return (
+          <div className="text-center py-12">
+            <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-700 mb-2">Marketplace Admin</h3>
+            <p className="text-gray-500 mb-4">Manage products, orders, and sellers</p>
+            <p className="text-sm text-gray-400">Available in Phase 4</p>
+          </div>
+        );
       case 'media':
-        return <div>Media Manager coming soon...</div>;
+        return (
+          <div className="text-center py-12">
+            <Camera className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-700 mb-2">Media Manager</h3>
+            <p className="text-gray-500 mb-4">Upload and manage images, videos, and files</p>
+            <p className="text-sm text-gray-400">Available in Phase 5</p>
+          </div>
+        );
       case 'theme':
-        return <div>Theme Customizer coming soon...</div>;
+        return (
+          <div className="text-center py-12">
+            <Palette className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-700 mb-2">Theme Customizer</h3>
+            <p className="text-gray-500 mb-4">Customize colors, fonts, and branding</p>
+            <p className="text-sm text-gray-400">Available in Phase 8</p>
+          </div>
+        );
       case 'system':
-        return <div>System Settings coming soon...</div>;
+        return (
+          <div className="text-center py-12">
+            <Settings className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-700 mb-2">System Settings</h3>
+            <p className="text-gray-500 mb-4">Configure email, payments, and API keys</p>
+            <p className="text-sm text-gray-400">Available in Phase 7</p>
+          </div>
+        );
       default:
         return renderDashboard();
     }
