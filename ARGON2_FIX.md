@@ -23,10 +23,10 @@ The Dockerfile production stage was only copying `bcryptjs` for password hashing
 export async function hashPassword(password: string): Promise<string> {
   try {
     return await argon2.hash(password, {
-      type: argon2.argon2id,
-      memoryCost: 65536,
-      timeCost: 3,
-      parallelism: 4,
+      type: argon2.argon2id,     // Most secure argon2 variant
+      memoryCost: 65536,          // 64 MB memory
+      timeCost: 3,                // 3 iterations
+      parallelism: 4,             // 4 parallel threads
     });
   } catch (error) {
     console.warn('Argon2 hashing failed, falling back to bcryptjs:', error);
@@ -117,6 +117,9 @@ argon2.hash('test').then(h => console.log('Hash:', h.substring(0, 50) + '...'));
 Should output an argon2 hash starting with `$argon2id$v=19$m=...`
 
 3. Test admin login:
+
+**⚠️ Security Warning**: The following command includes a password in plaintext which may be logged in shell history. Use with caution and clear your shell history afterwards (`history -c`) or test via the web interface instead.
+
 ```bash
 curl -v \
   -H "Content-Type: application/x-www-form-urlencoded" \
@@ -126,6 +129,8 @@ curl -v \
 ```
 
 Should return a redirect (302) instead of 500 error.
+
+**Safer alternative**: Test login through the web interface at `https://damdayvillage.com/auth/signin`
 
 ## Background
 - Argon2 is the recommended password hashing algorithm (winner of the Password Hashing Competition)
