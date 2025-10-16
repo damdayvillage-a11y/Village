@@ -43,6 +43,8 @@ import { ContentEditor } from '@/lib/components/admin-panel/ContentEditor';
 import { UserManagement } from '@/lib/components/admin-panel/UserManagement';
 import { BookingManagement } from '@/lib/components/admin-panel/BookingManagement';
 import { ReviewManagement } from '@/lib/components/admin-panel/ReviewManagement';
+import { ProductManagement } from '@/lib/components/admin-panel/ProductManagement';
+import { OrderManagement } from '@/lib/components/admin-panel/OrderManagement';
 import { signOut } from 'next-auth/react';
 
 // Disable static generation for this page as it requires authentication
@@ -505,62 +507,9 @@ export default function AdminPanelPage() {
       case 'complaints':
         return <ReviewManagement />;
       case 'marketplace':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Marketplace Admin</h2>
-              <p className="text-gray-600">Manage products, orders, and sellers</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Products</h3>
-                  <Package className="h-6 w-6 text-purple-500" />
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{adminStats.totalProducts || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">Total products listed</p>
-              </Card>
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Orders</h3>
-                  <ShoppingBag className="h-6 w-6 text-orange-500" />
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{adminStats.pendingOrders || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">Pending orders</p>
-              </Card>
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Revenue</h3>
-                  <DollarSign className="h-6 w-6 text-green-500" />
-                </div>
-                <p className="text-3xl font-bold text-gray-900">₹{adminStats.revenue || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">Total revenue</p>
-              </Card>
-            </div>
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
-              <p className="text-gray-500 text-center py-8">Order management interface coming soon</p>
-            </Card>
-          </div>
-        );
+        return <OrderManagement />;
       case 'products':
-        return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Management</h2>
-                <p className="text-gray-600">Manage marketplace products and inventory</p>
-              </div>
-              <Button className="bg-primary-600 hover:bg-primary-700">
-                <Package className="h-4 w-4 mr-2" />
-                Add Product
-              </Button>
-            </div>
-            <Card className="p-6">
-              <p className="text-gray-500 text-center py-8">Product management interface coming soon</p>
-            </Card>
-          </div>
-        );
+        return <ProductManagement />;
       case 'devices':
         return (
           <div className="space-y-6">
