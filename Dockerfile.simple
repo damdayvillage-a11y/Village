@@ -115,9 +115,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modul
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/tsx ./node_modules/.bin/tsx
 
-# Copy dependencies required by seed.ts (not traced by Next.js standalone)
-# bcryptjs - simple package for password hashing
+# Copy dependencies required by seed.ts and auth (not traced by Next.js standalone)
+# bcryptjs and argon2 - password hashing libraries
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/argon2 ./node_modules/argon2
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@phc ./node_modules/@phc
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/node-addon-api ./node_modules/node-addon-api
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/node-gyp-build ./node_modules/node-gyp-build
 
 # Copy scripts directory for runtime operations (seeding, validation, etc.)
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
