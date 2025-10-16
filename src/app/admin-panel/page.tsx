@@ -22,7 +22,17 @@ import {
   Globe,
   Activity,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  LogOut,
+  ChevronRight,
+  Bell,
+  Search,
+  Menu,
+  X,
+  Package,
+  Cpu,
+  TrendingUp,
+  DollarSign
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
@@ -33,6 +43,7 @@ import { ContentEditor } from '@/lib/components/admin-panel/ContentEditor';
 import { UserManagement } from '@/lib/components/admin-panel/UserManagement';
 import { BookingManagement } from '@/lib/components/admin-panel/BookingManagement';
 import { ReviewManagement } from '@/lib/components/admin-panel/ReviewManagement';
+import { signOut } from 'next-auth/react';
 
 // Disable static generation for this page as it requires authentication
 export const dynamic = 'force-dynamic';
@@ -44,6 +55,10 @@ interface AdminStats {
   systemHealth: 'healthy' | 'warning' | 'error';
   complaints: number;
   articles: number;
+  revenue?: number;
+  totalProducts?: number;
+  pendingOrders?: number;
+  onlineDevices?: number;
 }
 
 export default function AdminPanelPage() {
@@ -52,6 +67,7 @@ export default function AdminPanelPage() {
   const status = sessionResult?.status || 'loading';
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [adminStats, setAdminStats] = useState<AdminStats>({
     totalUsers: 0,
     activeBookings: 0,
@@ -150,16 +166,19 @@ export default function AdminPanelPage() {
   }
 
   const sidebarItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'users', label: 'User Management', icon: Users },
-    { id: 'content', label: 'Content Editor', icon: Edit3 },
-    { id: 'pages', label: 'Page Manager', icon: FileText },
-    { id: 'complaints', label: 'Complaints & Reviews', icon: MessageSquare },
-    { id: 'bookings', label: 'Booking Management', icon: Calendar },
-    { id: 'marketplace', label: 'Marketplace Admin', icon: ShoppingBag },
-    { id: 'media', label: 'Media Manager', icon: Camera },
-    { id: 'theme', label: 'Theme Customizer', icon: Palette },
-    { id: 'system', label: 'System Settings', icon: Settings }
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, section: 'main' },
+    { id: 'users', label: 'User Management', icon: Users, section: 'main' },
+    { id: 'bookings', label: 'Booking Management', icon: Calendar, section: 'operations' },
+    { id: 'complaints', label: 'Reviews & Complaints', icon: MessageSquare, section: 'operations' },
+    { id: 'marketplace', label: 'Marketplace Admin', icon: ShoppingBag, section: 'commerce' },
+    { id: 'products', label: 'Product Management', icon: Package, section: 'commerce' },
+    { id: 'content', label: 'Content Editor', icon: Edit3, section: 'content' },
+    { id: 'pages', label: 'Page Manager', icon: FileText, section: 'content' },
+    { id: 'media', label: 'Media Manager', icon: Camera, section: 'content' },
+    { id: 'devices', label: 'IoT Devices', icon: Cpu, section: 'monitoring' },
+    { id: 'analytics', label: 'Analytics', icon: TrendingUp, section: 'monitoring' },
+    { id: 'theme', label: 'Theme Customizer', icon: Palette, section: 'settings' },
+    { id: 'system', label: 'System Settings', icon: Settings, section: 'settings' }
   ];
 
   const renderDashboard = () => (
@@ -196,7 +215,7 @@ export default function AdminPanelPage() {
 
       {/* Admin Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
+        <Card className="p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Users className="h-6 w-6 text-blue-600" />
@@ -208,7 +227,7 @@ export default function AdminPanelPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
               <Calendar className="h-6 w-6 text-green-600" />
@@ -220,19 +239,19 @@ export default function AdminPanelPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <MessageSquare className="h-6 w-6 text-yellow-600" />
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <DollarSign className="h-6 w-6 text-purple-600" />
             </div>
             <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Pending Reviews</h3>
-              <p className="text-2xl font-semibold text-gray-900">{adminStats.pendingReviews}</p>
+              <h3 className="text-sm font-medium text-gray-500">Revenue</h3>
+              <p className="text-2xl font-semibold text-gray-900">₹{adminStats.revenue || 0}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center">
             <div className={`p-2 rounded-lg ${
               adminStats.systemHealth === 'healthy' ? 'bg-green-100' :
@@ -249,6 +268,49 @@ export default function AdminPanelPage() {
               <h3 className="text-sm font-medium text-gray-500">System Health</h3>
               <p className="text-lg font-semibold text-gray-900 capitalize">{adminStats.systemHealth}</p>
             </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Additional Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-500">Products</p>
+              <p className="text-xl font-bold text-gray-900">{adminStats.totalProducts || 0}</p>
+            </div>
+            <Package className="h-8 w-8 text-purple-500" />
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-500">Pending Orders</p>
+              <p className="text-xl font-bold text-gray-900">{adminStats.pendingOrders || 0}</p>
+            </div>
+            <ShoppingBag className="h-8 w-8 text-orange-500" />
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-500">Pending Reviews</p>
+              <p className="text-xl font-bold text-gray-900">{adminStats.pendingReviews}</p>
+            </div>
+            <MessageSquare className="h-8 w-8 text-yellow-500" />
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-500">Online Devices</p>
+              <p className="text-xl font-bold text-gray-900">{adminStats.onlineDevices || 0}</p>
+            </div>
+            <Cpu className="h-8 w-8 text-blue-500" />
           </div>
         </Card>
       </div>
@@ -442,6 +504,129 @@ export default function AdminPanelPage() {
         return <BookingManagement />;
       case 'complaints':
         return <ReviewManagement />;
+      case 'marketplace':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Marketplace Admin</h2>
+              <p className="text-gray-600">Manage products, orders, and sellers</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Products</h3>
+                  <Package className="h-6 w-6 text-purple-500" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{adminStats.totalProducts || 0}</p>
+                <p className="text-sm text-gray-500 mt-2">Total products listed</p>
+              </Card>
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Orders</h3>
+                  <ShoppingBag className="h-6 w-6 text-orange-500" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{adminStats.pendingOrders || 0}</p>
+                <p className="text-sm text-gray-500 mt-2">Pending orders</p>
+              </Card>
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Revenue</h3>
+                  <DollarSign className="h-6 w-6 text-green-500" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900">₹{adminStats.revenue || 0}</p>
+                <p className="text-sm text-gray-500 mt-2">Total revenue</p>
+              </Card>
+            </div>
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
+              <p className="text-gray-500 text-center py-8">Order management interface coming soon</p>
+            </Card>
+          </div>
+        );
+      case 'products':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Management</h2>
+                <p className="text-gray-600">Manage marketplace products and inventory</p>
+              </div>
+              <Button className="bg-primary-600 hover:bg-primary-700">
+                <Package className="h-4 w-4 mr-2" />
+                Add Product
+              </Button>
+            </div>
+            <Card className="p-6">
+              <p className="text-gray-500 text-center py-8">Product management interface coming soon</p>
+            </Card>
+          </div>
+        );
+      case 'devices':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">IoT Device Management</h2>
+              <p className="text-gray-600">Monitor and manage village IoT devices</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Online</h3>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{adminStats.onlineDevices || 0}</p>
+                <p className="text-sm text-gray-500 mt-2">Devices currently online</p>
+              </Card>
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Health</h3>
+                  <Activity className={`h-6 w-6 ${
+                    adminStats.systemHealth === 'healthy' ? 'text-green-500' :
+                    adminStats.systemHealth === 'warning' ? 'text-yellow-500' :
+                    'text-red-500'
+                  }`} />
+                </div>
+                <p className="text-2xl font-bold text-gray-900 capitalize">{adminStats.systemHealth}</p>
+                <p className="text-sm text-gray-500 mt-2">Overall system status</p>
+              </Card>
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Alerts</h3>
+                  <Bell className="h-6 w-6 text-red-500" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900">0</p>
+                <p className="text-sm text-gray-500 mt-2">Active alerts</p>
+              </Card>
+            </div>
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Device List</h3>
+              <p className="text-gray-500 text-center py-8">Device monitoring interface coming soon</p>
+            </Card>
+          </div>
+        );
+      case 'analytics':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Analytics Dashboard</h2>
+              <p className="text-gray-600">Track performance metrics and trends</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">User Growth</h3>
+                <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
+                  <p className="text-gray-400">Chart coming soon</p>
+                </div>
+              </Card>
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Revenue Trends</h3>
+                <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
+                  <p className="text-gray-400">Chart coming soon</p>
+                </div>
+              </Card>
+            </div>
+          </div>
+        );
       case 'pages':
         return (
           <div className="text-center py-12">
@@ -449,15 +634,6 @@ export default function AdminPanelPage() {
             <h3 className="text-lg font-medium text-gray-700 mb-2">Page Manager</h3>
             <p className="text-gray-500 mb-4">Manage static pages and content blocks</p>
             <p className="text-sm text-gray-400">Available in Phase 3</p>
-          </div>
-        );
-      case 'marketplace':
-        return (
-          <div className="text-center py-12">
-            <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Marketplace Admin</h3>
-            <p className="text-gray-500 mb-4">Manage products, orders, and sellers</p>
-            <p className="text-sm text-gray-400">Available in Phase 4</p>
           </div>
         );
       case 'media':
@@ -494,38 +670,138 @@ export default function AdminPanelPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Professional Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo and Title */}
+            <div className="flex items-center">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 mr-2"
+              >
+                {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+              <Shield className="h-8 w-8 text-primary-600 mr-3" />
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+                <p className="text-xs text-gray-500">Damday Village</p>
+              </div>
+            </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <div className="w-64 flex-shrink-0">
-            <nav className="space-y-1">
-              {sidebarItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      activeTab === item.id
-                        ? 'bg-primary-100 text-primary-700'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5 mr-3" />
-                    {item.label}
-                  </button>
-                );
-              })}
+            {/* Right side - User menu and logout */}
+            <div className="flex items-center space-x-4">
+              {/* Notifications */}
+              <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-full relative">
+                <Bell className="h-5 w-5" />
+                {adminStats.pendingReviews > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
+              </button>
+
+              {/* User Profile */}
+              <div className="flex items-center space-x-3 border-l border-gray-200 pl-4">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
+                  <p className="text-xs text-gray-500">{session?.user?.role}</p>
+                </div>
+                <Avatar className="h-10 w-10 bg-primary-100 text-primary-700 font-semibold">
+                  {session?.user?.name?.charAt(0) || 'A'}
+                </Avatar>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/admin-panel/login' })}
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                  title="Logout"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex">
+        {/* Enhanced Sidebar */}
+        <aside className={`
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+          fixed lg:sticky top-16 left-0 z-40
+          w-64 h-[calc(100vh-4rem)]
+          bg-white border-r border-gray-200
+          transition-transform duration-300 ease-in-out
+          overflow-y-auto
+        `}>
+          <nav className="p-4 space-y-6">
+            {/* Group sections */}
+            {[
+              { title: 'Main', items: sidebarItems.filter(i => i.section === 'main') },
+              { title: 'Operations', items: sidebarItems.filter(i => i.section === 'operations') },
+              { title: 'Commerce', items: sidebarItems.filter(i => i.section === 'commerce') },
+              { title: 'Content', items: sidebarItems.filter(i => i.section === 'content') },
+              { title: 'Monitoring', items: sidebarItems.filter(i => i.section === 'monitoring') },
+              { title: 'Settings', items: sidebarItems.filter(i => i.section === 'settings') },
+            ].map((group) => (
+              <div key={group.title}>
+                <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  {group.title}
+                </h3>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setActiveTab(item.id);
+                          if (window.innerWidth < 1024) setSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                          activeTab === item.id
+                            ? 'bg-primary-100 text-primary-700'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                        }`}
+                      >
+                        <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                        {activeTab === item.id && (
+                          <ChevronRight className="h-4 w-4 ml-auto" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 p-6 lg:p-8 overflow-auto">
+          {/* Breadcrumb */}
+          <div className="mb-6">
+            <nav className="flex items-center text-sm text-gray-500">
+              <Home className="h-4 w-4 mr-2" />
+              <span>Admin</span>
+              <ChevronRight className="h-4 w-4 mx-2" />
+              <span className="text-gray-900 font-medium">
+                {sidebarItems.find(i => i.id === activeTab)?.label || 'Dashboard'}
+              </span>
             </nav>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {renderContent()}
-          </div>
-        </div>
+          {/* Content */}
+          {renderContent()}
+        </main>
       </div>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
     </div>
   );
 }
