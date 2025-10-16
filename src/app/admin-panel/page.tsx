@@ -21,7 +21,8 @@ import {
   Camera,
   Globe,
   Activity,
-  AlertTriangle
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
@@ -59,6 +60,10 @@ export default function AdminPanelPage() {
   });
   const [loading, setLoading] = useState(true);
   const [statsError, setStatsError] = useState<string | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [refreshInterval, setRefreshInterval] = useState(30000); // 30 seconds
+  const [activities, setActivities] = useState<any[]>([]);
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -75,8 +80,21 @@ export default function AdminPanelPage() {
       }
       
       loadAdminData();
+      loadActivities();
     }
   }, [status, router, session]);
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!autoRefresh) return;
+    
+    const interval = setInterval(() => {
+      loadAdminData();
+      loadActivities();
+    }, refreshInterval);
+    
+    return () => clearInterval(interval);
+  }, [autoRefresh, refreshInterval]);
 
   const loadAdminData = async () => {
     try {
@@ -86,6 +104,7 @@ export default function AdminPanelPage() {
       if (statsResponse.ok) {
         const stats = await statsResponse.json();
         setAdminStats(stats);
+        setLastRefreshTime(new Date());
       } else {
         const errorData = await statsResponse.json().catch(() => ({}));
         const errorMsg = errorData.details || errorData.error || 'Failed to load statistics';
@@ -98,6 +117,18 @@ export default function AdminPanelPage() {
       console.error('Failed to load admin data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadActivities = async () => {
+    try {
+      const response = await fetch('/api/admin/activity');
+      if (response.ok) {
+        const data = await response.json();
+        setActivities(data.activities);
+      }
+    } catch (error) {
+      console.error('Failed to load activities:', error);
     }
   };
 
@@ -266,30 +297,77 @@ export default function AdminPanelPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Activity</CardTitle>
+              <div className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={autoRefresh}
+                    onChange={(e) => setAutoRefresh(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span>Auto-refresh</span>
+                </label>
+                <select
+                  value={refreshInterval}
+                  onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                  disabled={!autoRefresh}
+                  className="text-xs px-2 py-1 border rounded"
+                >
+                  <option value={10000}>10s</option>
+                  <option value={30000}>30s</option>
+                  <option value={60000}>1m</option>
+                  <option value={300000}>5m</option>
+                </select>
+                <button
+                  onClick={() => {
+                    loadAdminData();
+                    loadActivities();
+                  }}
+                  className="p-1 hover:bg-gray-100 rounded"
+                  title="Refresh now"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Last updated: {lastRefreshTime.toLocaleTimeString()}
+            </p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">New user registration</span>
-                <span className="text-xs text-gray-400">2 min ago</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">Booking confirmed</span>
-                <span className="text-xs text-gray-400">15 min ago</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">New complaint submitted</span>
-                <span className="text-xs text-gray-400">1 hour ago</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">Article published</span>
-                <span className="text-xs text-gray-400">3 hours ago</span>
-              </div>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {activities.length > 0 ? (
+                activities.map((activity, index) => {
+                  const colorMap: Record<string, string> = {
+                    green: 'bg-green-500',
+                    blue: 'bg-blue-500',
+                    yellow: 'bg-yellow-500',
+                    purple: 'bg-purple-500',
+                    red: 'bg-red-500',
+                  };
+                  
+                  const bgColor = colorMap[activity.color] || 'bg-gray-500';
+                  
+                  return (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${bgColor}`}></div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-gray-600 block truncate">{activity.message}</span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(activity.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 text-gray-400">
+                  <Activity className="h-8 w-8 mx-auto mb-2" />
+                  <p className="text-sm">No recent activity</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
