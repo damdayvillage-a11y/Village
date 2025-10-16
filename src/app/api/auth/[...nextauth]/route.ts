@@ -5,7 +5,10 @@ import { authOptions } from '../../../../../lib/auth/config';
 const handler = NextAuth(authOptions);
 
 // Wrap the handler with error handling
-async function wrappedHandler(req: NextRequest) {
+async function wrappedHandler(
+  req: NextRequest,
+  context: { params: Promise<{ nextauth: string[] }> }
+) {
   try {
     // Pre-flight validation to catch configuration errors early
     // This prevents 500 errors from NextAuth initialization
@@ -30,7 +33,7 @@ async function wrappedHandler(req: NextRequest) {
       throw new Error('NEXTAUTH_SECRET contains unreplaced CapRover placeholders ($$cap_*$$). Please replace with a secure secret.');
     }
     
-    return await handler(req as any);
+    return await handler(req, context);
   } catch (error) {
     console.error('NextAuth handler error:', error);
     
