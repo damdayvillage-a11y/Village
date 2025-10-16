@@ -705,9 +705,10 @@ export default function AdminPanelPage() {
                   <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
                   <p className="text-xs text-gray-500">{session?.user?.role}</p>
                 </div>
-                <Avatar className="h-10 w-10 bg-primary-100 text-primary-700 font-semibold">
-                  {session?.user?.name?.charAt(0) || 'A'}
-                </Avatar>
+                <Avatar 
+                  initials={session?.user?.name?.charAt(0) || 'A'}
+                  className="h-10 w-10 bg-primary-100 text-primary-700 font-semibold"
+                />
                 <button
                   onClick={() => signOut({ callbackUrl: '/admin-panel/login' })}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-md"

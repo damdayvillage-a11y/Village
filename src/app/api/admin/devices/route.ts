@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
-import { UserRole } from '@prisma/client';
+import { UserRole, DeviceStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,12 +19,15 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+    const statusParam = searchParams.get('status');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
 
-    const where = status ? { status } : {};
+    const where: any = {};
+    if (statusParam && Object.values(DeviceStatus).includes(statusParam as DeviceStatus)) {
+      where.status = statusParam as DeviceStatus;
+    }
 
     const [devices, total, onlineCount, offlineCount] = await Promise.all([
       prisma.device.findMany({
@@ -85,11 +88,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, type, location, apiKey } = body;
+    const { name, type, location, villageId } = body;
 
-    if (!name || !type) {
+    if (!name || !type || !villageId) {
       return NextResponse.json(
-        { error: 'Missing required fields: name, type' },
+        { error: 'Missing required fields: name, type, villageId' },
         { status: 400 }
       );
     }
@@ -98,8 +101,8 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         type,
+        villageId,
         location: location || '',
-        apiKey: apiKey || `device_${Date.now()}`,
         status: 'OFFLINE',
         lastSeen: new Date(),
       },
