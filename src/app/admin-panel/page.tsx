@@ -48,6 +48,7 @@ import { OrderManagement } from '@/lib/components/admin-panel/OrderManagement';
 import { MediaManager } from '@/lib/components/admin-panel/MediaManager';
 import SystemSettings from '@/lib/components/admin-panel/SystemSettings';
 import IoTDeviceManagement from '@/lib/components/admin-panel/IoTDeviceManagement';
+import AnalyticsDashboard from '@/lib/components/admin-panel/AnalyticsDashboard';
 import { signOut } from 'next-auth/react';
 
 // Disable static generation for this page as it requires authentication
@@ -516,28 +517,7 @@ export default function AdminPanelPage() {
       case 'devices':
         return <IoTDeviceManagement />;
       case 'analytics':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Analytics Dashboard</h2>
-              <p className="text-gray-600">Track performance metrics and trends</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">User Growth</h3>
-                <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
-                  <p className="text-gray-400">Chart coming soon</p>
-                </div>
-              </Card>
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Revenue Trends</h3>
-                <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
-                  <p className="text-gray-400">Chart coming soon</p>
-                </div>
-              </Card>
-            </div>
-          </div>
-        );
+        return <AnalyticsDashboard />;
       case 'pages':
         return (
           <div className="text-center py-12">
