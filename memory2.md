@@ -2,7 +2,8 @@
 
 **Last Updated**: 2025-10-17  
 **Purpose**: Comprehensive tracking file for all PRs, components, features, implementations, and project architecture  
-**Status**: Living document - Updated with each PR
+**Status**: Living document - Updated with each PR  
+**Vision**: Production-ready smart village platform with blockchain carbon credits achieving 25,000 trees in 5 years
 
 ---
 
@@ -869,6 +870,325 @@ All 10 phases of admin panel implementation completed. Total progress: Phases 1-
 - `src/app/marketplace/page.tsx` - Added SEO notes
 
 **Documentation**: See `docs/md-files/PR12_ANALYSIS_AND_NEXT_STEPS.md`
+
+---
+
+### 🚀 PR #13-21 - Future Roadmap (Production-Ready Platform)
+
+**Vision**: Transform Damday Village into a WordPress-like smart village platform with blockchain carbon credits
+
+**Master Goal**: 25,000 trees in 5 years → Sustainable, self-sufficient village
+
+---
+
+#### PR #13 - Admin Control Center Enhancement
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: Make admin panel as easy as WordPress
+
+**Features**:
+- Settings Manager (feature on/off toggles)
+- Logo & Branding Manager (live preview)
+- Header/Footer/Sidebar Visual Editor
+- Media Drive Integration (Google Drive/S3)
+- Theme Customizer (real-time preview)
+- API Key Manager (with validation)
+- Page Builder (drag-drop sections)
+- SEO Controls (per-page meta tags)
+
+**Admin Control**: Toggle any feature on/off, validate API keys before enabling
+
+**Implementation**:
+- Settings table with JSON configuration
+- WebSocket for real-time updates
+- Visual editors with preview
+- Secure key storage (vault)
+
+**Outcome**: Non-technical admin manages entire site
+
+---
+
+#### PR #14 - Media Management & Drive Integration
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: Centralized media library with cloud storage
+
+**Features**:
+- Media Library (grid, search, tags, folders)
+- Google Drive Auto-sync
+- Image Optimization (resize, compress, WebP)
+- Gallery Builder
+- Video Embedding (YouTube, Vimeo)
+- Usage Tracking
+- Bulk Operations
+
+**Architecture**: Upload → Optimize → Cloud → CDN → Frontend
+
+**Implementation**:
+- Google Drive API
+- Sharp for image processing
+- CloudFront/Cloudflare CDN
+- Media references in database
+
+**Outcome**: Unlimited storage, fast delivery
+
+---
+
+#### PR #15 - Village Tours & Experiences Module
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: Complete tour booking system
+
+**Features**:
+- Tour Management (itineraries, pricing, availability)
+- Guide Profiles (registration, verification)
+- Tour Calendar (visual booking slots)
+- Multi-day Tours (day-by-day itineraries)
+- Group Bookings (special pricing)
+- Tour Reviews & Ratings
+- Equipment Rental
+- Tour Galleries
+
+**Admin Control**: Enable/disable tours, set capacity, approve guides
+
+**Implementation**:
+- Tour model with JSON itinerary
+- Guide verification system
+- Availability calendar
+- Conflict prevention
+
+**Outcome**: Complete tour ecosystem
+
+---
+
+#### PR #16 - Community Blog & Content Management
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: WordPress-like blog for village stories
+
+**Features**:
+- Rich Text Editor (CKEditor/TinyMCE)
+- Blog Categories
+- Author Management
+- SEO Auto-optimization
+- Comments System (moderated)
+- Social Sharing
+- Newsletter Integration
+- Related Posts (AI-powered)
+
+**Admin Control**: Moderate content, schedule posts, featured posts
+
+**Implementation**:
+- Post model with rich content
+- Comment moderation workflow
+- Email newsletter system
+- RSS feed generation
+
+**Outcome**: Engaging content platform
+
+---
+
+#### PR #17 - Community Projects & Volunteering
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: Showcase projects, accept volunteers
+
+**Features**:
+- Project Showcase (tree plantation, schools, roads)
+- Volunteer Registration
+- Donation Integration (Razorpay/Stripe)
+- Progress Tracking (photos, videos, milestones)
+- Impact Dashboard
+- Volunteer Profiles
+- Project Timeline
+- Social Proof (donor names)
+
+**Admin Control**: Create projects, approve volunteers, send updates
+
+**Implementation**:
+- Project model with milestones
+- Volunteer workflow
+- Payment gateway
+- Email notifications
+
+**Outcome**: Transparent community development
+
+---
+
+#### PR #18 - Blockchain Carbon Credit System (Phase 1)
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: Issue NFT-based carbon credits
+
+**Features**:
+- Tree Registration (GPS coordinates)
+- NFT Minting (Polygon/Solana - low gas)
+- Carbon Calculation (CO2 offset by species)
+- Certificate Generation (PDF with blockchain proof)
+- Public Ledger (blockchain explorer)
+- QR Code per Tree
+- Wallet Integration (MetaMask)
+- Tree Adoption (recurring payments)
+
+**Admin Control**: Register trees, set CO2 parameters, manage adoptions
+
+**Implementation**:
+- Smart contract (ERC-721 on Polygon)
+- Web3.js/ethers.js
+- IPFS for metadata
+- Automated minting workflow
+
+**Blockchain**: Polygon Mumbai (testnet) → Mainnet
+
+**Outcome**: Transparent, verifiable carbon credits
+
+---
+
+#### PR #19 - Carbon Credit Marketplace (Phase 2)
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: Buy/sell/trade carbon credits
+
+**Features**:
+- Credit Marketplace (list for sale)
+- Trading Platform (peer-to-peer)
+- Corporate Partnerships (bulk purchases)
+- Credit Retirement (burn to claim offset)
+- Price Discovery (market-driven charts)
+- Escrow System (smart contract)
+- Impact Reports (PDF for CSR)
+- Business API (corporate integration)
+
+**Admin Control**: Set price limits, approve partnerships, monitor transactions
+
+**Implementation**:
+- Marketplace smart contract (ERC-721 trading)
+- Escrow mechanism
+- Price history tracking
+- External API endpoints
+
+**Outcome**: Revenue stream for sustainability
+
+---
+
+#### PR #20 - Offline/Low-Connectivity Features
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: PWA with offline support
+
+**Features**:
+- Progressive Web App (installable)
+- Offline Mode (cached content)
+- Service Workers (background sync)
+- Queue System (offline bookings/orders)
+- SMS Fallbacks (critical notifications)
+- Lightweight Mode (low-bandwidth)
+- Push Notifications
+- Offline GPS
+
+**Admin Control**: Configure sync intervals, SMS gateway, cached duration
+
+**Implementation**:
+- Service worker (offline-first)
+- IndexedDB storage
+- Background sync API
+- SMS gateway (Twilio/MSG91)
+
+**Outcome**: Reliable despite poor connectivity
+
+---
+
+#### PR #21 - Advanced Analytics & Business Intelligence
+**Status**: Planned  
+**Progress**: 0%  
+**Goal**: Comprehensive dashboards
+
+**Features**:
+- Revenue Dashboard (by source)
+- Visitor Analytics (traffic, behavior)
+- Booking Insights (peak seasons, cancellations)
+- Carbon Impact (trees, CO2, credits)
+- Community Metrics (volunteers, projects)
+- Predictive Analytics (ML forecasts)
+- Custom Reports (PDF)
+- Goal Tracking (25k trees progress)
+
+**Admin Control**: Enable modules, schedule reports, set KPI alerts
+
+**Implementation**:
+- Real-time aggregation
+- TimescaleDB for time-series
+- Python ML microservice
+- Chart.js/D3.js visualizations
+
+**Outcome**: Data-driven decision making
+
+---
+
+### 🎯 5-Year Success Metrics
+
+**Environmental**:
+- 25,000 trees planted (5,000/year)
+- 500 tons CO2 offset annually
+- 100% renewable energy village
+
+**Economic**:
+- ₹50 lakh annual tourism revenue
+- ₹20 lakh carbon credit sales
+- 100+ employment opportunities
+
+**Community**:
+- 500+ active volunteers
+- 50+ projects completed
+- 10,000+ monthly visitors
+
+**Technical**:
+- 99.9% uptime
+- <2s page loads
+- 100% mobile-friendly
+
+---
+
+### 📅 Implementation Timeline
+
+**Phase 1 (Months 1-2)**: PR13, PR14  
+**Phase 2 (Months 3-4)**: PR15, PR16  
+**Phase 3 (Months 5-6)**: PR17, PR18  
+**Phase 4 (Months 7-8)**: PR19, PR20  
+**Phase 5 (Month 9)**: PR21
+
+**Total Duration**: 9 months to production-ready
+
+---
+
+### 🏗️ Technical Architecture (PR13-21)
+
+**New Database Tables** (9):
+- Settings (feature_flags, api_keys, theme_config)
+- MediaFiles (url, tags, folder, drive_sync)
+- Tours (itinerary_json, guide_id, capacity)
+- Guides (profile, verification_status, ratings)
+- BlogPosts (rich_content, author_id, categories)
+- Projects (milestones_json, volunteers, donations)
+- CarbonCredits (tree_id, nft_address, co2_offset)
+- TreeRegistry (gps_coords, species, planting_date)
+- CreditTransactions (sale_id, escrow_status)
+
+**New API Endpoints** (60+):
+- Admin: /api/admin/settings, /media, /tours, /blog, /carbon
+- Public: /api/public/tours, /blog, /projects, /carbon-marketplace
+
+**Blockchain Components**:
+- TreeNFT.sol (ERC-721 for ownership)
+- CarbonMarketplace.sol (trading)
+- Escrow.sol (secure transactions)
+- Deployment: Polygon Mainnet
+
+**Infrastructure Additions**:
+- Redis (caching, real-time)
+- RabbitMQ (job queue)
+- Python Microservice (ML, image processing)
+- IPFS Node (decentralized storage)
 
 ---
 
