@@ -49,8 +49,9 @@ interface Notification {
   title: string;
   message: string;
   type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'BOOKING' | 'ORDER' | 'ACHIEVEMENT' | 'SYSTEM';
-  timestamp: string;
   read: boolean;
+  actionUrl?: string;
+  createdAt: string;
 }
 
 interface Article {

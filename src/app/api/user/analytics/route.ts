@@ -54,17 +54,17 @@ export async function GET(request: NextRequest) {
 
     // Get spending stats (from orders)
     const orders = await prisma.order.findMany({
-      where: { userId: user.id },
-      select: { totalAmount: true, createdAt: true }
+      where: { customerId: user.id },
+      select: { total: true, createdAt: true }
     });
 
-    const totalSpending = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const totalSpending = orders.reduce((sum, order) => sum + order.total, 0);
     const thisMonthSpending = orders
       .filter(order => order.createdAt >= thisMonthStart)
-      .reduce((sum, order) => sum + order.totalAmount, 0);
+      .reduce((sum, order) => sum + order.total, 0);
     const lastMonthSpending = orders
       .filter(order => order.createdAt >= lastMonthStart && order.createdAt <= lastMonthEnd)
-      .reduce((sum, order) => sum + order.totalAmount, 0);
+      .reduce((sum, order) => sum + order.total, 0);
 
     // Get carbon credit stats
     const carbonCredit = await prisma.carbonCredit.findUnique({
@@ -89,15 +89,11 @@ export async function GET(request: NextRequest) {
       .reduce((sum, t) => sum + t.amount, 0);
 
     // Get activity stats (total actions)
-    const totalArticles = await prisma.article.count({
-      where: { authorId: user.id }
-    });
-
     const totalReviews = await prisma.review.count({
       where: { userId: user.id }
     });
 
-    const totalActions = totalBookings + orders.length + totalArticles + totalReviews;
+    const totalActions = totalBookings + orders.length + totalReviews;
     const thisMonthActions = thisMonthBookings + 
       orders.filter(o => o.createdAt >= thisMonthStart).length;
 
