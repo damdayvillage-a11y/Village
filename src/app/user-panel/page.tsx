@@ -31,6 +31,7 @@ import { ArticleEditor } from '@/lib/components/user-panel/ArticleEditor';
 import { EnhancedDashboard } from '@/lib/components/user-panel/EnhancedDashboard';
 import { ProfileManagement } from '@/lib/components/user-panel/ProfileManagement';
 import { BookingManagement } from '@/lib/components/user-panel/BookingManagement';
+import { CarbonCreditWallet } from '@/lib/components/user-panel/CarbonCreditWallet';
 
 interface UserStats {
   bookings: number;
@@ -119,6 +120,8 @@ export default function UserPanelPage() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [carbonCredits, setCarbonCredits] = useState<any>(null);
+  const [carbonTransactions, setCarbonTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -174,6 +177,20 @@ export default function UserPanelPage() {
       if (bookingsResponse.ok) {
         const userBookings = await bookingsResponse.json();
         setBookings(userBookings);
+      }
+
+      // Load carbon credits
+      const carbonCreditsResponse = await fetch('/api/user/carbon-credits');
+      if (carbonCreditsResponse.ok) {
+        const credits = await carbonCreditsResponse.json();
+        setCarbonCredits(credits);
+      }
+
+      // Load carbon transactions
+      const carbonTransactionsResponse = await fetch('/api/user/carbon-credits/transactions');
+      if (carbonTransactionsResponse.ok) {
+        const transactions = await carbonTransactionsResponse.json();
+        setCarbonTransactions(transactions);
       }
     } catch (error) {
       console.error('Failed to load user data:', error);
@@ -338,7 +355,102 @@ export default function UserPanelPage() {
     // TODO: Implement reschedule modal
     console.log('Reschedule booking:', bookingId);
   };
+
+  const handleEarnCredits = async (opportunityId: string) => {
+    // In a real implementation, this would fetch the opportunity details
+    // For now, we'll simulate earning credits
+    try {
+      const response = await fetch('/api/user/carbon-credits', {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: 10, // Default amount
+          reason: `Completed opportunity ${opportunityId}`,
+          type: 'EARN',
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh carbon credits and transactions
+        const [creditsResponse, transactionsResponse] = await Promise.all([
+          fetch('/api/user/carbon-credits'),
+          fetch('/api/user/carbon-credits/transactions'),
+        ]);
+
+        if (creditsResponse.ok) {
+          const credits = await creditsResponse.json();
+          setCarbonCredits(credits);
+        }
+
+        if (transactionsResponse.ok) {
+          const transactions = await transactionsResponse.json();
+          setCarbonTransactions(transactions);
+        }
+
+        // Refresh stats
+        const statsResponse = await fetch('/api/user/stats');
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json();
+          setUserStats(stats);
+        }
+      } else {
+        throw new Error('Failed to earn credits');
+      }
+    } catch (error) {
+      console.error('Failed to earn credits:', error);
+      throw error;
+    }
+  };
+
+  const handleSpendCredits = async (amount: number, reason: string) => {
+    try {
+      const response = await fetch('/api/user/carbon-credits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount,
+          reason,
+          type: 'SPEND',
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh carbon credits and transactions
+        const [creditsResponse, transactionsResponse] = await Promise.all([
+          fetch('/api/user/carbon-credits'),
+          fetch('/api/user/carbon-credits/transactions'),
+        ]);
+
+        if (creditsResponse.ok) {
+          const credits = await creditsResponse.json();
+          setCarbonCredits(credits);
+        }
+
+        if (transactionsResponse.ok) {
+          const transactions = await transactionsResponse.json();
+          setCarbonTransactions(transactions);
+        }
+
+        // Refresh stats
+        const statsResponse = await fetch('/api/user/stats');
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json();
+          setUserStats(stats);
+        }
+      } else {
+        throw new Error('Failed to spend credits');
+      }
+    } catch (error) {
+      console.error('Failed to spend credits:', error);
+      throw error;
+    }
+  };
+
+  if (status === 'loading' || loading) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
@@ -424,7 +536,18 @@ export default function UserPanelPage() {
       case 'orders':
         return <div>Orders content coming soon...</div>;
       case 'carbon':
-        return <div>Carbon Credits content coming soon...</div>;
+        if (!carbonCredits) {
+          return <div>Loading carbon credits...</div>;
+        }
+        return (
+          <CarbonCreditWallet
+            creditBalance={carbonCredits}
+            transactions={carbonTransactions}
+            earningOpportunities={[]}
+            onEarnCredits={handleEarnCredits}
+            onSpendCredits={handleSpendCredits}
+          />
+        );
       case 'articles':
         return (
           <ArticleEditor
