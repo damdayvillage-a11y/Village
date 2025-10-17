@@ -46,6 +46,17 @@ export function ProductManagement() {
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: 'honey',
+    stock: '',
+    images: [] as string[],
+    isActive: true,
+  });
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -123,6 +134,93 @@ export function ProductManagement() {
     }
   };
 
+  const openAddModal = () => {
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      category: 'honey',
+      stock: '',
+      images: [],
+      isActive: true,
+    });
+    setEditingProduct(null);
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (product: Product) => {
+    setFormData({
+      name: product.name,
+      description: product.description,
+      price: product.price.toString(),
+      category: product.category,
+      stock: product.stock.toString(),
+      images: product.images || [],
+      isActive: product.isActive,
+    });
+    setEditingProduct(product);
+    setShowAddModal(true);
+  };
+
+  const handleFormChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const saveProduct = async () => {
+    // Validation
+    if (!formData.name.trim()) {
+      alert('Product name is required');
+      return;
+    }
+    if (!formData.description.trim()) {
+      alert('Product description is required');
+      return;
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      alert('Valid price is required');
+      return;
+    }
+    if (!formData.stock || parseInt(formData.stock) < 0) {
+      alert('Valid stock quantity is required');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        price: parseFloat(formData.price),
+        category: formData.category,
+        stock: parseInt(formData.stock),
+        images: formData.images,
+        isActive: formData.isActive,
+        ...(editingProduct && { productId: editingProduct.id }),
+      };
+
+      const method = editingProduct ? 'PATCH' : 'POST';
+      const response = await fetch('/api/admin/products', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        await loadProducts();
+        setShowAddModal(false);
+        setEditingProduct(null);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || `Failed to ${editingProduct ? 'update' : 'create'} product`);
+      }
+    } catch (error) {
+      console.error('Failed to save product:', error);
+      alert('Network error saving product');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const exportToCSV = () => {
     const csvData = filteredProducts.map(product => ({
       'Product ID': product.id,
@@ -192,7 +290,7 @@ export function ProductManagement() {
           <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
           <p className="text-gray-600">Manage marketplace products and inventory</p>
         </div>
-        <Button onClick={() => setShowAddModal(true)} className="bg-primary-600 hover:bg-primary-700">
+        <Button onClick={openAddModal} className="bg-primary-600 hover:bg-primary-700">
           <Plus className="h-4 w-4 mr-2" />
           Add Product
         </Button>
@@ -405,6 +503,14 @@ export function ProductManagement() {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => openEditModal(product)}
+                          title="Edit product"
+                        >
+                          <Edit className="h-4 w-4 text-blue-500" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => toggleProductStatus(product.id, product.isActive)}
                           title={product.isActive ? 'Deactivate' : 'Activate'}
                         >
@@ -444,21 +550,144 @@ export function ProductManagement() {
         </CardContent>
       </Card>
 
-      {/* Add Product Modal Placeholder */}
+      {/* Add/Edit Product Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
-              <CardTitle>Add New Product</CardTitle>
+              <CardTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-500 text-center py-8">
-                Product form coming soon...
-              </p>
-              <div className="flex justify-end">
-                <Button variant="outline" onClick={() => setShowAddModal(false)}>
-                  Close
-                </Button>
+              <div className="space-y-4">
+                {/* Product Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Product Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => handleFormChange('name', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="Enter product name"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleFormChange('description', e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="Enter product description"
+                  />
+                </div>
+
+                {/* Category and Stock */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => handleFormChange('category', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="honey">Honey</option>
+                      <option value="handicrafts">Handicrafts</option>
+                      <option value="textiles">Textiles</option>
+                      <option value="food">Food Products</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Stock Quantity <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={formData.stock}
+                      onChange={(e) => handleFormChange('stock', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Price (₹) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => handleFormChange('price', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="0.00"
+                  />
+                </div>
+
+                {/* Status Toggle */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={formData.isActive}
+                    onChange={(e) => handleFormChange('isActive', e.target.checked)}
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                    Active (available for purchase)
+                  </label>
+                </div>
+
+                {/* Image URL Input (Simple version) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Image URL (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.images[0] || ''}
+                    onChange={(e) => handleFormChange('images', e.target.value ? [e.target.value] : [])}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter a direct URL to a product image
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowAddModal(false);
+                      setEditingProduct(null);
+                    }}
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={saveProduct}
+                    disabled={isSaving}
+                    className="bg-primary-600 hover:bg-primary-700"
+                  >
+                    {isSaving ? 'Saving...' : (editingProduct ? 'Update Product' : 'Create Product')}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
