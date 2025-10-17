@@ -9,6 +9,12 @@ import { Input } from '@/lib/components/ui/Input';
 import { Badge } from '@/lib/components/ui/Badge';
 import { ProductCard } from '@/lib/components/public/ProductCard';
 
+// Note: For SEO, consider converting to server component with metadata export
+// export const metadata = {
+//   title: 'Village Marketplace',
+//   description: 'Shop authentic handcrafted products from local artisans...',
+// };
+
 interface Product {
   id: string;
   name: string;

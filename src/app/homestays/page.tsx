@@ -7,6 +7,12 @@ import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
 import { Card } from '@/lib/components/ui/Card';
 
+// Note: For SEO, consider converting to server component with metadata export
+// export const metadata = {
+//   title: 'Browse Homestays',
+//   description: 'Discover authentic Himalayan homestays in Damday Village...',
+// };
+
 interface Homestay {
   id: string;
   name: string;

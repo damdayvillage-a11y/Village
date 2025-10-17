@@ -69,7 +69,43 @@ export default async function HomePage() {
   const featuredProducts = productsResult.data || [];
   const villageStats = statsResult.data;
 
+  // Structured Data for SEO (JSON-LD)
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristDestination',
+    name: 'Damday Village',
+    description: 'A pioneering carbon-neutral, culturally-rich, and technologically progressive model village nestled at 2,100m elevation in the pristine Kumaon Himalayas',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Pithoragarh',
+      addressRegion: 'Uttarakhand',
+      addressCountry: 'IN',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 29.5830,
+      longitude: 80.2180,
+      elevation: '2100',
+    },
+    url: 'https://village-app.captain.damdayvillage.com',
+    image: 'https://village-app.captain.damdayvillage.com/village-hero.jpg',
+    amenityFeature: [
+      { '@type': 'LocationFeatureSpecification', name: 'Carbon Neutral' },
+      { '@type': 'LocationFeatureSpecification', name: 'Solar Powered' },
+      { '@type': 'LocationFeatureSpecification', name: 'IoT Enabled' },
+      { '@type': 'LocationFeatureSpecification', name: 'Homestays' },
+      { '@type': 'LocationFeatureSpecification', name: 'Local Marketplace' },
+    ],
+  };
+
   return (
+    <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -242,5 +278,6 @@ export default async function HomePage() {
         )}
       </main>
     </div>
+    </>
   );
 }

@@ -5,7 +5,10 @@ import { Footer } from '../../lib/components/layout/Footer';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Damday Village - Smart Carbon-Free Village',
+  title: {
+    default: 'Damday Village - Smart Carbon-Free Village',
+    template: '%s | Damday Village',
+  },
   description:
     'Experience Damday Village, a carbon-neutral, culturally-rich, and technologically progressive model village in the Himalayas. Book homestays, explore our digital twin, and join our sustainable future.',
   keywords: [
@@ -19,10 +22,30 @@ export const metadata: Metadata = {
     'sustainable living',
     'homestay',
     'digital twin',
+    'Pithoragarh',
+    'Uttarakhand',
+    'Kumaon',
+    'mountain tourism',
+    'green village',
   ],
   authors: [{ name: 'Damday Village Team' }],
+  creator: 'Damday Village Team',
+  publisher: 'Damday Village',
   manifest: '/manifest.json',
-  robots: 'index, follow',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://village-app.captain.damdayvillage.com/',
+  },
   openGraph: {
     title: 'Damday Village - Smart Carbon-Free Village',
     description:
@@ -31,13 +54,26 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://village-app.captain.damdayvillage.com/',
     siteName: 'Damday Village',
+    images: [
+      {
+        url: 'https://village-app.captain.damdayvillage.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Damday Village - Smart Carbon-Free Village',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Damday Village - Smart Carbon-Free Village',
     description: 'Experience sustainable living in the heart of the Himalayas.',
     creator: '@damdayvillage',
+    images: ['https://village-app.captain.damdayvillage.com/og-image.jpg'],
   },
+  verification: {
+    google: 'google-site-verification-code', // Add actual code later
+  },
+  category: 'tourism',
 };
 
 export const viewport: Viewport = {
