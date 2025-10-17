@@ -19,7 +19,8 @@ import {
   Award,
   BarChart3,
   Home,
-  PlusCircle
+  PlusCircle,
+  Leaf
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
@@ -27,19 +28,27 @@ import { Badge } from '@/lib/components/ui/Badge';
 import { Avatar } from '@/lib/components/ui/Avatar';
 import { ComplaintsForm } from '@/lib/components/user-panel/ComplaintsForm';
 import { ArticleEditor } from '@/lib/components/user-panel/ArticleEditor';
+import { EnhancedDashboard } from '@/lib/components/user-panel/EnhancedDashboard';
+import { ProfileManagement } from '@/lib/components/user-panel/ProfileManagement';
+import { BookingManagement } from '@/lib/components/user-panel/BookingManagement';
+import { CarbonCreditWallet } from '@/lib/components/user-panel/CarbonCreditWallet';
+import { NotificationCenter } from '@/lib/components/user-panel/NotificationCenter';
+import { Achievements } from '@/lib/components/user-panel/Achievements';
+import { PersonalAnalytics } from '@/lib/components/user-panel/PersonalAnalytics';
 
 interface UserStats {
   bookings: number;
   orders: number;
   articles: number;
-  contributions: number;
+  carbonCredits: number;
+  achievements: number;
 }
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'BOOKING' | 'ORDER' | 'ACHIEVEMENT' | 'SYSTEM';
   timestamp: string;
   read: boolean;
 }
@@ -65,6 +74,37 @@ interface Complaint {
   adminResponse?: string;
 }
 
+interface Booking {
+  id: string;
+  homestayId: string;
+  homestayName: string;
+  homestayAddress: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  status: 'PENDING' | 'CONFIRMED' | 'CHECKED_IN' | 'CHECKED_OUT' | 'CANCELLED' | 'NO_SHOW';
+  pricing: {
+    basePrice: number;
+    taxes: number;
+    fees: number;
+    total: number;
+  };
+  createdAt: string;
+}
+
+interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  avatar?: string;
+  image?: string;
+  preferences?: {
+    language?: string;
+    notifications?: boolean;
+  };
+}
+
 export default function UserPanelPage() {
   const sessionResult = useSession();
   const session = sessionResult?.data;
@@ -75,11 +115,18 @@ export default function UserPanelPage() {
     bookings: 0,
     orders: 0,
     articles: 0,
-    contributions: 0
+    carbonCredits: 0,
+    achievements: 0
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [carbonCredits, setCarbonCredits] = useState<any>(null);
+  const [carbonTransactions, setCarbonTransactions] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -95,6 +142,13 @@ export default function UserPanelPage() {
 
   const loadUserData = async () => {
     try {
+      // Load user profile
+      const profileResponse = await fetch('/api/user/profile');
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json();
+        setUserProfile(profile);
+      }
+
       // Load user statistics
       const statsResponse = await fetch('/api/user/stats');
       if (statsResponse.ok) {
@@ -122,6 +176,41 @@ export default function UserPanelPage() {
         const userComplaints = await complaintsResponse.json();
         setComplaints(userComplaints);
       }
+
+      // Load bookings
+      const bookingsResponse = await fetch('/api/user/bookings');
+      if (bookingsResponse.ok) {
+        const userBookings = await bookingsResponse.json();
+        setBookings(userBookings);
+      }
+
+      // Load carbon credits
+      const carbonCreditsResponse = await fetch('/api/user/carbon-credits');
+      if (carbonCreditsResponse.ok) {
+        const credits = await carbonCreditsResponse.json();
+        setCarbonCredits(credits);
+      }
+
+      // Load carbon transactions
+      const carbonTransactionsResponse = await fetch('/api/user/carbon-credits/transactions');
+      if (carbonTransactionsResponse.ok) {
+        const transactions = await carbonTransactionsResponse.json();
+        setCarbonTransactions(transactions);
+      }
+
+      // Load achievements
+      const achievementsResponse = await fetch('/api/user/achievements');
+      if (achievementsResponse.ok) {
+        const achievementsData = await achievementsResponse.json();
+        setAchievements(achievementsData);
+      }
+
+      // Load analytics
+      const analyticsResponse = await fetch('/api/user/analytics');
+      if (analyticsResponse.ok) {
+        const analyticsData = await analyticsResponse.json();
+        setAnalytics(analyticsData);
+      }
     } catch (error) {
       console.error('Failed to load user data:', error);
     } finally {
@@ -139,6 +228,66 @@ export default function UserPanelPage() {
       );
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
+      throw error;
+    }
+  };
+
+  const markAllNotificationsAsRead = async () => {
+    try {
+      // Mark all unread notifications
+      const unreadNotifications = notifications.filter(n => !n.read);
+      await Promise.all(
+        unreadNotifications.map(n => 
+          fetch(`/api/user/notifications/${n.id}/read`, { method: 'POST' })
+        )
+      );
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  };
+
+  const handleProfileUpdate = async (data: Partial<UserProfile>) => {
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        setUserProfile(updatedProfile);
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error;
+    }
+  };
+
+  const handleAvatarUpload = async (file: File): Promise<string> => {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await fetch('/api/user/profile/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result.avatarUrl;
+      } else {
+        throw new Error('Failed to upload avatar');
+      }
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+      throw error;
     }
   };
 
@@ -209,6 +358,151 @@ export default function UserPanelPage() {
     }
   };
 
+  const handleCancelBooking = async (bookingId: string) => {
+    try {
+      const response = await fetch(`/api/user/bookings/${bookingId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Refresh bookings list
+        const bookingsResponse = await fetch('/api/user/bookings');
+        if (bookingsResponse.ok) {
+          const userBookings = await bookingsResponse.json();
+          setBookings(userBookings);
+        }
+        // Refresh stats
+        const statsResponse = await fetch('/api/user/stats');
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json();
+          setUserStats(stats);
+        }
+      } else {
+        throw new Error('Failed to cancel booking');
+      }
+    } catch (error) {
+      console.error('Failed to cancel booking:', error);
+      throw error;
+    }
+  };
+
+  const handleRescheduleBooking = (bookingId: string) => {
+    // TODO: Implement reschedule modal
+    console.log('Reschedule booking:', bookingId);
+  };
+
+  const handleEarnCredits = async (opportunityId: string) => {
+    // In a real implementation, this would fetch the opportunity details
+    // For now, we'll simulate earning credits
+    try {
+      const response = await fetch('/api/user/carbon-credits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: 10, // Default amount
+          reason: `Completed opportunity ${opportunityId}`,
+          type: 'EARN',
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh carbon credits and transactions
+        const [creditsResponse, transactionsResponse] = await Promise.all([
+          fetch('/api/user/carbon-credits'),
+          fetch('/api/user/carbon-credits/transactions'),
+        ]);
+
+        if (creditsResponse.ok) {
+          const credits = await creditsResponse.json();
+          setCarbonCredits(credits);
+        }
+
+        if (transactionsResponse.ok) {
+          const transactions = await transactionsResponse.json();
+          setCarbonTransactions(transactions);
+        }
+
+        // Refresh stats
+        const statsResponse = await fetch('/api/user/stats');
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json();
+          setUserStats(stats);
+        }
+      } else {
+        throw new Error('Failed to earn credits');
+      }
+    } catch (error) {
+      console.error('Failed to earn credits:', error);
+      throw error;
+    }
+  };
+
+  const handleSpendCredits = async (amount: number, reason: string) => {
+    try {
+      const response = await fetch('/api/user/carbon-credits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount,
+          reason,
+          type: 'SPEND',
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh carbon credits and transactions
+        const [creditsResponse, transactionsResponse] = await Promise.all([
+          fetch('/api/user/carbon-credits'),
+          fetch('/api/user/carbon-credits/transactions'),
+        ]);
+
+        if (creditsResponse.ok) {
+          const credits = await creditsResponse.json();
+          setCarbonCredits(credits);
+        }
+
+        if (transactionsResponse.ok) {
+          const transactions = await transactionsResponse.json();
+          setCarbonTransactions(transactions);
+        }
+
+        // Refresh stats
+        const statsResponse = await fetch('/api/user/stats');
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json();
+          setUserStats(stats);
+        }
+      } else {
+        throw new Error('Failed to spend credits');
+      }
+    } catch (error) {
+      console.error('Failed to spend credits:', error);
+      throw error;
+    }
+  };
+
+  if (status === 'loading' || loading) {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const newComplaint = await response.json();
+        setComplaints(prev => [newComplaint, ...prev]);
+      } else {
+        throw new Error('Failed to create complaint/suggestion');
+      }
+    } catch (error) {
+      console.error('Failed to submit complaint/suggestion:', error);
+      throw error;
+    }
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center">
@@ -231,6 +525,9 @@ export default function UserPanelPage() {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'bookings', label: 'Bookings', icon: Calendar },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
+    { id: 'carbon', label: 'Carbon Credits', icon: Leaf },
+    { id: 'achievements', label: 'Achievements', icon: Award },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'articles', label: 'My Articles', icon: FileText },
     { id: 'complaints', label: 'Complaints & Suggestions', icon: MessageSquare },
     { id: 'notifications', label: 'Notifications', icon: Bell, badge: unreadNotifications },
@@ -238,226 +535,26 @@ export default function UserPanelPage() {
   ];
 
   const renderDashboard = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Welcome back, {session?.user?.name || 'User'}!
-        </h2>
-        <p className="text-gray-600">
-          Here's what's happening with your Damday Village account
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Bookings</h3>
-              <p className="text-2xl font-semibold text-gray-900">{userStats.bookings}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <ShoppingBag className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Orders</h3>
-              <p className="text-2xl font-semibold text-gray-900">{userStats.orders}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <FileText className="h-6 w-6 text-purple-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Articles</h3>
-              <p className="text-2xl font-semibold text-gray-900">{userStats.articles}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Award className="h-6 w-6 text-orange-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Contributions</h3>
-              <p className="text-2xl font-semibold text-gray-900">{userStats.contributions}</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Articles</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {articles.length > 0 ? (
-              <div className="space-y-3">
-                {articles.slice(0, 3).map((article) => (
-                  <div key={article.id} className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{article.title}</h4>
-                      <p className="text-sm text-gray-500">
-                        {article.status === 'published' ? `${article.views} views` : article.status}
-                      </p>
-                    </div>
-                    <Badge 
-                      className={
-                        article.status === 'published' ? 'bg-green-100 text-green-800' :
-                        article.status === 'review' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }
-                    >
-                      {article.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">No articles yet</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={() => setActiveTab('articles')}
-                >
-                  Write your first article
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Notifications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {notifications.length > 0 ? (
-              <div className="space-y-3">
-                {notifications.slice(0, 3).map((notification) => (
-                  <div 
-                    key={notification.id} 
-                    className={`p-3 rounded-lg border ${
-                      !notification.read ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <h4 className="font-medium text-gray-900">{notification.title}</h4>
-                    <p className="text-sm text-gray-600">{notification.message}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(notification.timestamp).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <Bell className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">No notifications</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <EnhancedDashboard
+      userName={session?.user?.name || 'User'}
+      stats={userStats}
+      recentActivities={[]}
+    />
   );
 
-  const renderProfile = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Settings</h2>
-        <p className="text-gray-600">Manage your account information and preferences</p>
-      </div>
+  const renderProfile = () => {
+    if (!userProfile) {
+      return <div>Loading profile...</div>;
+    }
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-6 mb-6">
-            <Avatar 
-              src={session?.user?.image} 
-              alt={session?.user?.name || 'User'} 
-              size="lg"
-            />
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {session?.user?.name || 'User'}
-              </h3>
-              <p className="text-gray-600">{session?.user?.email}</p>
-              <Button variant="outline" size="sm" className="mt-2">
-                Change Photo
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                defaultValue={session?.user?.name || ''}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                defaultValue={session?.user?.email || ''}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone
-              </label>
-              <input
-                type="tel"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="+91 XXXXX XXXXX"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="City, State"
-              />
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <Button variant="primary">Save Changes</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+    return (
+      <ProfileManagement
+        profile={userProfile}
+        onUpdate={handleProfileUpdate}
+        onAvatarUpload={handleAvatarUpload}
+      />
+    );
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -466,9 +563,28 @@ export default function UserPanelPage() {
       case 'profile':
         return renderProfile();
       case 'bookings':
-        return <div>Bookings content coming soon...</div>;
+        return (
+          <BookingManagement
+            bookings={bookings}
+            onCancel={handleCancelBooking}
+            onReschedule={handleRescheduleBooking}
+          />
+        );
       case 'orders':
         return <div>Orders content coming soon...</div>;
+      case 'carbon':
+        if (!carbonCredits) {
+          return <div>Loading carbon credits...</div>;
+        }
+        return (
+          <CarbonCreditWallet
+            creditBalance={carbonCredits}
+            transactions={carbonTransactions}
+            earningOpportunities={[]}
+            onEarnCredits={handleEarnCredits}
+            onSpendCredits={handleSpendCredits}
+          />
+        );
       case 'articles':
         return (
           <ArticleEditor
@@ -486,7 +602,33 @@ export default function UserPanelPage() {
           />
         );
       case 'notifications':
-        return <div>Notifications management coming soon...</div>;
+        return (
+          <NotificationCenter
+            notifications={notifications}
+            onMarkAsRead={markNotificationAsRead}
+            onMarkAllAsRead={markAllNotificationsAsRead}
+          />
+        );
+      case 'achievements':
+        if (!achievements) {
+          return <div>Loading achievements...</div>;
+        }
+        return (
+          <Achievements
+            userAchievements={achievements.userAchievements || []}
+            totalPoints={achievements.totalPoints || 0}
+            rank={achievements.rank}
+          />
+        );
+      case 'analytics':
+        if (!analytics) {
+          return <div>Loading analytics...</div>;
+        }
+        return (
+          <PersonalAnalytics
+            analyticsData={analytics}
+          />
+        );
       case 'settings':
         return <div>Settings content coming soon...</div>;
       default:

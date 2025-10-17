@@ -38,7 +38,14 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 - ✅ Complete database schema with TimescaleDB support
 - ✅ Environment validation (prevents startup with invalid config)
 - ✅ Multi-language admin panel (English & Hindi)
-- ✅ **NEW:** Auto-creation of admin and host users on startup (no SSH needed!)
+- ✅ **NEW:** Comprehensive User Panel with real-time features
+  - Dashboard with live statistics
+  - Profile management with avatar upload
+  - Booking management (create, view, cancel, reschedule)
+  - Order tracking and history
+  - Product wishlist with stock status
+  - Review and rating system
+- ✅ Auto-creation of admin and host users on startup (no SSH needed!)
 - ✅ Auto-recovery for missing admin user
 - ✅ Comprehensive error messages
 - ✅ HTTPS/SSL enforced
@@ -212,6 +219,43 @@ After running the database seed (`npm run db:seed`), you can log in with:
 - Role: Host (can manage homestays and bookings)
 
 ⚠️ **Security Note**: Change these default passwords immediately in production!
+
+## 👤 User Panel Access
+
+### Features Overview
+
+The user panel provides comprehensive functionality for village users:
+
+**Dashboard**:
+- Real-time statistics (bookings, orders, articles, carbon credits, achievements)
+- Recent activity feed
+- Quick action buttons
+
+**Profile Management**:
+- Complete profile editing
+- Avatar upload (5MB max, JPEG/PNG/WebP)
+- Preferences and settings
+- Security options
+
+**Booking Management**:
+- View all homestay bookings
+- Search and filter (upcoming, past, cancelled)
+- Cancel and reschedule bookings
+- Download booking confirmations
+- Price breakdown
+
+**Orders & Marketplace**:
+- Order history with tracking
+- Product wishlist
+- Stock status monitoring
+- Review and rating system
+- Invoice downloads
+
+**Access at**: `https://your-domain.com/user-panel`
+
+**📚 Documentation:**
+- **[PR11_USER_PANEL_ROADMAP.md](./PR11_USER_PANEL_ROADMAP.md)** - Complete feature roadmap
+- **[PR11_IMPLEMENTATION_COMPLETE.md](./PR11_IMPLEMENTATION_COMPLETE.md)** - Implementation details
 
 ### Troubleshooting Admin Panel
 
