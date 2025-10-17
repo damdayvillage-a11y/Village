@@ -30,6 +30,7 @@ import { ComplaintsForm } from '@/lib/components/user-panel/ComplaintsForm';
 import { ArticleEditor } from '@/lib/components/user-panel/ArticleEditor';
 import { EnhancedDashboard } from '@/lib/components/user-panel/EnhancedDashboard';
 import { ProfileManagement } from '@/lib/components/user-panel/ProfileManagement';
+import { BookingManagement } from '@/lib/components/user-panel/BookingManagement';
 
 interface UserStats {
   bookings: number;
@@ -69,6 +70,24 @@ interface Complaint {
   adminResponse?: string;
 }
 
+interface Booking {
+  id: string;
+  homestayId: string;
+  homestayName: string;
+  homestayAddress: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  status: 'PENDING' | 'CONFIRMED' | 'CHECKED_IN' | 'CHECKED_OUT' | 'CANCELLED' | 'NO_SHOW';
+  pricing: {
+    basePrice: number;
+    taxes: number;
+    fees: number;
+    total: number;
+  };
+  createdAt: string;
+}
+
 interface UserProfile {
   id: string;
   email: string;
@@ -98,6 +117,7 @@ export default function UserPanelPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -147,6 +167,13 @@ export default function UserPanelPage() {
       if (complaintsResponse.ok) {
         const userComplaints = await complaintsResponse.json();
         setComplaints(userComplaints);
+      }
+
+      // Load bookings
+      const bookingsResponse = await fetch('/api/user/bookings');
+      if (bookingsResponse.ok) {
+        const userBookings = await bookingsResponse.json();
+        setBookings(userBookings);
       }
     } catch (error) {
       console.error('Failed to load user data:', error);
@@ -279,6 +306,56 @@ export default function UserPanelPage() {
     }
   };
 
+  const handleCancelBooking = async (bookingId: string) => {
+    try {
+      const response = await fetch(`/api/user/bookings/${bookingId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Refresh bookings list
+        const bookingsResponse = await fetch('/api/user/bookings');
+        if (bookingsResponse.ok) {
+          const userBookings = await bookingsResponse.json();
+          setBookings(userBookings);
+        }
+        // Refresh stats
+        const statsResponse = await fetch('/api/user/stats');
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json();
+          setUserStats(stats);
+        }
+      } else {
+        throw new Error('Failed to cancel booking');
+      }
+    } catch (error) {
+      console.error('Failed to cancel booking:', error);
+      throw error;
+    }
+  };
+
+  const handleRescheduleBooking = (bookingId: string) => {
+    // TODO: Implement reschedule modal
+    console.log('Reschedule booking:', bookingId);
+  };
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const newComplaint = await response.json();
+        setComplaints(prev => [newComplaint, ...prev]);
+      } else {
+        throw new Error('Failed to create complaint/suggestion');
+      }
+    } catch (error) {
+      console.error('Failed to submit complaint/suggestion:', error);
+      throw error;
+    }
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center">
@@ -337,7 +414,13 @@ export default function UserPanelPage() {
       case 'profile':
         return renderProfile();
       case 'bookings':
-        return <div>Bookings content coming soon...</div>;
+        return (
+          <BookingManagement
+            bookings={bookings}
+            onCancel={handleCancelBooking}
+            onReschedule={handleRescheduleBooking}
+          />
+        );
       case 'orders':
         return <div>Orders content coming soon...</div>;
       case 'carbon':
