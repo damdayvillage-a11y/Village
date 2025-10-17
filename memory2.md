@@ -2061,56 +2061,933 @@ For each PR:
   - 🔄 Phase 5: Booking Flow (75% → 90%) - Pending
   - 🔄 Phase 6: SEO & Performance (90% → 100%) - 95% Complete
 
-### Planned (Future PRs)
+### Planned (PR13-PR21: 9-Month Production Roadmap)
 
-**PR13: Mobile App** (Optional)
-- React Native app
-- Share API with web app
-- User panel features
-- Booking and ordering
-- Push notifications
+**Vision**: Transform Damday Village into production-ready, WordPress-like smart village platform with blockchain carbon credits achieving 25,000 trees in 5 years.
 
-**PR14: Advanced IoT Features**
-- Real-time dashboards
-- Alerts and thresholds
-- Historical data analysis
-- Device automation rules
+---
 
-**PR15: DAO Governance**
-- Proposal system
-- Voting mechanisms
-- Fund management
-- Community decisions
+### **PR13: Admin Control Center Enhancement** ⭐
+**Duration**: 2 months | **Priority**: Critical  
+**Goal**: WordPress-like admin interface - control EVERYTHING from one place
 
-**PR16: Payment Gateway Integration**
-- Razorpay live mode
-- Stripe integration
-- Payment webhooks
-- Refund handling
+#### Phase 1: Settings Infrastructure (Week 1-2)
+**Database**:
+```sql
+model AppSettings {
+  id category key value(Json) isPublic updatedAt updatedBy
+}
+```
+**Features**:
+- Feature toggles (homestays/marketplace/tours/blog/projects/carbon)
+- Settings API (4 endpoints)
+- Toggle UI with real-time save
+- Category-based organization
 
-**PR17: Email & SMS Notifications**
-- Email templates
-- SMS alerts
-- Notification preferences
-- Delivery tracking
+#### Phase 2: API Key Manager (Week 3-4)
+**Database**:
+```sql
+model ApiKey {
+  id service keyName value(encrypted) isActive validatedAt
+}
+```
+**Features**:
+- AES-256 encryption for keys
+- Auto-validation (Razorpay/Stripe/SMTP/SMS/Drive)
+- Enable feature only after key validates
+- Masked display + copy functionality
 
-**PR18: Advanced Analytics**
-- Custom reports
-- Data export (PDF, Excel)
-- Scheduled reports
-- Predictive analytics
+#### Phase 3: Visual Theme Customizer (Week 5-6)
+**Database**:
+```sql
+model ThemeConfig {
+  id primaryColor secondaryColor accentColor fontFamily logoUrl faviconUrl customCSS
+}
+```
+**Features**:
+- Color picker with live preview
+- Logo uploader (drag-drop)
+- Preset themes (Modern/Eco/Sunset/Mountain)
+- Custom CSS editor with syntax highlighting
+- Split-screen: Editor + Live Preview
 
-**PR19: Multi-language Support**
-- i18n implementation
-- Hindi translations
-- Language switcher
-- RTL support
+#### Phase 4: Header/Footer/Sidebar Editor (Week 7)
+**Database**:
+```sql
+model LayoutConfig {
+  id section(header/footer/sidebar) structure(Json) isActive
+}
+```
+**Features**:
+- Menu item management (add/remove/reorder)
+- Footer columns (2/3/4)
+- Widget system for sidebar
+- Drag-drop reordering
+- Social media links
 
-**PR20: Performance Optimization**
-- Image optimization
-- Code splitting
-- Caching strategies
-- CDN integration
+#### Phase 5: Page Builder & Media Drive (Week 8)
+**Database**:
+```sql
+model Page {
+  id slug title sections(Json) isPublished seoMeta
+}
+```
+**Features**:
+- 7 section types (Hero/Features/Stats/Gallery/Testimonials/CTA/RichText)
+- Drag-drop interface (React DnD)
+- Google Drive OAuth integration
+- Media library with search/tags/folders
+- SEO meta editor per page
+
+**Outcome**: Non-technical admin manages entire site without code
+
+---
+
+### **PR14: Media Management & Drive Integration** 📸
+**Duration**: 1.5 months | **Priority**: High  
+**Goal**: Unlimited cloud storage with professional media library
+
+#### Phase 1: Google Drive Setup (Week 1)
+**Implementation**:
+- OAuth2 authentication flow
+- Folder structure: `/village-media/{year}/{month}`
+- Auto-sync uploaded files
+- Public URL generation
+
+#### Phase 2: Media Library Core (Week 2-3)
+**Database**:
+```sql
+model MediaFile {
+  id filename fileType size url driveId tags folder uploadedBy usageCount
+}
+```
+**Features**:
+- Grid view with thumbnails
+- Multi-file upload (drag-drop)
+- Search by name/tags
+- Folder organization
+- Usage tracking (where media is used)
+
+#### Phase 3: Image Optimization (Week 4)
+**Tools**: Sharp library
+**Features**:
+- Auto-resize to standard dimensions
+- WebP conversion for web
+- Thumbnail generation
+- Lazy loading support
+- Compression without quality loss
+
+#### Phase 4: Gallery Builder (Week 5)
+**Features**:
+- 3 layouts (Masonry/Grid/Carousel)
+- Caption support
+- Lightbox viewer
+- Bulk selection
+- Sort by date/name/size
+
+#### Phase 5: Video & Advanced Media (Week 6)
+**Features**:
+- YouTube/Vimeo embedding
+- Video thumbnail extraction
+- GIF support
+- PDF preview
+- Download tracking
+
+**Outcome**: Professional media management like WordPress Media Library
+
+---
+
+### **PR15: Village Tours & Experiences** 🏔️
+**Duration**: 1.5 months | **Priority**: High  
+**Goal**: Complete tour booking system with guides and itineraries
+
+#### Phase 1: Tour Management (Week 1-2)
+**Database**:
+```sql
+model Tour {
+  id name description duration difficulty price capacity images
+}
+model Itinerary {
+  id tourId day activities meals accommodation
+}
+```
+**Features**:
+- Tour CRUD in admin
+- Multi-day itinerary builder
+- Difficulty levels (Easy/Moderate/Challenging/Expert)
+- Price tiers (Solo/Group/Family)
+- Image gallery per tour
+
+#### Phase 2: Guide System (Week 3)
+**Database**:
+```sql
+model Guide {
+  id userId bio certifications languages rating verified
+}
+```
+**Features**:
+- Guide registration form
+- Admin verification workflow
+- Profile with certifications
+- Language skills
+- Rating system
+
+#### Phase 3: Tour Calendar & Booking (Week 4)
+**Database**:
+```sql
+model TourBooking {
+  id tourId guideId participants date status payment
+}
+```
+**Features**:
+- Visual calendar with availability
+- Slot management (prevent overbooking)
+- Group booking with discounts
+- Waitlist system
+- Booking confirmation emails
+
+#### Phase 4: Equipment Rental (Week 5)
+**Database**:
+```sql
+model Equipment {
+  id name category quantity pricePerDay available
+}
+```
+**Features**:
+- Equipment catalog (trekking poles/tents/sleeping bags)
+- Add to tour booking
+- Availability tracking
+- Damage deposit handling
+- Return checklist
+
+#### Phase 5: Reviews & Testimonials (Week 6)
+**Features**:
+- Post-tour review form
+- Rating (5-star)
+- Photo uploads in reviews
+- Admin moderation
+- Display on tour pages
+
+**Outcome**: Professional tour booking like Viator/GetYourGuide
+
+---
+
+### **PR16: Community Blog & Content** ✍️
+**Duration**: 1 month | **Priority**: Medium  
+**Goal**: WordPress-like blog for village stories and news
+
+#### Phase 1: Rich Text Editor (Week 1)
+**Tool**: TinyMCE or CKEditor
+**Features**:
+- WYSIWYG editor
+- Image insertion from media library
+- Video embedding
+- Code blocks
+- Tables and lists
+
+#### Phase 2: Blog Management (Week 2)
+**Database**:
+```sql
+model BlogPost {
+  id title slug content authorId categoryId tags featured publishedAt
+}
+model Category {
+  id name slug description
+}
+```
+**Features**:
+- Draft/Published status
+- Schedule publishing
+- Featured posts
+- Categories and tags
+- Author profiles
+
+#### Phase 3: Comments & Engagement (Week 3)
+**Database**:
+```sql
+model Comment {
+  id postId userId content isApproved
+}
+```
+**Features**:
+- Comment moderation queue
+- Spam detection (Akismet API)
+- Reply threading
+- Like/dislike
+- Email notifications
+
+#### Phase 4: SEO & Social Sharing (Week 4)
+**Features**:
+- Auto-generate meta descriptions
+- Open Graph tags
+- Twitter cards
+- Auto-sitemap update
+- Related posts (AI-powered)
+- Social share buttons (WhatsApp/Facebook/Twitter)
+
+#### Phase 5: Newsletter Integration
+**Tool**: Mailchimp API or SendGrid
+**Features**:
+- Subscribe widget
+- Auto-send digest (weekly/monthly)
+- Template customization
+- Analytics tracking
+- Unsubscribe management
+
+**Outcome**: Full-featured blog like WordPress
+
+---
+
+### **PR17: Community Projects & Volunteering** 🤝
+**Duration**: 1 month | **Priority**: Medium  
+**Goal**: Transparent project tracking with volunteer management
+
+#### Phase 1: Project Showcase (Week 1)
+**Database**:
+```sql
+model Project {
+  id name description category goal raised volunteers startDate endDate images
+}
+```
+**Features**:
+- Project types (Tree Plantation/School/Roads/Water)
+- Progress tracking (0-100%)
+- Photo/video updates
+- Milestone timeline
+- Impact metrics
+
+#### Phase 2: Volunteer Registration (Week 2)
+**Database**:
+```sql
+model Volunteer {
+  id userId projectId skills availability status
+}
+```
+**Features**:
+- Volunteer signup form
+- Skill matching
+- Availability calendar
+- Background verification
+- Volunteer dashboard
+
+#### Phase 3: Donation System (Week 3)
+**Features**:
+- Razorpay/Stripe integration
+- One-time & recurring donations
+- Donation tiers with perks
+- Donor wall (opt-in)
+- Tax receipt generation (80G certificate)
+- Goal thermometer widget
+
+#### Phase 4: Progress Updates (Week 4)
+**Features**:
+- Admin adds milestones
+- Photo/video uploads
+- Email updates to donors/volunteers
+- Before/after comparisons
+- Impact reports (PDF)
+
+#### Phase 5: Analytics Dashboard
+**Features**:
+- Total funds raised
+- Active volunteers
+- Projects completed
+- Impact visualization (trees planted, CO2 offset)
+- Donor retention rate
+- Volunteer hours tracking
+
+**Outcome**: Transparent project management like DonorsChoose
+
+---
+
+### **PR18: Blockchain Carbon Credits (Phase 1)** 🌳 ⚡ CRITICAL
+**Duration**: 2 months | **Priority**: CRITICAL  
+**Goal**: NFT-based carbon credits - 25,000 trees target
+
+#### Phase 1: Smart Contract Development (Week 1-2)
+**Blockchain**: Polygon (low gas fees)
+**Contract**: TreeNFT.sol (ERC-721)
+```solidity
+contract TreeNFT {
+  struct Tree {
+    uint256 id;
+    string species;
+    string gpsCoords;
+    uint256 plantedDate;
+    uint256 co2Offset; // kg per year
+    string qrCode;
+  }
+  function mintTree(Tree memory) public onlyAdmin
+  function getTreeDetails(uint256 tokenId) public view
+}
+```
+**Features**:
+- Mint NFT per tree
+- Store metadata on IPFS
+- Transfer ownership
+- Burn (retire credit)
+
+#### Phase 2: Tree Registration System (Week 3-4)
+**Database**:
+```sql
+model TreeRegistry {
+  id species gpsLat gpsLon plantedDate nftTokenId co2PerYear qrCodeUrl photo
+}
+```
+**Admin Features**:
+- Register new tree
+- Upload photo
+- GPS coordinates (map picker)
+- Species selection (pre-defined list with CO2 data)
+- Auto-generate QR code
+- Trigger NFT minting
+
+#### Phase 3: CO2 Calculation Engine (Week 5)
+**Implementation**:
+- Species database (Himalayan trees)
+- Age-based CO2 calculation
+- Annual growth rate
+- Verification methodology (CDM/VCS standards)
+- Auto-update yearly
+
+**Species Examples**:
+- Deodar: 22 kg CO2/year
+- Oak: 21 kg CO2/year
+- Pine: 20 kg CO2/year
+
+#### Phase 4: Certificate Generation (Week 6-7)
+**Features**:
+- PDF certificate with:
+  - Tree ID and NFT address
+  - Species and location
+  - CO2 offset per year
+  - QR code for verification
+  - Blockchain transaction hash
+  - Owner name (optional)
+- Email delivery
+- Print-ready format
+
+#### Phase 5: Tree Adoption Program (Week 8)
+**Database**:
+```sql
+model TreeAdoption {
+  id treeId adopterId monthlyAmount nftMinted
+}
+```
+**Features**:
+- Adopt-a-tree subscription
+- Monthly payment (₹100-₹500)
+- Receive NFT after 12 months
+- Get regular photo updates
+- Visit your tree option
+- Personalized certificate
+
+**Outcome**: World's first blockchain-verified village carbon credit system
+
+---
+
+### **PR19: Carbon Credit Marketplace (Phase 2)** 💰
+**Duration**: 1.5 months | **Priority**: Critical  
+**Goal**: Trading platform for carbon credits
+
+#### Phase 1: Marketplace Smart Contract (Week 1-2)
+**Contract**: CarbonMarketplace.sol
+```solidity
+contract CarbonMarketplace {
+  function listCredit(uint256 tokenId, uint256 price) public
+  function buyCredit(uint256 listingId) public payable
+  function retireCredit(uint256 tokenId) public
+  // Escrow handling
+}
+```
+**Features**:
+- List NFT for sale
+- Buy with crypto/fiat
+- Escrow protection
+- Commission (5% to village)
+
+#### Phase 2: Trading Interface (Week 3)
+**Features**:
+- Browse available credits
+- Filter (species/age/location)
+- Sort (price/CO2/date)
+- Credit details popup
+- Buy now or make offer
+- Wallet integration (MetaMask)
+
+#### Phase 3: Corporate Partnerships (Week 4)
+**Database**:
+```sql
+model CorporateClient {
+  id companyName contactPerson email creditsPurchased apiKey
+}
+```
+**Features**:
+- Corporate registration
+- Bulk credit purchase
+- Custom pricing tiers
+- Invoice generation
+- API access for integration
+- White-label certificates
+
+#### Phase 4: Credit Retirement (Week 5)
+**Features**:
+- Burn NFT to claim offset
+- Retirement certificate
+- Public ledger of retired credits
+- Company CSR reports
+- Impact visualization
+- LinkedIn badge integration
+
+#### Phase 5: Analytics & Reporting (Week 6)
+**Features**:
+- Total credits issued
+- Credits traded
+- Credits retired
+- Revenue generated
+- Top buyers
+- Market price trends
+- Annual impact report (PDF)
+
+**Outcome**: Sustainable revenue stream (target: ₹20 lakh/year)
+
+---
+
+### **PR20: Offline/Low-Connectivity Features** 📱
+**Duration**: 1 month | **Priority**: High (Himalayan region)  
+**Goal**: PWA with offline support for unreliable connectivity
+
+#### Phase 1: Progressive Web App Setup (Week 1)
+**Tool**: Next.js PWA plugin
+**Features**:
+- App manifest
+- Install prompts
+- App icons (all sizes)
+- Splash screens
+- Standalone mode
+
+#### Phase 2: Service Workers (Week 2)
+**Strategy**: Network-first with offline fallback
+**Features**:
+- Cache critical assets
+- Cache API responses
+- Background sync queue
+- Offline page
+- Update notifications
+
+#### Phase 3: Local Storage & IndexedDB (Week 3)
+**Features**:
+- Save booking drafts locally
+- Queue orders when offline
+- Sync when connection returns
+- Conflict resolution
+- Storage quota management
+
+#### Phase 4: SMS Fallbacks (Week 4)
+**Tool**: Twilio/MSG91 API
+**Features**:
+- Critical notifications via SMS
+- Booking confirmations
+- Payment receipts
+- Low-data mode toggle
+- USSD menu (future)
+
+#### Phase 5: Lightweight Mode
+**Features**:
+- Strip heavy images
+- Text-only content
+- Minimal JavaScript
+- Compressed responses
+- Data saver badge
+
+**Outcome**: Reliable platform despite poor connectivity
+
+---
+
+### **PR21: Advanced Analytics & Business Intelligence** 📊
+**Duration**: 1 month | **Priority**: Medium  
+**Goal**: Comprehensive dashboards for data-driven decisions
+
+#### Phase 1: Revenue Dashboard (Week 1)
+**Features**:
+- Income by source (homestays/products/tours/carbon)
+- Daily/weekly/monthly/yearly views
+- Revenue trends (line charts)
+- Comparison to previous period
+- Top earners
+- Commission tracking
+
+#### Phase 2: Visitor Analytics (Week 2)
+**Tool**: Google Analytics 4 or Plausible
+**Features**:
+- Page views and sessions
+- Traffic sources
+- Popular pages
+- User demographics
+- Device breakdown
+- Bounce rate
+- Average session duration
+
+#### Phase 3: Booking & Sales Insights (Week 3)
+**Features**:
+- Peak booking seasons
+- Popular homestays/tours
+- Cancellation rates
+- Average booking value
+- Conversion funnel
+- Cart abandonment
+- Repeat customer rate
+
+#### Phase 4: Carbon Impact Tracking (Week 4)
+**Features**:
+- Trees planted (daily/cumulative)
+- CO2 offset visualization
+- Credits issued vs retired
+- Revenue from carbon credits
+- Progress to 25k trees goal
+- Geographic distribution map
+- Species breakdown
+
+#### Phase 5: Predictive Analytics
+**Tool**: Python ML microservice (scikit-learn)
+**Features**:
+- Revenue forecasting
+- Booking demand prediction
+- Price optimization suggestions
+- Inventory recommendations
+- Churn prediction
+- Trend analysis
+
+**Outcome**: Data-driven decision making for sustainable growth
+
+---
+
+## 🎯 5-Year Success Metrics (Revisited)
+
+### Environmental Goals
+- **25,000 trees planted** (5,000/year)
+  - Year 1: 5,000 trees
+  - Year 2: 10,000 trees (cumulative)
+  - Year 3: 15,000 trees
+  - Year 4: 20,000 trees
+  - Year 5: 25,000 trees
+- **500 tons CO2 offset annually** (by Year 5)
+- **100% renewable energy** village
+- **Zero-waste tourism** certification
+
+### Economic Goals
+- **Tourism Revenue**: ₹50 lakh/year (by Year 3)
+- **Carbon Credit Sales**: ₹20 lakh/year (by Year 4)
+- **Marketplace Revenue**: ₹15 lakh/year (by Year 3)
+- **Total Revenue**: ₹85 lakh/year (by Year 5)
+- **100+ direct employment** opportunities
+- **500+ indirect employment** (guides, homestay owners, artisans)
+
+### Community Goals
+- **500+ active volunteers**
+- **50+ community projects** completed
+- **10,000+ monthly website visitors** (by Year 2)
+- **1,000+ carbon credit buyers** (individuals + corporates)
+- **50+ homestays** registered
+- **200+ local products** on marketplace
+
+### Technical Goals
+- **99.9% uptime** SLA
+- **<2s page load times**
+- **100% mobile-friendly** (Lighthouse score 90+)
+- **WCAG 2.1 AA accessibility**
+- **PWA with offline support**
+- **Blockchain-verified** carbon credits
+
+---
+
+## 🏗️ Technical Architecture Expansion
+
+### New Database Models (PR13-21)
+1. **AppSettings** - Feature toggles and configuration
+2. **ApiKey** - Encrypted external API keys
+3. **ThemeConfig** - Visual theme customization
+4. **LayoutConfig** - Header/footer/sidebar settings
+5. **Page** - Custom pages with sections
+6. **MediaFile** - Media library tracking
+7. **Tour** - Village tours
+8. **Itinerary** - Multi-day tour plans
+9. **Guide** - Tour guide profiles
+10. **TourBooking** - Tour reservations
+11. **Equipment** - Rental equipment
+12. **BlogPost** - Blog content
+13. **Category** - Blog categories
+14. **Comment** - Blog comments
+15. **Project** - Community projects
+16. **Volunteer** - Volunteer registrations
+17. **TreeRegistry** - Planted trees
+18. **TreeAdoption** - Tree adoption subscriptions
+19. **CorporateClient** - Corporate carbon buyers
+
+**Total Models**: 27 (current) + 19 (new) = **46 models**
+
+### New API Endpoints (60+)
+
+**Admin APIs**:
+- `/api/admin/settings` (CRUD)
+- `/api/admin/api-keys` (CRUD + validate)
+- `/api/admin/theme` (CRUD + preview)
+- `/api/admin/layout` (CRUD)
+- `/api/admin/pages` (CRUD + publish)
+- `/api/admin/media` (upload, delete, organize)
+- `/api/admin/tours` (CRUD)
+- `/api/admin/guides` (approve, verify)
+- `/api/admin/blog` (CRUD + schedule)
+- `/api/admin/projects` (CRUD + updates)
+- `/api/admin/trees` (register, mint NFT)
+- `/api/admin/carbon-marketplace` (listings, sales)
+
+**Public APIs**:
+- `/api/public/tours` (listings + booking)
+- `/api/public/blog` (posts + comments)
+- `/api/public/projects` (list + volunteer signup)
+- `/api/public/carbon-credits` (browse + buy)
+- `/api/public/tree/{id}` (verify tree via QR)
+
+### Blockchain Infrastructure
+
+**Smart Contracts** (3):
+1. **TreeNFT.sol** (ERC-721) - Tree ownership NFTs
+2. **CarbonMarketplace.sol** - Trading platform
+3. **Escrow.sol** - Secure transactions
+
+**Blockchain Stack**:
+- **Network**: Polygon Mainnet (low gas fees ~$0.01)
+- **Library**: ethers.js v6
+- **Wallet**: MetaMask, WalletConnect
+- **Storage**: IPFS for metadata
+- **Indexer**: The Graph for queries
+
+**Deployment**:
+- Testnet: Mumbai (free testing)
+- Mainnet: Polygon
+- Contract verification: Polygonscan
+
+### Additional Infrastructure
+
+**New Services**:
+- **Redis** - Caching, real-time updates (WebSockets)
+- **RabbitMQ** - Background job queue (email, NFT minting)
+- **Python Microservice** - ML predictions, image processing
+- **IPFS Node** - Decentralized metadata storage
+- **Polygon Node** - Blockchain interaction
+
+**Deployment Updates**:
+```yaml
+# docker-compose.yml additions
+services:
+  redis:
+    image: redis:7-alpine
+  rabbitmq:
+    image: rabbitmq:3-management
+  python-ml:
+    build: ./ml-service
+  ipfs:
+    image: ipfs/go-ipfs
+```
+
+---
+
+## 📅 Implementation Timeline
+
+### Phase 1: Foundation (Months 1-2)
+- **PR13**: Admin Control Center
+- **PR14**: Media Management
+
+**Milestone**: Admin can control all features without code
+
+### Phase 2: Content & Tours (Months 3-4)
+- **PR15**: Village Tours
+- **PR16**: Community Blog
+
+**Milestone**: Complete content management system
+
+### Phase 3: Community & Blockchain (Months 5-6)
+- **PR17**: Community Projects
+- **PR18**: Blockchain Carbon Credits
+
+**Milestone**: First 1,000 trees minted as NFTs
+
+### Phase 4: Marketplace & Offline (Months 7-8)
+- **PR19**: Carbon Credit Marketplace
+- **PR20**: Offline Features
+
+**Milestone**: First carbon credit sale to corporate client
+
+### Phase 5: Analytics & Launch (Month 9)
+- **PR21**: Advanced Analytics
+- **Production Launch**
+
+**Milestone**: Full production-ready platform
+
+---
+
+## 📖 Step-by-Step Implementation Guide (For Non-Programmers)
+
+### Before Starting Any PR
+
+1. **Read the Phase Description**
+   - Understand what you're building
+   - Check dependencies (what must exist first)
+
+2. **Set Up Development Environment**
+   ```bash
+   git checkout -b feature/pr{N}-phase{M}
+   npm install
+   npm run dev
+   ```
+
+3. **Create Database Model**
+   - Open `prisma/schema.prisma`
+   - Add model (copy format from existing)
+   - Run: `npm run db:push`
+
+4. **Create API Endpoint**
+   - Create file: `src/app/api/admin/{feature}/route.ts`
+   - Copy template from existing API
+   - Modify for your feature
+
+5. **Create Admin Component**
+   - Create file: `lib/components/admin-panel/{Feature}.tsx`
+   - Copy template from existing component
+   - Customize UI
+
+6. **Test Thoroughly**
+   - Check all CRUD operations work
+   - Verify data saves to database
+   - Test error handling
+   - Check mobile responsiveness
+
+7. **Update Documentation**
+   - Update memory2.md
+   - Add API documentation
+   - Screenshot new features
+
+8. **Create Pull Request**
+   - Commit changes
+   - Push to GitHub
+   - Create PR with description
+
+### Common Patterns
+
+**CRUD API Template**:
+```typescript
+// GET - Read
+export async function GET() {
+  const items = await prisma.{model}.findMany();
+  return NextResponse.json(items);
+}
+
+// POST - Create
+export async function POST(request: Request) {
+  const data = await request.json();
+  const item = await prisma.{model}.create({ data });
+  return NextResponse.json(item);
+}
+
+// PATCH - Update
+export async function PATCH(request: Request) {
+  const { id, ...data } = await request.json();
+  const item = await prisma.{model}.update({
+    where: { id },
+    data
+  });
+  return NextResponse.json(item);
+}
+
+// DELETE - Delete
+export async function DELETE(request: Request) {
+  const { id } = await request.json();
+  await prisma.{model}.delete({ where: { id } });
+  return NextResponse.json({ success: true });
+}
+```
+
+**Admin Component Template**:
+```typescript
+'use client';
+import { useState, useEffect } from 'react';
+import { Card } from '@/lib/components/ui/card';
+import { Button } from '@/lib/components/ui/button';
+
+export default function FeatureManager() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  async function fetchItems() {
+    const res = await fetch('/api/admin/{feature}');
+    const data = await res.json();
+    setItems(data);
+    setLoading(false);
+  }
+
+  async function handleCreate() {
+    // Create new item
+  }
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <Card>
+      <h2>Feature Manager</h2>
+      <Button onClick={handleCreate}>Add New</Button>
+      {/* List items here */}
+    </Card>
+  );
+}
+```
+
+---
+
+## 🎓 Learning Resources
+
+For implementing these PRs, learn:
+
+**Frontend**:
+- React Hooks (useState, useEffect)
+- TypeScript basics
+- Tailwind CSS
+- Next.js App Router
+
+**Backend**:
+- Prisma ORM
+- REST API design
+- Authentication (NextAuth.js)
+- File uploads
+
+**Blockchain**:
+- Solidity basics
+- ethers.js library
+- MetaMask integration
+- IPFS usage
+
+**Resources**:
+- Next.js Docs: https://nextjs.org/docs
+- Prisma Docs: https://prisma.io/docs
+- Polygon Docs: https://docs.polygon.technology
+- React Docs: https://react.dev
+
+---
+
+**End of PR13-PR21 Roadmap**
+
+This roadmap transforms Damday Village into a world-class sustainable smart village platform with:
+- Complete admin control (WordPress-like)
+- Blockchain carbon credits (unique innovation)
+- Multiple revenue streams
+- Offline support for Himalayan connectivity
+- 25,000 trees target over 5 years
+
+Each PR is broken into 5 manageable phases with clear deliverables. Follow the step-by-step guide, and even non-programmers can contribute!
 
 ---
 
