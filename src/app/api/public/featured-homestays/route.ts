@@ -5,18 +5,10 @@ export async function GET() {
   try {
     const featuredHomestays = await prisma.homestay.findMany({
       where: {
-        featured: true,
-        status: 'APPROVED',
+        available: true,
       },
       take: 6,
       include: {
-        images: {
-          take: 1,
-          orderBy: {
-            isPrimary: 'desc',
-          },
-        },
-        amenities: true,
         reviews: {
           select: {
             rating: true,
@@ -34,17 +26,21 @@ export async function GET() {
           ? homestay.reviews.reduce((sum, r) => sum + r.rating, 0) / homestay.reviews.length
           : 0;
 
+      // Parse photos from JSON field
+      const photos = Array.isArray(homestay.photos) ? homestay.photos : [];
+      const amenitiesArray = Array.isArray(homestay.amenities) ? homestay.amenities : [];
+
       return {
         id: homestay.id,
         name: homestay.name,
         description: homestay.description,
-        location: homestay.location,
-        pricePerNight: homestay.pricePerNight,
+        location: homestay.address,
+        pricePerNight: homestay.basePrice,
         maxGuests: homestay.maxGuests,
-        image: homestay.images[0]?.url || '/placeholder-homestay.jpg',
+        image: photos[0] || '/placeholder-homestay.jpg',
         rating: Math.round(avgRating * 10) / 10,
         reviewCount: homestay.reviews.length,
-        amenities: homestay.amenities.map((a) => a.name),
+        amenities: amenitiesArray,
       };
     });
 

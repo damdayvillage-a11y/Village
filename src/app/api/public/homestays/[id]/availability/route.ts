@@ -32,10 +32,10 @@ export async function GET(
     // Check if homestay exists
     const homestay = await prisma.homestay.findUnique({
       where: { id },
-      select: { id: true, isApproved: true },
+      select: { id: true, available: true },
     });
 
-    if (!homestay || !homestay.isApproved) {
+    if (!homestay || !homestay.available) {
       return NextResponse.json(
         { success: false, error: 'Homestay not found' },
         { status: 404 }
@@ -53,22 +53,22 @@ export async function GET(
           // Booking starts during the requested period
           {
             AND: [
-              { checkInDate: { gte: checkInDate } },
-              { checkInDate: { lt: checkOutDate } },
+              { checkIn: { gte: checkInDate } },
+              { checkIn: { lt: checkOutDate } },
             ],
           },
           // Booking ends during the requested period
           {
             AND: [
-              { checkOutDate: { gt: checkInDate } },
-              { checkOutDate: { lte: checkOutDate } },
+              { checkOut: { gt: checkInDate } },
+              { checkOut: { lte: checkOutDate } },
             ],
           },
           // Booking completely encompasses the requested period
           {
             AND: [
-              { checkInDate: { lte: checkInDate } },
-              { checkOutDate: { gte: checkOutDate } },
+              { checkIn: { lte: checkInDate } },
+              { checkOut: { gte: checkOutDate } },
             ],
           },
         ],

@@ -111,7 +111,7 @@ export function Achievements({
     return categoryMatch && statusMatch;
   });
 
-  const categories = ['all', ...new Set(userAchievements.map(ua => ua.achievement.category))];
+  const categories = ['all', ...Array.from(new Set(userAchievements.map(ua => ua.achievement.category)))];
 
   return (
     <div className="space-y-6">

@@ -49,8 +49,9 @@ interface Notification {
   title: string;
   message: string;
   type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'BOOKING' | 'ORDER' | 'ACHIEVEMENT' | 'SYSTEM';
-  timestamp: string;
   read: boolean;
+  actionUrl?: string;
+  createdAt: string;
 }
 
 interface Article {
@@ -481,24 +482,6 @@ export default function UserPanelPage() {
       }
     } catch (error) {
       console.error('Failed to spend credits:', error);
-      throw error;
-    }
-  };
-
-  if (status === 'loading' || loading) {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const newComplaint = await response.json();
-        setComplaints(prev => [newComplaint, ...prev]);
-      } else {
-        throw new Error('Failed to create complaint/suggestion');
-      }
-    } catch (error) {
-      console.error('Failed to submit complaint/suggestion:', error);
       throw error;
     }
   };
