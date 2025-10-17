@@ -6,18 +6,65 @@
 
 ---
 
+## 🎯 Core Requirements & Architectural Principles
+
+### Primary Requirement: Admin-First Architecture
+**ALL features, functions, and content MUST be controllable through the Admin Panel**
+
+This is the foundational principle of the entire application:
+
+1. **Admin Control Everything**
+   - Every feature on user-facing pages must be manageable from admin panel
+   - Content visibility, availability, and configuration controlled by admin
+   - No hardcoded content - everything from database
+   - Admin can enable/disable features dynamically
+
+2. **Feature Implementation Pattern**
+   ```
+   Admin Panel → Database → Public/User Interface
+   ```
+   - Admin creates/manages content
+   - Database stores all configuration
+   - Public/User interfaces display based on admin settings
+
+3. **Examples of Admin Control**
+   - **Homestays**: Admin adds/edits/deletes homestays → Users can view/book
+   - **Products**: Admin manages inventory → Users can browse/purchase
+   - **Content**: Admin controls what appears on homepage
+   - **Features**: Admin can enable/disable entire sections
+   - **Settings**: All system configuration via admin panel
+   - **Theme**: Admin controls colors, layouts, branding
+
+4. **Implementation Rules**
+   - When building user features, always create admin management first
+   - User interfaces are READ-ONLY displays of admin-managed data
+   - All business logic controllable through admin settings
+   - Admin panel is the single source of truth for configuration
+
+5. **Goals**
+   - Complete control without touching code
+   - Dynamic feature management
+   - Easy content updates
+   - Scalable configuration system
+   - Non-technical admin users can manage everything
+
+**This principle applies to ALL current and future PRs.**
+
+---
+
 ## 📋 Table of Contents
 
-1. [Project Overview](#project-overview)
-2. [Technology Stack](#technology-stack)
-3. [Database Architecture](#database-architecture)
-4. [Complete PR Timeline (PR1-PR12+)](#complete-pr-timeline)
-5. [Component Inventory](#component-inventory)
-6. [API Endpoints Directory](#api-endpoints-directory)
-7. [Feature Mapping](#feature-mapping)
-8. [Deployment & Infrastructure](#deployment--infrastructure)
-9. [GitHub Copilot Agent Instructions](#github-copilot-agent-instructions)
-10. [Development Guidelines](#development-guidelines)
+1. [Core Requirements & Architectural Principles](#core-requirements--architectural-principles)
+2. [Project Overview](#project-overview)
+3. [Technology Stack](#technology-stack)
+4. [Database Architecture](#database-architecture)
+5. [Complete PR Timeline (PR1-PR12+)](#complete-pr-timeline)
+6. [Component Inventory](#component-inventory)
+7. [API Endpoints Directory](#api-endpoints-directory)
+8. [Feature Mapping](#feature-mapping)
+9. [Deployment & Infrastructure](#deployment--infrastructure)
+10. [GitHub Copilot Agent Instructions](#github-copilot-agent-instructions)
+11. [Development Guidelines](#development-guidelines)
 
 ---
 
