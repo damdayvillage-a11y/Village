@@ -5,47 +5,32 @@ export async function GET() {
   try {
     const featuredProducts = await prisma.product.findMany({
       where: {
-        featured: true,
-        status: 'ACTIVE',
+        active: true,
+        stock: {
+          gt: 0,
+        },
       },
       take: 8,
-      include: {
-        category: true,
-        reviews: {
-          select: {
-            rating: true,
-          },
-        },
+      orderBy: {
+        createdAt: 'desc',
       },
-      orderBy: [
-        {
-          trending: 'desc',
-        },
-        {
-          createdAt: 'desc',
-        },
-      ],
     });
 
     const productsWithDetails = featuredProducts.map((product) => {
-      const avgRating =
-        product.reviews.length > 0
-          ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-          : 0;
+      // Parse images from JSON field
+      const images = Array.isArray(product.images) ? product.images : [];
 
       return {
         id: product.id,
         name: product.name,
         description: product.description,
         price: product.price,
-        discountPrice: product.discountPrice,
         stock: product.stock,
-        inStock: product.stock > 0,
-        image: product.imageUrl || '/placeholder-product.jpg',
-        category: product.category?.name || 'Uncategorized',
-        rating: Math.round(avgRating * 10) / 10,
-        reviewCount: product.reviews.length,
-        trending: product.trending,
+        inStock: product.stock > 0 || product.unlimited,
+        image: images[0] || '/placeholder-product.jpg',
+        category: product.category || 'Uncategorized',
+        locallySourced: product.locallySourced,
+        carbonFootprint: product.carbonFootprint,
       };
     });
 

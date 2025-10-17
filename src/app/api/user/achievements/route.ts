@@ -59,7 +59,6 @@ export async function GET(request: NextRequest) {
         icon: ua.achievement.icon,
         category: ua.achievement.category,
         points: ua.achievement.points,
-        rarity: ua.achievement.rarity,
       }
     }));
 

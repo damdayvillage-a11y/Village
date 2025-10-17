@@ -3,13 +3,12 @@ import prisma from '@/lib/db/prisma';
 
 export async function GET() {
   try {
-    // Get testimonials from reviews that are featured and have high ratings
+    // Get testimonials from reviews that have high ratings
     const testimonials = await prisma.review.findMany({
       where: {
         rating: {
           gte: 4,
         },
-        featured: true,
       },
       take: 6,
       include: {
@@ -17,11 +16,6 @@ export async function GET() {
           select: {
             name: true,
             image: true,
-          },
-        },
-        product: {
-          select: {
-            name: true,
           },
         },
         homestay: {
@@ -40,9 +34,9 @@ export async function GET() {
       userName: review.user.name || 'Anonymous',
       userImage: review.user.image || '/default-avatar.png',
       rating: review.rating,
-      comment: review.comment,
-      itemName: review.product?.name || review.homestay?.name || 'Village Experience',
-      itemType: review.productId ? 'product' : review.homestayId ? 'homestay' : 'general',
+      comment: review.comment || 'Great experience!',
+      itemName: review.homestay?.name || 'Village Experience',
+      itemType: review.homestayId ? 'homestay' : 'general',
       date: review.createdAt,
     }));
 

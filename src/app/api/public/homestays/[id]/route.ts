@@ -11,7 +11,7 @@ export async function GET(
     const homestay = await prisma.homestay.findUnique({
       where: { id },
       include: {
-        host: {
+        owner: {
           select: {
             id: true,
             name: true,
@@ -34,7 +34,7 @@ export async function GET(
       },
     });
 
-    if (!homestay || !homestay.isApproved) {
+    if (!homestay || !homestay.available) {
       return NextResponse.json(
         { success: false, error: 'Homestay not found' },
         { status: 404 }
@@ -47,20 +47,24 @@ export async function GET(
       ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
       : 0;
 
-    // Get related homestays (same location)
+    // Parse photos from JSON field
+    const photos = Array.isArray(homestay.photos) ? homestay.photos : [];
+    const amenitiesArray = Array.isArray(homestay.amenities) ? homestay.amenities : [];
+
+    // Get related homestays (same village)
     const relatedHomestays = await prisma.homestay.findMany({
       where: {
-        location: homestay.location,
+        villageId: homestay.villageId,
         id: { not: id },
-        isApproved: true,
+        available: true,
       },
       take: 4,
       select: {
         id: true,
         name: true,
-        location: true,
-        pricePerNight: true,
-        images: true,
+        address: true,
+        basePrice: true,
+        photos: true,
       },
     });
 
@@ -68,21 +72,21 @@ export async function GET(
       id: homestay.id,
       name: homestay.name,
       description: homestay.description,
-      location: homestay.location,
-      pricePerNight: homestay.pricePerNight,
+      location: homestay.address,
+      pricePerNight: homestay.basePrice,
       maxGuests: homestay.maxGuests,
-      bedrooms: homestay.bedrooms,
-      bathrooms: homestay.bathrooms,
-      images: homestay.images,
-      amenities: homestay.amenities,
-      houseRules: homestay.houseRules,
+      rooms: homestay.rooms,
+      images: photos,
+      amenities: amenitiesArray,
       averageRating: parseFloat(averageRating.toFixed(1)),
       reviewCount: homestay.reviews.length,
+      latitude: homestay.latitude,
+      longitude: homestay.longitude,
       host: {
-        id: homestay.host.id,
-        name: homestay.host.name || 'Host',
-        avatar: homestay.host.image || '/default-avatar.png',
-        memberSince: homestay.host.createdAt.toISOString().split('T')[0],
+        id: homestay.owner.id,
+        name: homestay.owner.name || 'Host',
+        avatar: homestay.owner.image || '/default-avatar.png',
+        memberSince: homestay.owner.createdAt.toISOString().split('T')[0],
       },
       reviews: homestay.reviews.map((review) => ({
         id: review.id,
@@ -94,13 +98,16 @@ export async function GET(
           avatar: review.user.image || '/default-avatar.png',
         },
       })),
-      relatedHomestays: relatedHomestays.map((h) => ({
-        id: h.id,
-        name: h.name,
-        location: h.location,
-        pricePerNight: h.pricePerNight,
-        primaryImage: h.images?.[0] || '/placeholder-homestay.jpg',
-      })),
+      relatedHomestays: relatedHomestays.map((h) => {
+        const hPhotos = Array.isArray(h.photos) ? h.photos : [];
+        return {
+          id: h.id,
+          name: h.name,
+          location: h.address,
+          pricePerNight: h.basePrice,
+          primaryImage: hPhotos[0] || '/placeholder-homestay.jpg',
+        };
+      }),
     };
 
     return NextResponse.json({ success: true, data: response });

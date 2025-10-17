@@ -32,19 +32,19 @@ export async function GET(request: NextRequest) {
 
     // Get booking stats
     const totalBookings = await prisma.booking.count({
-      where: { userId: user.id }
+      where: { guestId: user.id }
     });
 
     const thisMonthBookings = await prisma.booking.count({
       where: {
-        userId: user.id,
+        guestId: user.id,
         createdAt: { gte: thisMonthStart }
       }
     });
 
     const lastMonthBookings = await prisma.booking.count({
       where: {
-        userId: user.id,
+        guestId: user.id,
         createdAt: {
           gte: lastMonthStart,
           lte: lastMonthEnd

@@ -486,24 +486,6 @@ export default function UserPanelPage() {
   };
 
   if (status === 'loading' || loading) {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const newComplaint = await response.json();
-        setComplaints(prev => [newComplaint, ...prev]);
-      } else {
-        throw new Error('Failed to create complaint/suggestion');
-      }
-    } catch (error) {
-      console.error('Failed to submit complaint/suggestion:', error);
-      throw error;
-    }
-  };
-
-  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center">
         <div className="text-center">

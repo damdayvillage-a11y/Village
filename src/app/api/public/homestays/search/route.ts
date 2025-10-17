@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {
-      isApproved: true,
+      available: true,
     };
 
     // Full-text search
@@ -29,13 +29,13 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { name: { contains: query, mode: 'insensitive' } },
         { description: { contains: query, mode: 'insensitive' } },
-        { location: { contains: query, mode: 'insensitive' } },
+        { address: { contains: query, mode: 'insensitive' } },
       ];
     }
 
     // Location filter
     if (location) {
-      where.location = {
+      where.address = {
         contains: location,
         mode: 'insensitive',
       };
@@ -43,9 +43,9 @@ export async function GET(request: NextRequest) {
 
     // Price filter
     if (priceMin || priceMax) {
-      where.pricePerNight = {};
-      if (priceMin) where.pricePerNight.gte = parseFloat(priceMin);
-      if (priceMax) where.pricePerNight.lte = parseFloat(priceMax);
+      where.basePrice = {};
+      if (priceMin) where.basePrice.gte = parseFloat(priceMin);
+      if (priceMax) where.basePrice.lte = parseFloat(priceMax);
     }
 
     // Guest capacity filter
@@ -55,22 +55,14 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // Amenities filter
-    if (amenities) {
-      const amenityList = amenities.split(',').map(a => a.trim());
-      where.amenities = {
-        hasEvery: amenityList,
-      };
-    }
-
     // Build orderBy
     let orderBy: any = {};
     switch (sortBy) {
       case 'price_asc':
-        orderBy = { pricePerNight: 'asc' };
+        orderBy = { basePrice: 'asc' };
         break;
       case 'price_desc':
-        orderBy = { pricePerNight: 'desc' };
+        orderBy = { basePrice: 'desc' };
         break;
       case 'relevance':
       default:
@@ -97,8 +89,8 @@ export async function GET(request: NextRequest) {
             },
           },
           select: {
-            checkInDate: true,
-            checkOutDate: true,
+            checkIn: true,
+            checkOut: true,
           },
         } : false,
       },
@@ -114,9 +106,9 @@ export async function GET(request: NextRequest) {
         
         const hasConflict = homestay.bookings.some((booking: any) => {
           return (
-            (booking.checkInDate >= checkInDate && booking.checkInDate < checkOutDate) ||
-            (booking.checkOutDate > checkInDate && booking.checkOutDate <= checkOutDate) ||
-            (booking.checkInDate <= checkInDate && booking.checkOutDate >= checkOutDate)
+            (booking.checkIn >= checkInDate && booking.checkIn < checkOutDate) ||
+            (booking.checkOut > checkInDate && booking.checkOut <= checkOutDate) ||
+            (booking.checkIn <= checkInDate && booking.checkOut >= checkOutDate)
           );
         });
         
@@ -134,12 +126,20 @@ export async function GET(request: NextRequest) {
         ? ratings.reduce((sum: number, r: number) => sum + r, 0) / ratings.length
         : 0;
 
+      // Parse photos and amenities from JSON
+      const photos = Array.isArray(homestay.photos) ? homestay.photos : [];
+      const amenitiesArray = Array.isArray(homestay.amenities) ? homestay.amenities : [];
+
       // Remove bookings from response
       const { bookings, reviews, ...rest } = homestay;
 
       return {
         ...rest,
-        primaryImage: homestay.images?.[0] || '/placeholder-homestay.jpg',
+        location: homestay.address,
+        pricePerNight: homestay.basePrice,
+        images: photos,
+        primaryImage: photos[0] || '/placeholder-homestay.jpg',
+        amenities: amenitiesArray,
         averageRating: parseFloat(averageRating.toFixed(1)),
         reviewCount: reviews.length,
       };

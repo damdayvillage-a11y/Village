@@ -19,36 +19,28 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {
-      isApproved: true,
+      available: true,
     };
 
-    // Location filter
+    // Location filter (using address field)
     if (location) {
-      where.location = {
+      where.address = {
         contains: location,
         mode: 'insensitive',
       };
     }
 
-    // Price filter
+    // Price filter (using basePrice)
     if (priceMin || priceMax) {
-      where.pricePerNight = {};
-      if (priceMin) where.pricePerNight.gte = parseFloat(priceMin);
-      if (priceMax) where.pricePerNight.lte = parseFloat(priceMax);
+      where.basePrice = {};
+      if (priceMin) where.basePrice.gte = parseFloat(priceMin);
+      if (priceMax) where.basePrice.lte = parseFloat(priceMax);
     }
 
     // Guest capacity filter
     if (guests) {
       where.maxGuests = {
         gte: parseInt(guests),
-      };
-    }
-
-    // Amenities filter (AND logic)
-    if (amenities) {
-      const amenityList = amenities.split(',').map(a => a.trim());
-      where.amenities = {
-        hasEvery: amenityList,
       };
     }
 
@@ -64,10 +56,10 @@ export async function GET(request: NextRequest) {
     let orderBy: any = {};
     switch (sortBy) {
       case 'price_asc':
-        orderBy = { pricePerNight: 'asc' };
+        orderBy = { basePrice: 'asc' };
         break;
       case 'price_desc':
-        orderBy = { pricePerNight: 'desc' };
+        orderBy = { basePrice: 'desc' };
         break;
       case 'rating_desc':
         orderBy = { createdAt: 'desc' }; // Will calculate rating separately
@@ -103,20 +95,25 @@ export async function GET(request: NextRequest) {
         ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
         : 0;
 
+      // Parse photos and amenities from JSON
+      const photos = Array.isArray(homestay.photos) ? homestay.photos : [];
+      const amenitiesArray = Array.isArray(homestay.amenities) ? homestay.amenities : [];
+
       return {
         id: homestay.id,
         name: homestay.name,
         description: homestay.description,
-        location: homestay.location,
-        pricePerNight: homestay.pricePerNight,
+        location: homestay.address,
+        pricePerNight: homestay.basePrice,
         maxGuests: homestay.maxGuests,
-        bedrooms: homestay.bedrooms,
-        bathrooms: homestay.bathrooms,
-        images: homestay.images,
-        primaryImage: homestay.images?.[0] || '/placeholder-homestay.jpg',
-        amenities: homestay.amenities,
+        rooms: homestay.rooms,
+        images: photos,
+        primaryImage: photos[0] || '/placeholder-homestay.jpg',
+        amenities: amenitiesArray,
         averageRating: parseFloat(averageRating.toFixed(1)),
         reviewCount: homestay.reviews.length,
+        latitude: homestay.latitude,
+        longitude: homestay.longitude,
       };
     });
 

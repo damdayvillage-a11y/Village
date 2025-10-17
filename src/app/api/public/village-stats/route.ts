@@ -14,12 +14,12 @@ export async function GET() {
     ] = await Promise.all([
       prisma.homestay.count({
         where: {
-          status: 'APPROVED',
+          available: true,
         },
       }),
       prisma.product.count({
         where: {
-          status: 'ACTIVE',
+          active: true,
         },
       }),
       prisma.booking.count({
@@ -51,7 +51,7 @@ export async function GET() {
     });
 
     const totalCarbonOffset = carbonCredits._sum.balance || 0;
-    const co2OffsetKg = totalCarbonOffset * 0.1; // Each credit = 0.1 kg CO2
+    const co2OffsetKg = Number(totalCarbonOffset) * 0.1; // Each credit = 0.1 kg CO2
 
     const stats = {
       homestays: {
