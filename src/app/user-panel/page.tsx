@@ -19,7 +19,8 @@ import {
   Award,
   BarChart3,
   Home,
-  PlusCircle
+  PlusCircle,
+  Leaf
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
@@ -27,19 +28,22 @@ import { Badge } from '@/lib/components/ui/Badge';
 import { Avatar } from '@/lib/components/ui/Avatar';
 import { ComplaintsForm } from '@/lib/components/user-panel/ComplaintsForm';
 import { ArticleEditor } from '@/lib/components/user-panel/ArticleEditor';
+import { EnhancedDashboard } from '@/lib/components/user-panel/EnhancedDashboard';
+import { ProfileManagement } from '@/lib/components/user-panel/ProfileManagement';
 
 interface UserStats {
   bookings: number;
   orders: number;
   articles: number;
-  contributions: number;
+  carbonCredits: number;
+  achievements: number;
 }
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'BOOKING' | 'ORDER' | 'ACHIEVEMENT' | 'SYSTEM';
   timestamp: string;
   read: boolean;
 }
@@ -65,6 +69,19 @@ interface Complaint {
   adminResponse?: string;
 }
 
+interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  avatar?: string;
+  image?: string;
+  preferences?: {
+    language?: string;
+    notifications?: boolean;
+  };
+}
+
 export default function UserPanelPage() {
   const sessionResult = useSession();
   const session = sessionResult?.data;
@@ -75,11 +92,13 @@ export default function UserPanelPage() {
     bookings: 0,
     orders: 0,
     articles: 0,
-    contributions: 0
+    carbonCredits: 0,
+    achievements: 0
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -95,6 +114,13 @@ export default function UserPanelPage() {
 
   const loadUserData = async () => {
     try {
+      // Load user profile
+      const profileResponse = await fetch('/api/user/profile');
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json();
+        setUserProfile(profile);
+      }
+
       // Load user statistics
       const statsResponse = await fetch('/api/user/stats');
       if (statsResponse.ok) {
@@ -139,6 +165,50 @@ export default function UserPanelPage() {
       );
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
+    }
+  };
+
+  const handleProfileUpdate = async (data: Partial<UserProfile>) => {
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        setUserProfile(updatedProfile);
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error;
+    }
+  };
+
+  const handleAvatarUpload = async (file: File): Promise<string> => {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await fetch('/api/user/profile/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result.avatarUrl;
+      } else {
+        throw new Error('Failed to upload avatar');
+      }
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+      throw error;
     }
   };
 
@@ -231,6 +301,7 @@ export default function UserPanelPage() {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'bookings', label: 'Bookings', icon: Calendar },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
+    { id: 'carbon', label: 'Carbon Credits', icon: Leaf },
     { id: 'articles', label: 'My Articles', icon: FileText },
     { id: 'complaints', label: 'Complaints & Suggestions', icon: MessageSquare },
     { id: 'notifications', label: 'Notifications', icon: Bell, badge: unreadNotifications },
@@ -238,226 +309,26 @@ export default function UserPanelPage() {
   ];
 
   const renderDashboard = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Welcome back, {session?.user?.name || 'User'}!
-        </h2>
-        <p className="text-gray-600">
-          Here's what's happening with your Damday Village account
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Bookings</h3>
-              <p className="text-2xl font-semibold text-gray-900">{userStats.bookings}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <ShoppingBag className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Orders</h3>
-              <p className="text-2xl font-semibold text-gray-900">{userStats.orders}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <FileText className="h-6 w-6 text-purple-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Articles</h3>
-              <p className="text-2xl font-semibold text-gray-900">{userStats.articles}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Award className="h-6 w-6 text-orange-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Contributions</h3>
-              <p className="text-2xl font-semibold text-gray-900">{userStats.contributions}</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Articles</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {articles.length > 0 ? (
-              <div className="space-y-3">
-                {articles.slice(0, 3).map((article) => (
-                  <div key={article.id} className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{article.title}</h4>
-                      <p className="text-sm text-gray-500">
-                        {article.status === 'published' ? `${article.views} views` : article.status}
-                      </p>
-                    </div>
-                    <Badge 
-                      className={
-                        article.status === 'published' ? 'bg-green-100 text-green-800' :
-                        article.status === 'review' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }
-                    >
-                      {article.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">No articles yet</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={() => setActiveTab('articles')}
-                >
-                  Write your first article
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Notifications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {notifications.length > 0 ? (
-              <div className="space-y-3">
-                {notifications.slice(0, 3).map((notification) => (
-                  <div 
-                    key={notification.id} 
-                    className={`p-3 rounded-lg border ${
-                      !notification.read ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <h4 className="font-medium text-gray-900">{notification.title}</h4>
-                    <p className="text-sm text-gray-600">{notification.message}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(notification.timestamp).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <Bell className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">No notifications</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <EnhancedDashboard
+      userName={session?.user?.name || 'User'}
+      stats={userStats}
+      recentActivities={[]}
+    />
   );
 
-  const renderProfile = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Settings</h2>
-        <p className="text-gray-600">Manage your account information and preferences</p>
-      </div>
+  const renderProfile = () => {
+    if (!userProfile) {
+      return <div>Loading profile...</div>;
+    }
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-6 mb-6">
-            <Avatar 
-              src={session?.user?.image} 
-              alt={session?.user?.name || 'User'} 
-              size="lg"
-            />
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {session?.user?.name || 'User'}
-              </h3>
-              <p className="text-gray-600">{session?.user?.email}</p>
-              <Button variant="outline" size="sm" className="mt-2">
-                Change Photo
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                defaultValue={session?.user?.name || ''}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                defaultValue={session?.user?.email || ''}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone
-              </label>
-              <input
-                type="tel"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="+91 XXXXX XXXXX"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="City, State"
-              />
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <Button variant="primary">Save Changes</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+    return (
+      <ProfileManagement
+        profile={userProfile}
+        onUpdate={handleProfileUpdate}
+        onAvatarUpload={handleAvatarUpload}
+      />
+    );
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -469,6 +340,8 @@ export default function UserPanelPage() {
         return <div>Bookings content coming soon...</div>;
       case 'orders':
         return <div>Orders content coming soon...</div>;
+      case 'carbon':
+        return <div>Carbon Credits content coming soon...</div>;
       case 'articles':
         return (
           <ArticleEditor
