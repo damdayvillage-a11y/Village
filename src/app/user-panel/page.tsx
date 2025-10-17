@@ -32,6 +32,9 @@ import { EnhancedDashboard } from '@/lib/components/user-panel/EnhancedDashboard
 import { ProfileManagement } from '@/lib/components/user-panel/ProfileManagement';
 import { BookingManagement } from '@/lib/components/user-panel/BookingManagement';
 import { CarbonCreditWallet } from '@/lib/components/user-panel/CarbonCreditWallet';
+import { NotificationCenter } from '@/lib/components/user-panel/NotificationCenter';
+import { Achievements } from '@/lib/components/user-panel/Achievements';
+import { PersonalAnalytics } from '@/lib/components/user-panel/PersonalAnalytics';
 
 interface UserStats {
   bookings: number;
@@ -122,6 +125,8 @@ export default function UserPanelPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [carbonCredits, setCarbonCredits] = useState<any>(null);
   const [carbonTransactions, setCarbonTransactions] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -192,6 +197,20 @@ export default function UserPanelPage() {
         const transactions = await carbonTransactionsResponse.json();
         setCarbonTransactions(transactions);
       }
+
+      // Load achievements
+      const achievementsResponse = await fetch('/api/user/achievements');
+      if (achievementsResponse.ok) {
+        const achievementsData = await achievementsResponse.json();
+        setAchievements(achievementsData);
+      }
+
+      // Load analytics
+      const analyticsResponse = await fetch('/api/user/analytics');
+      if (analyticsResponse.ok) {
+        const analyticsData = await analyticsResponse.json();
+        setAnalytics(analyticsData);
+      }
     } catch (error) {
       console.error('Failed to load user data:', error);
     } finally {
@@ -209,6 +228,22 @@ export default function UserPanelPage() {
       );
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
+      throw error;
+    }
+  };
+
+  const markAllNotificationsAsRead = async () => {
+    try {
+      // Mark all unread notifications
+      const unreadNotifications = notifications.filter(n => !n.read);
+      await Promise.all(
+        unreadNotifications.map(n => 
+          fetch(`/api/user/notifications/${n.id}/read`, { method: 'POST' })
+        )
+      );
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
     }
   };
 
@@ -491,6 +526,8 @@ export default function UserPanelPage() {
     { id: 'bookings', label: 'Bookings', icon: Calendar },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
     { id: 'carbon', label: 'Carbon Credits', icon: Leaf },
+    { id: 'achievements', label: 'Achievements', icon: Award },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'articles', label: 'My Articles', icon: FileText },
     { id: 'complaints', label: 'Complaints & Suggestions', icon: MessageSquare },
     { id: 'notifications', label: 'Notifications', icon: Bell, badge: unreadNotifications },
@@ -565,7 +602,33 @@ export default function UserPanelPage() {
           />
         );
       case 'notifications':
-        return <div>Notifications management coming soon...</div>;
+        return (
+          <NotificationCenter
+            notifications={notifications}
+            onMarkAsRead={markNotificationAsRead}
+            onMarkAllAsRead={markAllNotificationsAsRead}
+          />
+        );
+      case 'achievements':
+        if (!achievements) {
+          return <div>Loading achievements...</div>;
+        }
+        return (
+          <Achievements
+            userAchievements={achievements.userAchievements || []}
+            totalPoints={achievements.totalPoints || 0}
+            rank={achievements.rank}
+          />
+        );
+      case 'analytics':
+        if (!analytics) {
+          return <div>Loading analytics...</div>;
+        }
+        return (
+          <PersonalAnalytics
+            analyticsData={analytics}
+          />
+        );
       case 'settings':
         return <div>Settings content coming soon...</div>;
       default:
