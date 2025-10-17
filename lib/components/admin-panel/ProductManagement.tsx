@@ -16,7 +16,9 @@ import {
   IndianRupee,
   TrendingUp,
   Filter,
-  Download
+  Download,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 
 interface Product {
@@ -57,6 +59,7 @@ export function ProductManagement() {
     isActive: true,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadProducts();
@@ -131,6 +134,100 @@ export function ProductManagement() {
     } catch (error) {
       console.error('Failed to delete product:', error);
       alert('Network error deleting product');
+    }
+  };
+
+  const toggleSelectProduct = (productId: string) => {
+    const newSelected = new Set(selectedProducts);
+    if (newSelected.has(productId)) {
+      newSelected.delete(productId);
+    } else {
+      newSelected.add(productId);
+    }
+    setSelectedProducts(newSelected);
+  };
+
+  const selectAllProducts = () => {
+    if (selectedProducts.size === filteredProducts.length) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(filteredProducts.map(p => p.id)));
+    }
+  };
+
+  const bulkActivateProducts = async () => {
+    if (selectedProducts.size === 0) {
+      alert('Please select products to activate');
+      return;
+    }
+
+    try {
+      const updatePromises = Array.from(selectedProducts).map(productId =>
+        fetch('/api/admin/products', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, isActive: true }),
+        })
+      );
+
+      await Promise.all(updatePromises);
+      setSelectedProducts(new Set());
+      await loadProducts();
+      alert(`Successfully activated ${selectedProducts.size} product(s)`);
+    } catch (error) {
+      console.error('Failed to activate products:', error);
+      alert('Network error activating products');
+    }
+  };
+
+  const bulkDeactivateProducts = async () => {
+    if (selectedProducts.size === 0) {
+      alert('Please select products to deactivate');
+      return;
+    }
+
+    try {
+      const updatePromises = Array.from(selectedProducts).map(productId =>
+        fetch('/api/admin/products', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, isActive: false }),
+        })
+      );
+
+      await Promise.all(updatePromises);
+      setSelectedProducts(new Set());
+      await loadProducts();
+      alert(`Successfully deactivated ${selectedProducts.size} product(s)`);
+    } catch (error) {
+      console.error('Failed to deactivate products:', error);
+      alert('Network error deactivating products');
+    }
+  };
+
+  const bulkDeleteProducts = async () => {
+    if (selectedProducts.size === 0) {
+      alert('Please select products to delete');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedProducts.size} product(s)?`)) {
+      return;
+    }
+
+    try {
+      const deletePromises = Array.from(selectedProducts).map(productId =>
+        fetch(`/api/admin/products?id=${productId}`, {
+          method: 'DELETE',
+        })
+      );
+
+      await Promise.all(deletePromises);
+      setSelectedProducts(new Set());
+      await loadProducts();
+    } catch (error) {
+      console.error('Failed to delete products:', error);
+      alert('Network error deleting products');
     }
   };
 
@@ -290,10 +387,43 @@ export function ProductManagement() {
           <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
           <p className="text-gray-600">Manage marketplace products and inventory</p>
         </div>
-        <Button onClick={openAddModal} className="bg-primary-600 hover:bg-primary-700">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Product
-        </Button>
+        <div className="flex items-center space-x-2">
+          {selectedProducts.size > 0 && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={bulkActivateProducts}
+                className="text-green-600 hover:text-green-700"
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Activate {selectedProducts.size}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={bulkDeactivateProducts}
+                className="text-yellow-600 hover:text-yellow-700"
+              >
+                <XCircle className="h-4 w-4 mr-1" />
+                Deactivate {selectedProducts.size}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={bulkDeleteProducts}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete {selectedProducts.size}
+              </Button>
+            </>
+          )}
+          <Button onClick={openAddModal} className="bg-primary-600 hover:bg-primary-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -403,15 +533,30 @@ export function ProductManagement() {
               <option value="false">Inactive</option>
             </select>
 
-            <Button
-              variant="outline"
-              onClick={exportToCSV}
-              disabled={filteredProducts.length === 0}
-              className="w-full"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV ({filteredProducts.length})
-            </Button>
+            <div className="flex items-center space-x-2">
+              {filteredProducts.length > 0 && (
+                <button
+                  onClick={selectAllProducts}
+                  className="flex items-center text-sm text-primary-600 hover:text-primary-700 px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  {selectedProducts.size === filteredProducts.length ? (
+                    <CheckSquare className="h-4 w-4 mr-1" />
+                  ) : (
+                    <Square className="h-4 w-4 mr-1" />
+                  )}
+                  {selectedProducts.size === filteredProducts.length ? 'Deselect All' : 'Select All'}
+                </button>
+              )}
+              <Button
+                variant="outline"
+                onClick={exportToCSV}
+                disabled={filteredProducts.length === 0}
+                className="w-full"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -423,6 +568,15 @@ export function ProductManagement() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
                 <tr>
+                  <th className="py-3 px-4 w-12">
+                    <button onClick={selectAllProducts}>
+                      {selectedProducts.size === filteredProducts.length && filteredProducts.length > 0 ? (
+                        <CheckSquare className="h-5 w-5 text-primary-600" />
+                      ) : (
+                        <Square className="h-5 w-5 text-gray-400" />
+                      )}
+                    </button>
+                  </th>
                   <th className="text-left py-3 px-4 font-semibold text-sm text-gray-700">Product</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm text-gray-700">Category</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm text-gray-700">Price</th>
@@ -435,6 +589,15 @@ export function ProductManagement() {
               <tbody className="divide-y divide-gray-200">
                 {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <button onClick={() => toggleSelectProduct(product.id)}>
+                        {selectedProducts.has(product.id) ? (
+                          <CheckSquare className="h-5 w-5 text-primary-600" />
+                        ) : (
+                          <Square className="h-5 w-5 text-gray-400" />
+                        )}
+                      </button>
+                    </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center">
                         {product.images && product.images.length > 0 ? (
