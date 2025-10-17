@@ -11,12 +11,12 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 
 ## 🚀 Quick Start - CapRover Deployment
 
-**📖 Complete Guide:** [CAPGUIDE.md](./CAPGUIDE.md) - Everything you need to deploy to CapRover
+**📖 Complete Guide:** [CAPGUIDE.md](./docs/md-files/CAPGUIDE.md) - Everything you need to deploy to CapRover
 
 ### Quick Steps
 
 1. **Deploy PostgreSQL** on CapRover
-2. **Create app** and configure environment variables (see CAPGUIDE.md)
+2. **Create app** and configure environment variables (see [CAPGUIDE.md](./docs/md-files/CAPGUIDE.md))
 3. **Deploy** from GitHub or CLI
 4. **Wait for startup** - Admin and host users are created automatically! 🎉
 5. **Login:** `admin@damdayvillage.org` / `Admin@123` (change password!)
@@ -24,13 +24,13 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 **No SSH commands needed!** The application automatically creates admin and host users on first startup.
 
 **📚 Additional Resources:**
-- 🗄️ [Database Setup Guide](./CAPROVER_DATABASE_SETUP.md) - Configure PostgreSQL connection for CapRover (srv-captain--postgres support)
+- 🗄️ [Database Setup Guide](./docs/md-files/CAPROVER_DATABASE_SETUP.md) - Configure PostgreSQL connection for CapRover (srv-captain--postgres support)
 
 ### 🆘 Getting Errors?
 
 - **500 Error?** Visit `/help/admin-500` (English) or `/help/admin-500-hi` (हिंदी) on your deployed app
 - **Need diagnostics?** Check `/admin-panel/status` for system health
-- **See full guide:** [CAPGUIDE.md](./CAPGUIDE.md) has complete troubleshooting
+- **See full guide:** [CAPGUIDE.md](./docs/md-files/CAPGUIDE.md) has complete troubleshooting
 
 ### Key Features
 
@@ -180,16 +180,16 @@ docker build -f Dockerfile.debug -t village-app .
 ## 📖 Documentation
 
 ### CapRover Deployment (Start Here!)
-- 🔥 **[CapRover Quick Fix](CAPROVER_QUICK_FIX.md)** - 3-step fix for "something bad" errors (5 min)
-- 📖 **[Complete Deployment Guide](CAPROVER_DEPLOYMENT_GUIDE.md)** - Full CapRover setup instructions
-- ⚠️ **[Environment Check](CAPROVER_ENV_CHECK.md)** - Validate before deploying
+- 🔥 **[CapRover Quick Fix](docs/md-files/CAPROVER_QUICK_FIX.md)** - 3-step fix for "something bad" errors (5 min)
+- 📖 **[Complete Deployment Guide](docs/md-files/CAPROVER_DEPLOYMENT_GUIDE.md)** - Full CapRover setup instructions
+- ⚠️ **[Environment Check](docs/md-files/CAPROVER_ENV_CHECK.md)** - Validate before deploying
 - 🔧 **[CapRover Troubleshooting](docs/CAPROVER_TROUBLESHOOTING.md)** - Fix build issues
 
 ### General Documentation
 - **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Admin Setup Guide](docs/ADMIN_SETUP.md)** - Admin credentials and setup
-- **[Deployment Checklist](DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment
-- **[Production Readiness](PRODUCTION_READINESS.md)** - Pre-deployment verification
+- **[Deployment Checklist](docs/md-files/DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment
+- **[Production Readiness](docs/md-files/PRODUCTION_READINESS.md)** - Pre-deployment verification
 
 ## 🔧 Environment Variables
 
@@ -254,8 +254,8 @@ The user panel provides comprehensive functionality for village users:
 **Access at**: `https://your-domain.com/user-panel`
 
 **📚 Documentation:**
-- **[PR11_USER_PANEL_ROADMAP.md](./PR11_USER_PANEL_ROADMAP.md)** - Complete feature roadmap
-- **[PR11_IMPLEMENTATION_COMPLETE.md](./PR11_IMPLEMENTATION_COMPLETE.md)** - Implementation details
+- **[PR11_USER_PANEL_ROADMAP.md](./docs/md-files/PR11_USER_PANEL_ROADMAP.md)** - Complete feature roadmap
+- **[PR11_IMPLEMENTATION_COMPLETE.md](./docs/md-files/PR11_IMPLEMENTATION_COMPLETE.md)** - Implementation details
 
 ### Troubleshooting Admin Panel
 
@@ -296,8 +296,8 @@ Visit `https://your-domain.com/admin-panel/status` for comprehensive diagnostics
    ```
 
 **📚 Detailed Documentation:**
-- 🩺 **[ADMIN_500_ERROR_FIX.md](./ADMIN_500_ERROR_FIX.md)** - Comprehensive admin panel diagnostics
-- [ADMIN_PANEL_SETUP.md](./ADMIN_PANEL_SETUP.md) - Complete setup and troubleshooting guide
+- 🩺 **[ADMIN_500_ERROR_FIX.md](./docs/md-files/ADMIN_500_ERROR_FIX.md)** - Comprehensive admin panel diagnostics
+- [ADMIN_PANEL_SETUP.md](./docs/md-files/ADMIN_PANEL_SETUP.md) - Complete setup and troubleshooting guide
 - [docs/PRODUCTION_SETUP_GUIDE.md](./docs/PRODUCTION_SETUP_GUIDE.md) - Production deployment guide
 - [docs/AUTH_ERROR_HANDLING.md](./docs/AUTH_ERROR_HANDLING.md) - Authentication error handling
 
