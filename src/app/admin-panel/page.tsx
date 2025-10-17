@@ -47,6 +47,7 @@ import { ProductManagement } from '@/lib/components/admin-panel/ProductManagemen
 import { OrderManagement } from '@/lib/components/admin-panel/OrderManagement';
 import { MediaManager } from '@/lib/components/admin-panel/MediaManager';
 import SystemSettings from '@/lib/components/admin-panel/SystemSettings';
+import IoTDeviceManagement from '@/lib/components/admin-panel/IoTDeviceManagement';
 import { signOut } from 'next-auth/react';
 
 // Disable static generation for this page as it requires authentication
@@ -513,48 +514,7 @@ export default function AdminPanelPage() {
       case 'products':
         return <ProductManagement />;
       case 'devices':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">IoT Device Management</h2>
-              <p className="text-gray-600">Monitor and manage village IoT devices</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Online</h3>
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{adminStats.onlineDevices || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">Devices currently online</p>
-              </Card>
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Health</h3>
-                  <Activity className={`h-6 w-6 ${
-                    adminStats.systemHealth === 'healthy' ? 'text-green-500' :
-                    adminStats.systemHealth === 'warning' ? 'text-yellow-500' :
-                    'text-red-500'
-                  }`} />
-                </div>
-                <p className="text-2xl font-bold text-gray-900 capitalize">{adminStats.systemHealth}</p>
-                <p className="text-sm text-gray-500 mt-2">Overall system status</p>
-              </Card>
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Alerts</h3>
-                  <Bell className="h-6 w-6 text-red-500" />
-                </div>
-                <p className="text-3xl font-bold text-gray-900">0</p>
-                <p className="text-sm text-gray-500 mt-2">Active alerts</p>
-              </Card>
-            </div>
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Device List</h3>
-              <p className="text-gray-500 text-center py-8">Device monitoring interface coming soon</p>
-            </Card>
-          </div>
-        );
+        return <IoTDeviceManagement />;
       case 'analytics':
         return (
           <div className="space-y-6">
