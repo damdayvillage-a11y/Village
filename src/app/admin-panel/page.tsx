@@ -49,6 +49,7 @@ import { MediaManager } from '@/lib/components/admin-panel/MediaManager';
 import SystemSettings from '@/lib/components/admin-panel/SystemSettings';
 import IoTDeviceManagement from '@/lib/components/admin-panel/IoTDeviceManagement';
 import AnalyticsDashboard from '@/lib/components/admin-panel/AnalyticsDashboard';
+import ThemeCustomizer from '@/lib/components/admin-panel/ThemeCustomizer';
 import { signOut } from 'next-auth/react';
 
 // Disable static generation for this page as it requires authentication
@@ -530,14 +531,7 @@ export default function AdminPanelPage() {
       case 'media':
         return <MediaManager />;
       case 'theme':
-        return (
-          <div className="text-center py-12">
-            <Palette className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Theme Customizer</h3>
-            <p className="text-gray-500 mb-4">Customize colors, fonts, and branding</p>
-            <p className="text-sm text-gray-400">Available in Phase 8</p>
-          </div>
-        );
+        return <ThemeCustomizer />;
       case 'system':
         return <SystemSettings />;
       default:
