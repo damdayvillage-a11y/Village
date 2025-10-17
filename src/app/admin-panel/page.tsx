@@ -43,6 +43,13 @@ import { ContentEditor } from '@/lib/components/admin-panel/ContentEditor';
 import { UserManagement } from '@/lib/components/admin-panel/UserManagement';
 import { BookingManagement } from '@/lib/components/admin-panel/BookingManagement';
 import { ReviewManagement } from '@/lib/components/admin-panel/ReviewManagement';
+import { ProductManagement } from '@/lib/components/admin-panel/ProductManagement';
+import { OrderManagement } from '@/lib/components/admin-panel/OrderManagement';
+import { MediaManager } from '@/lib/components/admin-panel/MediaManager';
+import SystemSettings from '@/lib/components/admin-panel/SystemSettings';
+import IoTDeviceManagement from '@/lib/components/admin-panel/IoTDeviceManagement';
+import AnalyticsDashboard from '@/lib/components/admin-panel/AnalyticsDashboard';
+import ThemeCustomizer from '@/lib/components/admin-panel/ThemeCustomizer';
 import { signOut } from 'next-auth/react';
 
 // Disable static generation for this page as it requires authentication
@@ -505,128 +512,13 @@ export default function AdminPanelPage() {
       case 'complaints':
         return <ReviewManagement />;
       case 'marketplace':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Marketplace Admin</h2>
-              <p className="text-gray-600">Manage products, orders, and sellers</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Products</h3>
-                  <Package className="h-6 w-6 text-purple-500" />
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{adminStats.totalProducts || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">Total products listed</p>
-              </Card>
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Orders</h3>
-                  <ShoppingBag className="h-6 w-6 text-orange-500" />
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{adminStats.pendingOrders || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">Pending orders</p>
-              </Card>
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Revenue</h3>
-                  <DollarSign className="h-6 w-6 text-green-500" />
-                </div>
-                <p className="text-3xl font-bold text-gray-900">₹{adminStats.revenue || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">Total revenue</p>
-              </Card>
-            </div>
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
-              <p className="text-gray-500 text-center py-8">Order management interface coming soon</p>
-            </Card>
-          </div>
-        );
+        return <OrderManagement />;
       case 'products':
-        return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Management</h2>
-                <p className="text-gray-600">Manage marketplace products and inventory</p>
-              </div>
-              <Button className="bg-primary-600 hover:bg-primary-700">
-                <Package className="h-4 w-4 mr-2" />
-                Add Product
-              </Button>
-            </div>
-            <Card className="p-6">
-              <p className="text-gray-500 text-center py-8">Product management interface coming soon</p>
-            </Card>
-          </div>
-        );
+        return <ProductManagement />;
       case 'devices':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">IoT Device Management</h2>
-              <p className="text-gray-600">Monitor and manage village IoT devices</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Online</h3>
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{adminStats.onlineDevices || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">Devices currently online</p>
-              </Card>
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Health</h3>
-                  <Activity className={`h-6 w-6 ${
-                    adminStats.systemHealth === 'healthy' ? 'text-green-500' :
-                    adminStats.systemHealth === 'warning' ? 'text-yellow-500' :
-                    'text-red-500'
-                  }`} />
-                </div>
-                <p className="text-2xl font-bold text-gray-900 capitalize">{adminStats.systemHealth}</p>
-                <p className="text-sm text-gray-500 mt-2">Overall system status</p>
-              </Card>
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Alerts</h3>
-                  <Bell className="h-6 w-6 text-red-500" />
-                </div>
-                <p className="text-3xl font-bold text-gray-900">0</p>
-                <p className="text-sm text-gray-500 mt-2">Active alerts</p>
-              </Card>
-            </div>
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Device List</h3>
-              <p className="text-gray-500 text-center py-8">Device monitoring interface coming soon</p>
-            </Card>
-          </div>
-        );
+        return <IoTDeviceManagement />;
       case 'analytics':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Analytics Dashboard</h2>
-              <p className="text-gray-600">Track performance metrics and trends</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">User Growth</h3>
-                <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
-                  <p className="text-gray-400">Chart coming soon</p>
-                </div>
-              </Card>
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Revenue Trends</h3>
-                <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
-                  <p className="text-gray-400">Chart coming soon</p>
-                </div>
-              </Card>
-            </div>
-          </div>
-        );
+        return <AnalyticsDashboard />;
       case 'pages':
         return (
           <div className="text-center py-12">
@@ -637,32 +529,11 @@ export default function AdminPanelPage() {
           </div>
         );
       case 'media':
-        return (
-          <div className="text-center py-12">
-            <Camera className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Media Manager</h3>
-            <p className="text-gray-500 mb-4">Upload and manage images, videos, and files</p>
-            <p className="text-sm text-gray-400">Available in Phase 5</p>
-          </div>
-        );
+        return <MediaManager />;
       case 'theme':
-        return (
-          <div className="text-center py-12">
-            <Palette className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Theme Customizer</h3>
-            <p className="text-gray-500 mb-4">Customize colors, fonts, and branding</p>
-            <p className="text-sm text-gray-400">Available in Phase 8</p>
-          </div>
-        );
+        return <ThemeCustomizer />;
       case 'system':
-        return (
-          <div className="text-center py-12">
-            <Settings className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">System Settings</h3>
-            <p className="text-gray-500 mb-4">Configure email, payments, and API keys</p>
-            <p className="text-sm text-gray-400">Available in Phase 7</p>
-          </div>
-        );
+        return <SystemSettings />;
       default:
         return renderDashboard();
     }
@@ -705,9 +576,10 @@ export default function AdminPanelPage() {
                   <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
                   <p className="text-xs text-gray-500">{session?.user?.role}</p>
                 </div>
-                <Avatar className="h-10 w-10 bg-primary-100 text-primary-700 font-semibold">
-                  {session?.user?.name?.charAt(0) || 'A'}
-                </Avatar>
+                <Avatar 
+                  initials={session?.user?.name?.charAt(0) || 'A'}
+                  className="h-10 w-10 bg-primary-100 text-primary-700 font-semibold"
+                />
                 <button
                   onClick={() => signOut({ callbackUrl: '/admin-panel/login' })}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-md"
