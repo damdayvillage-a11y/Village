@@ -238,7 +238,7 @@ export function ProductManagement() {
       price: '',
       category: 'honey',
       stock: '',
-      images: [],
+      images: [''], // Start with one empty image URL field
       isActive: true,
     });
     setEditingProduct(null);
@@ -252,7 +252,7 @@ export function ProductManagement() {
       price: product.price.toString(),
       category: product.category,
       stock: product.stock.toString(),
-      images: product.images || [],
+      images: product.images && product.images.length > 0 ? product.images : [''], // At least one empty field
       isActive: product.isActive,
     });
     setEditingProduct(product);
@@ -284,13 +284,16 @@ export function ProductManagement() {
 
     setIsSaving(true);
     try {
+      // Filter out empty image URLs
+      const validImages = formData.images.filter(url => url.trim() !== '');
+      
       const payload = {
         name: formData.name.trim(),
         description: formData.description.trim(),
         price: parseFloat(formData.price),
         category: formData.category,
         stock: parseInt(formData.stock),
-        images: formData.images,
+        images: validImages,
         isActive: formData.isActive,
         ...(editingProduct && { productId: editingProduct.id }),
       };
@@ -494,6 +497,41 @@ export function ProductManagement() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Low Stock Alerts */}
+      {stats.lowStock > 0 && (
+        <div className="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <TrendingUp className="h-5 w-5 text-orange-400" />
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-medium text-orange-800">
+                Low Stock Alert
+              </h3>
+              <div className="mt-2 text-sm text-orange-700">
+                <p>
+                  {stats.lowStock} product{stats.lowStock > 1 ? 's' : ''} {stats.lowStock > 1 ? 'have' : 'has'} low stock (less than 10 items). Consider restocking soon.
+                </p>
+              </div>
+              <div className="mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setStatusFilter('true');
+                    setCategoryFilter('all');
+                    setSearchTerm('');
+                  }}
+                  className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                >
+                  View Low Stock Products
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <Card>
@@ -814,20 +852,54 @@ export function ProductManagement() {
                   </label>
                 </div>
 
-                {/* Image URL Input (Simple version) */}
+                {/* Multiple Image URLs Input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Image URL (optional)
+                    Product Images (optional)
                   </label>
-                  <input
-                    type="text"
-                    value={formData.images[0] || ''}
-                    onChange={(e) => handleFormChange('images', e.target.value ? [e.target.value] : [])}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <div className="space-y-2">
+                    {formData.images.map((url, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={url}
+                          onChange={(e) => {
+                            const newImages = [...formData.images];
+                            newImages[index] = e.target.value;
+                            handleFormChange('images', newImages);
+                          }}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          placeholder={`Image URL ${index + 1}`}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newImages = formData.images.filter((_, i) => i !== index);
+                            handleFormChange('images', newImages);
+                          }}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        handleFormChange('images', [...formData.images, '']);
+                      }}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Image URL
+                    </Button>
+                  </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Enter a direct URL to a product image
+                    Enter direct URLs to product images. First image will be used as primary.
                   </p>
                 </div>
 
