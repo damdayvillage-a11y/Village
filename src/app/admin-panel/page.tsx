@@ -46,6 +46,7 @@ import { ReviewManagement } from '@/lib/components/admin-panel/ReviewManagement'
 import { ProductManagement } from '@/lib/components/admin-panel/ProductManagement';
 import { OrderManagement } from '@/lib/components/admin-panel/OrderManagement';
 import { MediaManager } from '@/lib/components/admin-panel/MediaManager';
+import SystemSettings from '@/lib/components/admin-panel/SystemSettings';
 import { signOut } from 'next-auth/react';
 
 // Disable static generation for this page as it requires authentication
@@ -598,14 +599,7 @@ export default function AdminPanelPage() {
           </div>
         );
       case 'system':
-        return (
-          <div className="text-center py-12">
-            <Settings className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">System Settings</h3>
-            <p className="text-gray-500 mb-4">Configure email, payments, and API keys</p>
-            <p className="text-sm text-gray-400">Available in Phase 7</p>
-          </div>
-        );
+        return <SystemSettings />;
       default:
         return renderDashboard();
     }
