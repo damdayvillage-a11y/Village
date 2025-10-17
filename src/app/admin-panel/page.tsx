@@ -45,6 +45,7 @@ import { BookingManagement } from '@/lib/components/admin-panel/BookingManagemen
 import { ReviewManagement } from '@/lib/components/admin-panel/ReviewManagement';
 import { ProductManagement } from '@/lib/components/admin-panel/ProductManagement';
 import { OrderManagement } from '@/lib/components/admin-panel/OrderManagement';
+import { MediaManager } from '@/lib/components/admin-panel/MediaManager';
 import { signOut } from 'next-auth/react';
 
 // Disable static generation for this page as it requires authentication
@@ -586,14 +587,7 @@ export default function AdminPanelPage() {
           </div>
         );
       case 'media':
-        return (
-          <div className="text-center py-12">
-            <Camera className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Media Manager</h3>
-            <p className="text-gray-500 mb-4">Upload and manage images, videos, and files</p>
-            <p className="text-sm text-gray-400">Available in Phase 5</p>
-          </div>
-        );
+        return <MediaManager />;
       case 'theme':
         return (
           <div className="text-center py-12">
