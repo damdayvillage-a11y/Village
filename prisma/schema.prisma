@@ -729,3 +729,19 @@ model Wishlist {
   @@index([userId])
   @@map("wishlists")
 }
+
+// ==================== PR13: ADMIN CONTROL CENTER MODELS ====================
+
+model AppSettings {
+  id         String   @id @default(cuid())
+  category   String   // features, payment, email, sms, storage, theme, etc.
+  key        String   // specific setting key
+  value      Json     // flexible JSON value for any type of setting
+  isPublic   Boolean  @default(false) // can be accessed by public APIs
+  updatedAt  DateTime @updatedAt
+  updatedBy  String?  // userId who last updated
+  
+  @@unique([category, key])
+  @@index([category])
+  @@map("app_settings")
+}

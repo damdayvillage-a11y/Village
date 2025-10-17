@@ -64,7 +64,8 @@ export default function MarketplacePage() {
         setProducts(productData);
         
         // Extract unique categories
-        const uniqueCategories = ['All', ...new Set(productData.map((p: Product) => p.category).filter(Boolean))];
+        const categorySet = new Set(productData.map((p: Product) => p.category).filter(Boolean));
+        const uniqueCategories: string[] = ['All', ...Array.from(categorySet) as string[]];
         setCategories(uniqueCategories);
       }
     } catch (error) {
@@ -331,5 +332,4 @@ export default function MarketplacePage() {
       </div>
     </div>
   );
-}
 }

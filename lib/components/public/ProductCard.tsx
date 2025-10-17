@@ -44,7 +44,7 @@ export function ProductCard({
         />
         {!inStock && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <Badge variant="destructive" className="text-sm">Out of Stock</Badge>
+            <Badge variant="error" className="text-sm">Out of Stock</Badge>
           </div>
         )}
         {locallySourced && (
@@ -55,7 +55,7 @@ export function ProductCard({
         )}
       </div>
       <CardContent className="p-4">
-        <Badge variant="outline" className="mb-2 text-xs">{category}</Badge>
+        <Badge variant="default" className="mb-2 text-xs">{category}</Badge>
         <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-1">{name}</h3>
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{description}</p>
 
@@ -72,7 +72,7 @@ export function ProductCard({
           </div>
           <Link href={`/marketplace/${id}`}>
             <Button 
-              variant={inStock ? "primary" : "outline"} 
+              variant={inStock ? "default" : "default"} 
               size="sm"
               disabled={!inStock}
             >

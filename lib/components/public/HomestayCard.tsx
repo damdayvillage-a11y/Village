@@ -66,12 +66,12 @@ export function HomestayCard({
         {amenities.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {amenities.slice(0, 3).map((amenity, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
+              <Badge key={index} variant="default" className="text-xs">
                 {amenity}
               </Badge>
             ))}
             {amenities.length > 3 && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="default" className="text-xs">
                 +{amenities.length - 3} more
               </Badge>
             )}
