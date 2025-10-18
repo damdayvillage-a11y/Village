@@ -21,9 +21,14 @@ COPY package*.json ./
 # Install dependencies and clean up in one layer
 RUN echo "📦 Installing dependencies..." && \
     npm ci --include=dev --no-audit --no-fund && \
-    echo "🧹 Cleaning npm cache..." && \
+    echo "🧹 Cleaning npm cache and temporary files..." && \
     npm cache clean --force && \
-    rm -rf /root/.npm /tmp/* && \
+    rm -rf /root/.npm /tmp/* /var/tmp/* && \
+    rm -rf /root/.cache /root/.local && \
+    find /app/node_modules -name "*.md" -type f -delete && \
+    find /app/node_modules -name "*.markdown" -type f -delete && \
+    find /app/node_modules -name "test" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /app/node_modules -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true && \
     echo "✅ Dependencies installed: $(du -sh node_modules)"
 
 # Build stage
@@ -68,7 +73,7 @@ COPY prisma ./prisma
 # Generate Prisma client and clean up
 RUN echo "🔧 Generating Prisma client..." && \
     node /app/node_modules/prisma/build/index.js generate && \
-    rm -rf /tmp/* && \
+    rm -rf /tmp/* /var/tmp/* /root/.npm /root/.cache && \
     echo "✅ Prisma client generated"
 
 # Copy configuration files
@@ -90,8 +95,11 @@ RUN echo "🏗️ Building application..." && \
     npm run build:production && \
     echo "Build complete: $(date)" && \
     echo "🧹 Aggressive cleanup..." && \
-    rm -rf .next/cache node_modules/.cache /tmp/* /root/.npm && \
+    rm -rf .next/cache node_modules/.cache /tmp/* /var/tmp/* /root/.npm /root/.cache /root/.local && \
     npm cache clean --force && \
+    find /app -name "*.md" -type f -delete 2>/dev/null || true && \
+    find /app -name "*.log" -type f -delete 2>/dev/null || true && \
+    rm -rf /app/docs /app/tools /app/ci 2>/dev/null || true && \
     echo "Disk after: $(df -h / | tail -1)" && \
     echo "✅ Complete"
 
