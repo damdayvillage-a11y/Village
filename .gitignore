@@ -57,8 +57,9 @@ jspm_packages/
 # Optional eslint cache
 .eslintcache
 
-# Storybook build outputs
+# Storybook build outputs and default demo files (not needed for production)
 .storybook-static
+src/stories/
 
 # Temporary folders
 tmp/
@@ -85,14 +86,32 @@ models/
 contracts/artifacts/
 contracts/cache/
 
-# CapRover
-captain-definition
+# CapRover - keep captain-definition in repo for deployment
+# captain-definition
 
 # Monitoring
 .monitoring/
 
 # Memory artifacts (keep in repo but ignore temp files)
 docs/memory/temp/
+docs/memory/screenshots/
 /generated/prisma
 
 *storybook.log
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+
+# Large documentation files
+memory2.md
+
+# Redundant documentation (keep essential docs in docs/md-files/)
+BUILD_OPTIMIZATION*.md
+CAPROVER_DEPLOYMENT*.md
+DEPLOYMENT_*.md
+DOCKER_*.md
+FIX_*.md
+GIT_CLONE*.md
+QUICK_FIX*.md
+SECURITY_SUMMARY.md
+STORYBOOK*.md

@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
       length: process.env.NEXTAUTH_SECRET?.length || 0,
       valid: process.env.NEXTAUTH_SECRET && 
              process.env.NEXTAUTH_SECRET.length >= 32 &&
-             !process.env.NEXTAUTH_SECRET.includes('dummy'),
+             !process.env.NEXTAUTH_SECRET.includes('dummy') &&
+             !process.env.NEXTAUTH_SECRET.includes('$$cap_') &&
+             !process.env.NEXTAUTH_SECRET.includes('change-this'),
     },
     database: {
       configured: false,
@@ -132,6 +134,10 @@ export async function GET(request: NextRequest) {
       recommendations.push('Set NEXTAUTH_SECRET - generate with: openssl rand -base64 32');
     } else if (checks.nextauth_secret.length < 32) {
       recommendations.push(`NEXTAUTH_SECRET too short (${checks.nextauth_secret.length} chars, need 32+)`);
+    } else if (process.env.NEXTAUTH_SECRET?.includes('$$cap_')) {
+      recommendations.push('Replace $$cap_*$$ placeholder in NEXTAUTH_SECRET');
+    } else if (process.env.NEXTAUTH_SECRET?.includes('change-this')) {
+      recommendations.push('Replace default NEXTAUTH_SECRET with actual secret');
     }
   }
 

@@ -85,7 +85,12 @@ function getRequiredRoles(path: string): UserRole[] | null {
     '/auth/verify-request',
     '/auth/unauthorized',
     '/admin-panel/login',
+    '/admin-panel/status',
     '/api/health',
+    '/api/auth/*',
+    '/api/admin/init',
+    '/api/admin/verify-setup',
+    '/api/admin/check-env',
   ];
   
   if (publicRoutes.includes(path) || path.startsWith('/api/public/')) {
@@ -182,7 +187,12 @@ export default withAuth(
           '/auth/verify-request',
           '/auth/unauthorized',
           '/admin-panel/login',
+          '/admin-panel/status',
           '/api/health',
+          '/api/auth/*',
+          '/api/admin/init',
+          '/api/admin/verify-setup',
+          '/api/admin/check-env',
           '/api/public/*',
         ];
         
@@ -207,7 +217,8 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    // Skip all internal paths (_next)
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    // Skip all internal paths (_next), static files, and NextAuth API routes
+    // NextAuth routes must be excluded to prevent authentication loops
+    '/((?!_next/static|_next/image|favicon.ico|public/|api/auth).*)',
   ],
 };
