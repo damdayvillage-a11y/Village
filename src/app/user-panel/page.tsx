@@ -330,7 +330,7 @@ export default function UserPanelPage() {
         body: JSON.stringify({
           title: data.title,
           content: data.content,
-          status: data.status.toUpperCase()
+          status: data.status  // API handles normalization
         })
       });
 

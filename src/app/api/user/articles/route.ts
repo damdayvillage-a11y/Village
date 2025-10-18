@@ -60,6 +60,9 @@ export async function POST(request: NextRequest) {
       .replace(/(^-|-$)/g, '') + 
       '-' + Date.now();
 
+    // Normalize status to uppercase for consistency
+    const normalizedStatus = status ? status.toUpperCase() : 'DRAFT';
+
     // Create article in database
     const newArticle = await prisma.article.create({
       data: {
@@ -67,9 +70,9 @@ export async function POST(request: NextRequest) {
         content,
         excerpt,
         slug,
-        status,
+        status: normalizedStatus,
         authorId: session.user.id,
-        publishedAt: status === 'PUBLISHED' ? new Date() : null,
+        publishedAt: normalizedStatus === 'PUBLISHED' ? new Date() : null,
         tags: tags || [],
       }
     });

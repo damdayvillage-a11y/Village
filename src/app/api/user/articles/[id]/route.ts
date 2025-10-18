@@ -72,9 +72,11 @@ export async function PATCH(
     if (tags !== undefined) updateData.tags = tags;
     
     if (status !== undefined) {
-      updateData.status = status;
+      // Normalize status to uppercase for consistency
+      const normalizedStatus = typeof status === 'string' ? status.toUpperCase() : status;
+      updateData.status = normalizedStatus;
       // Set publishedAt when publishing for the first time
-      if (status === 'PUBLISHED' && !existingArticle.publishedAt) {
+      if (normalizedStatus === 'PUBLISHED' && !existingArticle.publishedAt) {
         updateData.publishedAt = new Date();
       }
     }
