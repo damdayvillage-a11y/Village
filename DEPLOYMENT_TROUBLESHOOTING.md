@@ -149,11 +149,11 @@ JavaScript heap out of memory
 **Cause:** Node.js ran out of memory during build
 
 **Solution:**
-1. Set in CapRover environment variables:
+1. Set in CapRover environment variables (custom app variable used by Dockerfile):
    ```
    BUILD_MEMORY_LIMIT=2048
    ```
-   (Default is 1024, increase to 2048 or 4096)
+   (Default is 1024MB, increase to 2048MB or 4096MB)
 
 2. Make sure your VPS has at least 2GB RAM
 
@@ -186,7 +186,7 @@ JavaScript heap out of memory
 - **CPU**: 1 core
 
 ### Recommended (for production):
-- **Disk**: 40GB+ free space
+- **Disk**: 40GB+ total disk space (with at least 10GB free)
 - **RAM**: 4GB+
 - **CPU**: 2+ cores
 
@@ -202,6 +202,8 @@ Add to your server's crontab:
 sudo crontab -e
 
 # Add this line (runs every Sunday at 2 AM)
+# WARNING: This removes ALL unused Docker objects. Ensure you're okay with this.
+# For production, consider removing '-f' flag to require confirmation.
 0 2 * * 0 docker system prune -a -f && docker volume prune -f
 ```
 
