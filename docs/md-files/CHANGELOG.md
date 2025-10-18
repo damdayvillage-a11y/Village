@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - PR13 Phase 2: Advanced Theme & SEO Controls (2025-10-18)
+- **Advanced Theme Customizer**: Complete theme management system
+  - Typography settings (8 font options for heading and body)
+  - Layout controls (max width, spacing, border radius)
+  - Extended color palette (5 colors: primary, secondary, accent, background, text)
+  - Tab-based interface (Typography, Layout, Colors)
+  - Real-time preview for all settings
+  - Font preview with sample text
+  - Layout preview with visual examples
+- **SEO Controls**: Per-page SEO management
+  - Page selector for 7 main pages
+  - Meta title with character count (optimal: 30-60)
+  - Meta description with character count (optimal: 120-160)
+  - Keywords management
+  - Open Graph image configuration
+  - Canonical URL settings
+  - SEO analysis with recommendations
+  - Search result preview
+  - Real-time validation badges
+- **Enhanced Control Center**: Updated navigation
+  - Added Theme tab with Brush icon
+  - Added SEO tab with Search icon
+  - 5-tab navigation (Features, Branding, Theme, SEO, API Keys)
+  - Improved layout and spacing
+
+### API Endpoints - PR13 Phase 2 (2 new)
+- `GET/POST /api/admin/theme` - Theme customization settings
+  - Fonts (heading, body)
+  - Layout (maxWidth, spacing, borderRadius)
+  - Colors (primary, secondary, accent, background, text)
+- `GET/POST /api/admin/seo` - Per-page SEO management
+  - Meta tags (title, description, keywords)
+  - Open Graph settings
+  - Canonical URLs
+
+### Components Created - PR13 Phase 2 (2)
+- `ThemeCustomizer.tsx` - Advanced theme management with preview
+- `SEOControls.tsx` - Per-page SEO configuration
+
+### Infrastructure - PR13 Phase 2
+- Nested AppSettings storage (fonts.heading, layout.spacing, etc.)
+- Default SEO templates for common pages
+- SEO analysis algorithm
+- Real-time validation and feedback
+
 ### Added - PR13: Admin Control Center Enhancement (2025-10-18)
 - **Feature Toggle Dashboard**: WordPress-style feature management
   - Enable/disable features dynamically

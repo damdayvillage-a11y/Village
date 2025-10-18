@@ -5,7 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/lib/components/ui/ta
 import { FeatureToggleDashboard } from '@/lib/components/admin-panel/control-center/FeatureToggleDashboard';
 import { BrandingManager } from '@/lib/components/admin-panel/control-center/BrandingManager';
 import { APIKeyManager } from '@/lib/components/admin-panel/control-center/APIKeyManager';
-import { Settings, Palette, Key, LayoutDashboard } from 'lucide-react';
+import { ThemeCustomizer } from '@/lib/components/admin-panel/control-center/ThemeCustomizer';
+import { SEOControls } from '@/lib/components/admin-panel/control-center/SEOControls';
+import { Settings, Palette, Key, LayoutDashboard, Brush, Search } from 'lucide-react';
 
 export default function ControlCenterPage() {
   return (
@@ -16,12 +18,12 @@ export default function ControlCenterPage() {
           Admin Control Center
         </h1>
         <p className="text-gray-600 mt-2">
-          Manage your platform features, branding, and integrations - WordPress-style control
+          Manage your platform features, branding, theme, SEO, and integrations - WordPress-style control
         </p>
       </div>
 
       <Tabs defaultValue="features" className="space-y-6">
-        <TabsList className="grid grid-cols-3 w-full max-w-2xl">
+        <TabsList className="grid grid-cols-5 w-full max-w-4xl">
           <TabsTrigger value="features" className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4" />
             Features
@@ -29,6 +31,14 @@ export default function ControlCenterPage() {
           <TabsTrigger value="branding" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
             Branding
+          </TabsTrigger>
+          <TabsTrigger value="theme" className="flex items-center gap-2">
+            <Brush className="h-4 w-4" />
+            Theme
+          </TabsTrigger>
+          <TabsTrigger value="seo" className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            SEO
           </TabsTrigger>
           <TabsTrigger value="api-keys" className="flex items-center gap-2">
             <Key className="h-4 w-4" />
@@ -42,6 +52,14 @@ export default function ControlCenterPage() {
 
         <TabsContent value="branding">
           <BrandingManager />
+        </TabsContent>
+
+        <TabsContent value="theme">
+          <ThemeCustomizer />
+        </TabsContent>
+
+        <TabsContent value="seo">
+          <SEOControls />
         </TabsContent>
 
         <TabsContent value="api-keys">
