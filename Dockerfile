@@ -90,7 +90,7 @@ RUN echo "🏗️ Building application..." && \
     npm run build:production && \
     echo "Build complete: $(date)" && \
     echo "🧹 Aggressive cleanup..." && \
-    rm -rf .next/cache node_modules/.cache /tmp/* /root/.npm src lib && \
+    rm -rf .next/cache node_modules/.cache /tmp/* /root/.npm && \
     npm cache clean --force && \
     echo "Disk after: $(df -h / | tail -1)" && \
     echo "✅ Complete"

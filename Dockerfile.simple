@@ -99,8 +99,6 @@ RUN echo "🏗️ Building application..." && \
     rm -rf node_modules/.cache && \
     rm -rf /tmp/* && \
     rm -rf /root/.npm && \
-    rm -rf src && \
-    rm -rf lib && \
     npm cache clean --force && \
     echo "Disk after cleanup: $(df -h / | tail -1)" && \
     echo "✅ Build and cleanup complete"

@@ -46,6 +46,7 @@ QUICK_FIX_REFERENCE.md
 SECURITY_SUMMARY.md
 DOCKER_BUILD_OPTIMIZATION.md
 CAPROVER_DEPLOYMENT_FIX.md
+BUILD_OPTIMIZATION_V2.md
 
 # Docker files - don't need other Dockerfiles in the build
 Dockerfile
