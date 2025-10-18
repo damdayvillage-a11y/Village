@@ -104,3 +104,14 @@ tsconfig.tsbuildinfo
 
 # Large documentation files
 memory2.md
+
+# Redundant documentation (keep essential docs in docs/md-files/)
+BUILD_OPTIMIZATION*.md
+CAPROVER_DEPLOYMENT*.md
+DEPLOYMENT_*.md
+DOCKER_*.md
+FIX_*.md
+GIT_CLONE*.md
+QUICK_FIX*.md
+SECURITY_SUMMARY.md
+STORYBOOK*.md
