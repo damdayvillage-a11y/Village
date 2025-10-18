@@ -323,13 +323,53 @@ export default function UserPanelPage() {
     content: string;
     status: 'draft' | 'published' | 'review';
   }) => {
-    // TODO: Implement article update endpoint
-    console.log('Update article:', id, data);
+    try {
+      const response = await fetch(`/api/user/articles/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: data.title,
+          content: data.content,
+          status: data.status.toUpperCase()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update article');
+      }
+
+      // Refresh articles list
+      const articlesResponse = await fetch('/api/user/articles');
+      if (articlesResponse.ok) {
+        const userArticles = await articlesResponse.json();
+        setArticles(userArticles);
+      }
+    } catch (error) {
+      console.error('Update article error:', error);
+      throw error;
+    }
   };
 
   const handleArticleDelete = async (id: string) => {
-    // TODO: Implement article delete endpoint
-    console.log('Delete article:', id);
+    try {
+      const response = await fetch(`/api/user/articles/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete article');
+      }
+
+      // Refresh articles list
+      const articlesResponse = await fetch('/api/user/articles');
+      if (articlesResponse.ok) {
+        const userArticles = await articlesResponse.json();
+        setArticles(userArticles);
+      }
+    } catch (error) {
+      console.error('Delete article error:', error);
+      throw error;
+    }
   };
 
   const handleComplaintSubmit = async (data: {
