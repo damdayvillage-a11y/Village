@@ -186,6 +186,11 @@ docker build -f Dockerfile.simple -t village-app .
 - **[Deployment Checklist](docs/md-files/DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment
 - **[Production Readiness](docs/md-files/PRODUCTION_READINESS.md)** - Pre-deployment verification
 
+### API & Integration Documentation
+- **[Email Service Configuration](docs/EMAIL_SERVICE_CONFIGURATION.md)** - SendGrid & SMTP setup guide
+- **[Article & Complaint APIs](docs/API_DOCUMENTATION_ARTICLES_COMPLAINTS.md)** - API endpoints for user content
+- **[Security Audit Summary](docs/SECURITY_AUDIT_SUMMARY.md)** - Security vulnerability assessment
+
 ## 🔧 Environment Variables
 
 ### Required for Production
