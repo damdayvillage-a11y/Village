@@ -196,7 +196,7 @@ ssh your-server
 docker system prune -f
 
 # Or use our script
-curl -o cleanup.sh https://raw.githubusercontent.com/your-repo/main/scripts/caprover-cleanup.sh
+curl -o cleanup.sh https://raw.githubusercontent.com/damdayvillage-a11y/Village/main/scripts/caprover-cleanup.sh
 chmod +x cleanup.sh
 sudo bash cleanup.sh
 ```
