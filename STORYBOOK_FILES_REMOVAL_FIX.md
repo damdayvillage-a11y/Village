@@ -15,6 +15,8 @@ error: unable to write file src/stories/assets/avif-test-image.avif
 [... multiple similar errors ...]
 fatal: cannot create directory at 'stories': No space left on device
 warning: Clone succeeded, but checkout failed.
+
+**Note**: The error message mentions 'stories' directory, but the actual cause was the larger `src/stories/` directory (816KB with assets) that was being checked out before this error occurred.
 ```
 
 ## Root Cause Analysis
@@ -72,15 +74,14 @@ src/stories/page.css
 
 ### 2. Updated `.gitignore`
 
-Added entries to prevent re-adding Storybook files:
+Added entries to prevent re-adding Storybook default demo files:
 ```gitignore
-# Storybook build outputs and source files (not needed for production)
+# Storybook build outputs and default demo files (not needed for production)
 .storybook-static
 src/stories/
-stories/
 ```
 
-**Note**: The root `stories/` directory contains custom village project stories and is kept in git (only 32KB).
+**Note**: The root `stories/` directory contains custom village project stories and is kept in git (only 32KB, 3 files). Only the larger `src/stories/` demo files (816KB, 26 files) were removed.
 
 ### 3. Updated `.dockerignore`
 
@@ -88,12 +89,11 @@ Enhanced Docker build context exclusions:
 ```dockerignore
 # Storybook files - not needed in production
 .storybook
-stories/
 src/stories/
 storybook-static/
 ```
 
-**Impact**: Ensured Storybook files are excluded from Docker build context even if they exist locally.
+**Impact**: Ensured `src/stories/` demo files are excluded from Docker build context even if they exist locally. The custom `stories/` directory (32KB) is small enough to include without issues.
 
 ## Verification Results
 
@@ -170,16 +170,18 @@ The deployment process now:
 
 ## Troubleshooting
 
-### If Storybook Files Are Needed Locally
+### If Storybook Demo Files Are Needed Locally
 
-If a developer needs the default Storybook examples:
+If a developer needs the default Storybook demo files that were removed:
 
 ```bash
-# Initialize Storybook (will regenerate demo files)
-npx storybook@latest init --type react
+# Initialize Storybook for Next.js (will regenerate demo files)
+npx storybook@latest init
 
 # Or manually create stories in src/stories/
 ```
+
+**Note**: The existing Storybook setup already works with the custom stories in the root `stories/` directory.
 
 ### If Build Still Fails with Disk Space Errors
 

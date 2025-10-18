@@ -57,10 +57,9 @@ jspm_packages/
 # Optional eslint cache
 .eslintcache
 
-# Storybook build outputs and source files (not needed for production)
+# Storybook build outputs and default demo files (not needed for production)
 .storybook-static
 src/stories/
-stories/
 
 # Temporary folders
 tmp/
