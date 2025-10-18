@@ -10,12 +10,15 @@ WORKDIR /app
 ARG DATABASE_URL
 ARG CAPROVER_GIT_COMMIT_SHA
 
-# Install debugging tools and build dependencies for native modules
+# Install debugging tools
 RUN apk add --no-cache \
     curl \
     wget \
     procps \
-    htop \
+    htop
+
+# Install build dependencies for native modules (argon2, etc.)
+RUN apk add --no-cache \
     python3 \
     make \
     g++ \
