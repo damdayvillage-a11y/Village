@@ -1,28 +1,49 @@
+# Optimized build stage with separate dependency layer
+# Dependencies stage
+FROM node:20-alpine AS deps
+
+WORKDIR /app
+
+# Install build dependencies for native modules (argon2, etc.)
+RUN apk add --no-cache python3 make g++ linux-headers
+
+# Configure npm early
+RUN npm config set strict-ssl false && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config set fund false && \
+    npm config set update-notifier false && \
+    npm config set audit false && \
+    npm config set loglevel warn
+
+# Copy only package files for dependency installation
+COPY package*.json ./
+
+# Install dependencies and clean up in one layer
+RUN echo "📦 Installing dependencies..." && \
+    npm ci --include=dev --no-audit --no-fund && \
+    echo "🧹 Cleaning npm cache..." && \
+    npm cache clean --force && \
+    rm -rf /root/.npm /tmp/* && \
+    echo "✅ Dependencies installed: $(du -sh node_modules)"
+
 # Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies for native modules (argon2, etc.)
-# These are needed for npm ci to compile native dependencies
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    linux-headers
+# Install minimal runtime dependencies
+RUN apk add --no-cache python3
 
-# Accept build arguments from CapRover (optional)
+# Accept build arguments
 ARG DATABASE_URL
-ARG CAPROVER_GIT_COMMIT_SHA
 ARG SKIP_DB_DURING_BUILD
+ARG BUILD_MEMORY_LIMIT=1024
 
-# Set Node.js memory limit and optimization flags for build
-# Reduced to 1GB for 2GB VPS compatibility (was 4GB)
-ENV NODE_OPTIONS="--max-old-space-size=1024 --max-semi-space-size=256"
+# Set Node.js memory limit and optimization flags
+ENV NODE_OPTIONS="--max-old-space-size=${BUILD_MEMORY_LIMIT} --max-semi-space-size=256"
 ENV UV_THREADPOOL_SIZE=64
 
-# Set build-time environment variables early
-# Use ARG value if provided, otherwise use dummy default
+# Set build-time environment variables
 ENV DATABASE_URL=${DATABASE_URL:-"postgresql://dummy:dummy@localhost:5432/dummy"}
 ENV NEXTAUTH_SECRET="dummy-secret-for-build"
 ENV NEXTAUTH_URL="http://localhost:3000"
@@ -35,57 +56,44 @@ ENV GENERATE_SOURCEMAP=false
 ENV DISABLE_ESLINT=true
 ENV TYPESCRIPT_NO_TYPE_CHECK=true
 ENV CAPROVER_BUILD=true
-# Skip database connection attempts during build
 ENV SKIP_DB_DURING_BUILD=${SKIP_DB_DURING_BUILD:-"true"}
 
-# Copy package files
-COPY package*.json ./
+# Copy node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package*.json ./
 
-# Configure npm for CapRover environment
-RUN echo "🔧 Configuring npm for CapRover..." && \
-    npm config set strict-ssl false && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm config set fund false && \
-    npm config set update-notifier false && \
-    npm config set audit false && \
-    npm config set loglevel warn && \
-    echo "✅ NPM configured successfully"
+# Copy only essential files for Prisma
+COPY prisma ./prisma
 
-# Install dependencies with simple logging (no pipes or loops to avoid hangs)
-# Install all dependencies first (needed for build), then remove dev deps to save space
-RUN echo "📦 Installing dependencies..." && \
-    echo "Start time: $(date)" && \
-    npm ci --include=dev --no-audit --no-fund --loglevel=warn && \
-    echo "Dependencies installed at: $(date)" && \
-    echo "node_modules size: $(du -sh node_modules 2>/dev/null || echo 'calculating...')"
-
-# Copy source code
-COPY . .
-
-# Generate Prisma client
+# Generate Prisma client and clean up
 RUN echo "🔧 Generating Prisma client..." && \
-    echo "⏰ Timestamp: $(date '+%Y-%m-%d %H:%M:%S')" && \
     node /app/node_modules/prisma/build/index.js generate && \
-    echo "✅ Prisma client generated successfully!"
-
-# Build the application (no timeout to avoid hangs)
-RUN echo "🏗️ Building application..." && \
-    echo "Build start time: $(date)" && \
-    echo "Memory before build: $(free -h)" && \
-    echo "Running: npm run build:production" && \
-    npm run build:production && \
-    echo "Build completed at: $(date)" && \
-    echo "Verifying build output..." && \
-    ls -la .next/ && \
-    echo "Build verification complete" && \
-    echo "🧹 Cleaning up build artifacts to save disk space..." && \
-    rm -rf .next/cache && \
-    rm -rf node_modules/.cache && \
     rm -rf /tmp/* && \
-    rm -rf /root/.npm && \
+    echo "✅ Prisma client generated"
+
+# Copy configuration files
+COPY next.config.js tsconfig.json postcss.config.js tailwind.config.js ./
+COPY jest.config.js jest.setup.js ./
+
+# Copy source code in stages
+COPY lib ./lib
+COPY middleware.ts ./middleware.ts
+COPY types ./types
+COPY public ./public
+COPY src ./src
+COPY scripts ./scripts
+
+# Build with aggressive cleanup
+RUN echo "🏗️ Building application..." && \
+    echo "Build start: $(date)" && \
+    echo "Disk before: $(df -h / | tail -1)" && \
+    npm run build:production && \
+    echo "Build complete: $(date)" && \
+    echo "🧹 Aggressive cleanup..." && \
+    rm -rf .next/cache node_modules/.cache /tmp/* /root/.npm && \
     npm cache clean --force && \
-    echo "Disk space after cleanup: $(df -h /)" && \
-    echo "✅ Cleanup complete"
+    echo "Disk after: $(df -h / | tail -1)" && \
+    echo "✅ Complete"
 
 # Production stage
 FROM node:20-alpine AS runner

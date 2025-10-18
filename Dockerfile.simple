@@ -1,30 +1,51 @@
-# Simple Dockerfile for CapRover with minimal scripting to avoid hangs
+# Optimized Dockerfile for CapRover - minimal disk space usage
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 
 # Install build dependencies for native modules (argon2, etc.)
-# These are needed for npm ci to compile native dependencies
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    linux-headers
+RUN apk add --no-cache python3 make g++ linux-headers
 
 # Accept build arguments from CapRover (optional)
 ARG DATABASE_URL
-ARG CAPROVER_GIT_COMMIT_SHA
 ARG BUILD_MEMORY_LIMIT=1024
 
+# Configure npm early to avoid repeated configuration
+RUN npm config set strict-ssl false && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config set fund false && \
+    npm config set update-notifier false && \
+    npm config set audit false && \
+    npm config set loglevel error && \
+    npm config set progress false
+
+# Copy only package files for dependency installation
+COPY package*.json ./
+
+# Install dependencies and clean up in one layer to minimize disk usage
+RUN echo "📦 Installing dependencies..." && \
+    npm ci --include=dev --no-audit --no-fund && \
+    echo "🧹 Cleaning npm cache..." && \
+    npm cache clean --force && \
+    rm -rf /root/.npm /tmp/* && \
+    echo "✅ Dependencies installed: $(du -sh node_modules)"
+
+# Build stage - separate to allow deps caching
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install runtime dependencies only (no build tools to save space)
+RUN apk add --no-cache python3
+
 # Set Node.js memory and performance optimizations
-# Configurable via BUILD_MEMORY_LIMIT ARG (default 1GB for 2GB VPS)
+ARG BUILD_MEMORY_LIMIT=1024
 ENV NODE_OPTIONS="--max-old-space-size=${BUILD_MEMORY_LIMIT} --max-semi-space-size=256"
 ENV UV_THREADPOOL_SIZE=64
 
 # Set build-time environment variables
-# These are dummy values for the build process only
-# Real values should be set in CapRover environment variables
+ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL:-"postgresql://dummy:dummy@localhost:5432/dummy"}
 ENV NEXTAUTH_SECRET="dummy-secret-for-build-only-not-secure-min32chars"
 ENV NEXTAUTH_URL="http://localhost:3000"
@@ -38,72 +59,49 @@ ENV TYPESCRIPT_NO_TYPE_CHECK=true
 ENV CAPROVER_BUILD=true
 ENV SKIP_DB_DURING_BUILD=true
 
-# Copy package files for dependency caching
-COPY package*.json ./
+# Copy node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package*.json ./
 
-# Configure npm for CapRover environment
-RUN echo "🔧 Configuring npm for CapRover..." && \
-    npm config set strict-ssl false && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm config set fund false && \
-    npm config set update-notifier false && \
-    npm config set audit false && \
-    npm config set loglevel error && \
-    npm config set progress false && \
-    echo "✅ NPM configured successfully"
-
-# Install dependencies - simple and clean to avoid hangs
-# Removed --verbose to prevent output buffering issues
-# Removed --prefer-offline as it doesn't help with empty cache
-RUN echo "📦 Installing dependencies..." && \
-    echo "Start time: $(date)" && \
-    npm ci --include=dev --no-audit --no-fund && \
-    echo "Dependencies installed at: $(date)" && \
-    echo "node_modules size: $(du -sh node_modules)"
-
-# Copy Prisma schema first for better caching
+# Copy only essential files for Prisma generation (order matters for caching)
 COPY prisma ./prisma
 
-# Copy scripts directory (needed for seed.ts and other utilities)
+# Generate Prisma client and clean up immediately
+RUN echo "🔧 Generating Prisma client..." && \
+    node /app/node_modules/prisma/build/index.js generate --schema=/app/prisma/schema.prisma && \
+    rm -rf /tmp/* && \
+    echo "✅ Prisma client generated"
+
+# Copy configuration files
+COPY next.config.js ./
+COPY tsconfig.json ./
+COPY postcss.config.js ./
+COPY tailwind.config.js ./
+COPY jest.config.js ./
+COPY jest.setup.js ./
+
+# Copy source code in stages to optimize layer caching
+COPY lib ./lib
+COPY middleware.ts ./middleware.ts
+COPY types ./types
+COPY public ./public
+COPY src ./src
 COPY scripts ./scripts
 
-# Copy source files
-COPY . .
-
-# Generate Prisma client - use direct node path to avoid npx network calls
-RUN echo "🔧 Generating Prisma client..." && \
-    echo "Prisma generation start: $(date)" && \
-    node /app/node_modules/prisma/build/index.js generate --schema=/app/prisma/schema.prisma && \
-    echo "Prisma generation complete: $(date)"
-
-# Run database migrations during build (if DATABASE_URL is real, not dummy)
-# This will be skipped during build if using dummy DB, but can run in initialization command
-RUN if [ "$SKIP_DB_DURING_BUILD" != "true" ] && echo "$DATABASE_URL" | grep -qv "dummy:dummy"; then \
-      echo "🔄 Running database migrations..." && \
-      node /app/node_modules/prisma/build/index.js migrate deploy --schema=/app/prisma/schema.prisma && \
-      echo "✅ Migrations complete"; \
-    else \
-      echo "⏭️  Skipping migrations during build (will run via initialization command)"; \
-    fi
-
-# Build the application
+# Build the application with aggressive cleanup
 RUN echo "🏗️ Building application..." && \
-    echo "Build start time: $(date)" && \
-    echo "Memory before build: $(free -h)" && \
-    echo "Running: npm run build:production" && \
+    echo "Build start: $(date)" && \
+    echo "Disk before build: $(df -h / | tail -1)" && \
     npm run build:production && \
-    echo "Build completed at: $(date)" && \
-    echo "Verifying build output..." && \
-    ls -la .next/ && \
-    echo "Build verification complete" && \
-    echo "🧹 Cleaning up build artifacts to save disk space..." && \
+    echo "Build complete: $(date)" && \
+    echo "🧹 Aggressive cleanup to reclaim disk space..." && \
     rm -rf .next/cache && \
     rm -rf node_modules/.cache && \
     rm -rf /tmp/* && \
     rm -rf /root/.npm && \
     npm cache clean --force && \
-    echo "Disk space after cleanup: $(df -h /)" && \
-    echo "✅ Cleanup complete"
+    echo "Disk after cleanup: $(df -h / | tail -1)" && \
+    echo "✅ Build and cleanup complete"
 
 # Production stage
 FROM node:20-alpine AS runner
