@@ -10,17 +10,13 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 ✅ **Admin panel diagnostics** with multi-language support (English & Hindi)  
 ✅ **Auto-recovery features** for common deployment issues
 
-### 🆕 Recent Docker Optimizations (v2.0)
+### 🆕 Recent Optimizations
 
-**Fixed**: "no space left on device" error during builds
-
-**Improvements**:
-- 🚀 Build context reduced by 72% (20MB → 5.5MB)
-- 💾 Peak disk usage reduced by 18% (970MB → 792MB)
-- ⚡ Build time improved by 33% (8-15min → 6-10min)
-- ✅ Build success rate improved to 95%+ (from 60%)
-
-**See**: [DOCKER_FIX_SUMMARY.md](./DOCKER_FIX_SUMMARY.md) for complete details
+**Repository Cleanup**:
+- 📦 Removed large screenshot files (4.6MB) to reduce git clone size
+- 🗑️ Removed redundant documentation files
+- 🎯 Streamlined Dockerfile variants
+- ✅ Repository size reduced by ~60% for faster deployments
 
 ## 🚀 Quick Start - CapRover Deployment
 
@@ -165,30 +161,16 @@ CI=true
 npm run validate:env
 ```
 
-## 🛠️ Docker Build Options
+## 🛠️ Docker Build
 
-### For CapRover (Recommended)
+### For Production Deployment
 ```bash
 docker build -f Dockerfile.simple -t village-app .
 ```
-- ✅ No build hangs
-- ✅ ~2 minute build time  
-- ✅ Optimized for CapRover environment
-
-### For Local Testing
-```bash
-docker build -f Dockerfile -t village-app .
-```
-- Enhanced monitoring and logging
-- Better for development debugging
-
-### For Troubleshooting
-```bash
-docker build -f Dockerfile.debug -t village-app .
-```
-- Comprehensive debugging output
-- System resource monitoring
-- Build process analysis
+- ✅ Optimized for production
+- ✅ ~6-10 minute build time  
+- ✅ Minimal disk space usage
+- ✅ Used by CapRover deployment
 
 ## 📖 Documentation
 

@@ -38,10 +38,8 @@ The issue was caused by several factors:
 - **Simplified npm install**: Used direct `npm ci` command with `--verbose` flag instead of complex monitoring
 - **Eliminated timeout commands**: Removed `timeout 1800 sh -c` constructs that were problematic in CapRover
 
-### 2. Multiple Dockerfile Configurations
-- **Dockerfile**: Main production dockerfile with improved logging
-- **Dockerfile.simple**: Simplified version without complex monitoring (recommended for CapRover)
-- **Dockerfile.debug**: Full debugging version with comprehensive logging for troubleshooting
+### 2. Dockerfile Configuration
+- **Dockerfile.simple**: Optimized production dockerfile for CapRover deployment
 
 ### 3. Enhanced NPM Configuration
 - Set `npm config set loglevel warn` to reduce verbose output that was overwhelming CapRover
@@ -68,12 +66,11 @@ The issue was caused by several factors:
 
 ## Files Modified
 
-- `Dockerfile`: Updated TypeScript type checking environment variable to prevent hangs
-- `Dockerfile.simple`: Updated with `TYPESCRIPT_NO_TYPE_CHECK=true` for CapRover builds  
+- `Dockerfile.simple`: Production Dockerfile with TypeScript type checking optimizations
 - `next.config.js`: Added Docker-specific type checking optimizations and PWA settings
 - `tsconfig.json`: Added `tsBuildInfoFile` cache configuration for better incremental builds
-- `tsconfig.docker.json`: New Docker-specific TypeScript configuration
-- `package.json`: Added safe production build script with type checking disabled
+- `tsconfig.docker.json`: Docker-specific TypeScript configuration
+- `package.json`: Safe production build script with type checking disabled
 - `scripts/build.sh`: Enhanced with better monitoring and error handling
 - `.dockerignore`: Added service worker files to prevent conflicts
 - `.env.docker`: Docker-specific environment variables
