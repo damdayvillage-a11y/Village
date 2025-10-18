@@ -1,37 +1,108 @@
+# Node.js
 node_modules
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
 .next
-.git
-.gitignore
-README.md
-Dockerfile
-Dockerfile.*
-.dockerignore
-.env.local
-.env.*.local
-.DS_Store
+.next/cache
+out
+
+# Build artifacts
 coverage
 .nyc_output
-# Documentation files - not needed in production build
+dist
+build
+*.tsbuildinfo
+.swc
+.storybook-cache
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment files
+.env.local
+.env.*.local
+.env.development
+.env.test
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation - not needed in production build
 docs/
+*.md
+README.md
+CHANGELOG.md
+LICENSE
 memory2.md
 DEPLOYMENT_GUIDE.md
 QUICK_FIX_REFERENCE.md
 SECURITY_SUMMARY.md
 DOCKER_BUILD_OPTIMIZATION.md
-*.md
-# Service worker files - exclude existing ones to prevent build conflicts
+CAPROVER_DEPLOYMENT_FIX.md
+
+# Docker files - don't need other Dockerfiles in the build
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
+
+# Service worker files - exclude existing to prevent conflicts
 public/sw.js
+public/sw.js.map
 public/workbox-*.js
-# Build cache files
-.swc
-tsconfig.tsbuildinfo
-.next/cache
-*.log
-.storybook-cache
+public/workbox-*.js.map
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Test files - not needed in production
+**/*.test.ts
+**/*.test.tsx
+**/*.test.js
+**/*.test.jsx
+**/*.spec.ts
+**/*.spec.tsx
+**/*.spec.js
+**/*.spec.jsx
+jest.config.js
+jest.setup.js
+__tests__
+__mocks__
+
 # Storybook files - not needed in production
 .storybook
 stories/
+storybook-static/
+
 # Tools and CI files - not needed in production
 tools/
 ci/
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Logs
+*.log
+logs/
+
+# Screenshots and media from docs
+docs/memory/screenshots/
