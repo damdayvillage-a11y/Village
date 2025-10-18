@@ -76,7 +76,12 @@ RUN echo "🏗️ Building application..." && \
     echo "Build completed at: $(date)" && \
     echo "Verifying build output..." && \
     ls -la .next/ && \
-    echo "Build verification complete"
+    echo "Build verification complete" && \
+    echo "🧹 Cleaning up build artifacts..." && \
+    rm -rf .next/cache && \
+    rm -rf node_modules/.cache && \
+    npm cache clean --force && \
+    echo "✅ Cleanup complete"
 
 # Production stage
 FROM node:20-alpine AS runner

@@ -5,13 +5,19 @@ npm-debug.log*
 .gitignore
 README.md
 Dockerfile
+Dockerfile.*
 .dockerignore
 .env.local
 .env.*.local
 .DS_Store
 coverage
 .nyc_output
-docs/memory/temp
+# Documentation files - not needed in production build
+docs/
+memory2.md
+DEPLOYMENT_GUIDE.md
+QUICK_FIX_REFERENCE.md
+SECURITY_SUMMARY.md
 # Service worker files - exclude existing ones to prevent build conflicts
 public/sw.js
 public/workbox-*.js
@@ -21,3 +27,9 @@ tsconfig.tsbuildinfo
 .next/cache
 *.log
 .storybook-cache
+# Storybook files - not needed in production
+.storybook
+stories/
+# Tools and CI files - not needed in production
+tools/
+ci/

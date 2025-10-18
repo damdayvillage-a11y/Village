@@ -96,3 +96,7 @@ docs/memory/temp/
 /generated/prisma
 
 *storybook.log
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+memory2.md
