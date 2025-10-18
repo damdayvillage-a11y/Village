@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - PR12 Phase 5: Booking Flow (2025-10-18)
+- **Booking Components**: Complete booking flow UI components
+  - GuestInformationForm: Comprehensive guest details form with validation
+    - Name, email, phone validation
+    - Number of guests with min/max limits
+    - Special requests textarea
+    - Form state management and error handling
+  - BookingConfirmation: Post-booking success screen
+    - Booking details display
+    - Confirmation number
+    - Guest and payment information
+    - Download and share options
+    - Important information section
+- **Booking APIs**: Email and cancellation endpoints
+  - POST /api/booking/send-confirmation: Send booking confirmation email
+    - Fetches booking details with homestay and guest info
+    - Email content generation (ready for email service integration)
+    - Authorization checks
+  - POST /api/user/bookings/[id]/cancel: Cancel booking with refund calculation
+    - Cancellation policy enforcement (24h/12h refund tiers)
+    - Automatic refund calculation (100%/50%/0%)
+    - Notification creation
+    - Status validation (prevent double cancellation)
+- **Features**:
+  - Guest information validation with real-time feedback
+  - Automatic confirmation email sending on booking success
+  - Smart refund calculation based on cancellation timing
+  - Booking status tracking and updates
+  - Email notification integration (structure ready for SMTP/SendGrid)
+  - Social sharing for confirmations
+  - Download confirmation functionality (structure ready)
+
 ### Added - PR12 Phase 4: Payment Integration (2025-10-18)
 - **Payment Gateway**: Complete Razorpay integration
   - PaymentGateway component: Full checkout experience with Razorpay
