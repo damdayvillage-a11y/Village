@@ -161,30 +161,16 @@ CI=true
 npm run validate:env
 ```
 
-## 🛠️ Docker Build Options
+## 🛠️ Docker Build
 
-### For CapRover (Recommended)
+### For Production Deployment
 ```bash
 docker build -f Dockerfile.simple -t village-app .
 ```
-- ✅ No build hangs
-- ✅ ~2 minute build time  
-- ✅ Optimized for CapRover environment
-
-### For Local Testing
-```bash
-docker build -f Dockerfile -t village-app .
-```
-- Enhanced monitoring and logging
-- Better for development debugging
-
-### For Troubleshooting
-```bash
-docker build -f Dockerfile.debug -t village-app .
-```
-- Comprehensive debugging output
-- System resource monitoring
-- Build process analysis
+- ✅ Optimized for production
+- ✅ ~6-10 minute build time  
+- ✅ Minimal disk space usage
+- ✅ Used by CapRover deployment
 
 ## 📖 Documentation
 

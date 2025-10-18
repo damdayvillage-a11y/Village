@@ -43,10 +43,7 @@ The fix uses Docker's ARG variable substitution with default values:
 
 ## Files Modified
 
-- `Dockerfile` - Main production Dockerfile
-- `Dockerfile.simple` - Simplified CapRover Dockerfile (used by captain-definition)
-- `Dockerfile.fix` - Dockerfile with type checking fixes
-- `Dockerfile.debug` - Dockerfile with debugging features
+- `Dockerfile.simple` - Production Dockerfile (used by captain-definition)
 
 ## Testing
 
