@@ -1,122 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/config';
-import { UserRole } from '@prisma/client';
-import prisma from '@/lib/db/prisma';
 
+// Mock theme storage (in production, this would be in a database)
+let themeSettings = {
+  primaryColor: '#3B82F6',
+  secondaryColor: '#8B5CF6',
+  backgroundColor: '#FFFFFF',
+  textColor: '#1F2937',
+  borderColor: '#E5E7EB',
+  successColor: '#10B981',
+  warningColor: '#F59E0B',
+  errorColor: '#EF4444',
+  infoColor: '#3B82F6',
+  siteName: 'Village Admin',
+  tagline: 'Manage your village platform',
+  headerLogoUrl: '',
+  footerLogoUrl: '',
+  faviconUrl: '',
+  fontFamily: 'Inter, system-ui, sans-serif',
+  fontSize: 16,
+  lineHeight: 1.5,
+  fontWeight: 'normal',
+  headingFontFamily: 'Inter, system-ui, sans-serif',
+  borderRadius: 8,
+  boxShadow: true,
+  animationSpeed: 'normal',
+  spacingScale: 'normal',
+  customCSS: '',
+  updatedAt: new Date().toISOString(),
+};
+
+// GET - Retrieve theme settings
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== UserRole.ADMIN) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const themeSettings = await prisma.appSettings.findMany({
-      where: { category: 'theme' },
+    return NextResponse.json({
+      success: true,
+      theme: themeSettings,
     });
-
-    const theme = {
-      fonts: {
-        heading: 'Inter',
-        body: 'Inter',
-      },
-      layout: {
-        maxWidth: '1280px',
-        spacing: 'normal',
-        borderRadius: 'md',
-      },
-      colors: {
-        primary: '#061335',
-        secondary: '#1E40AF',
-        accent: '#10B981',
-        background: '#FFFFFF',
-        text: '#1F2937',
-      },
-    };
-
-    themeSettings.forEach((setting) => {
-      const keys = setting.key.split('.');
-      if (keys.length === 2) {
-        const [category, key] = keys;
-        if (category in theme) {
-          (theme as any)[category][key] = setting.value;
-        }
-      }
-    });
-
-    return NextResponse.json(theme);
   } catch (error) {
-    console.error('Theme fetch error:', error);
-    return NextResponse.json({ error: 'Failed to fetch theme' }, { status: 500 });
+    console.error('Error fetching theme:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch theme settings' },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(request: NextRequest) {
+// PATCH - Update theme settings
+export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== UserRole.ADMIN) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
+    const { theme } = body;
 
-    // Save fonts
-    for (const [key, value] of Object.entries(body.fonts || {})) {
-      await prisma.appSettings.upsert({
-        where: {
-          category_key: {
-            category: 'theme',
-            key: `fonts.${key}`,
-          },
-        },
-        update: { value: value as any },
-        create: {
-          category: 'theme',
-          key: `fonts.${key}`,
-          value: value as any,
-        },
-      });
+    if (!theme) {
+      return NextResponse.json(
+        { success: false, error: 'Theme data is required' },
+        { status: 400 }
+      );
     }
 
-    // Save layout
-    for (const [key, value] of Object.entries(body.layout || {})) {
-      await prisma.appSettings.upsert({
-        where: {
-          category_key: {
-            category: 'theme',
-            key: `layout.${key}`,
-          },
-        },
-        update: { value: value as any },
-        create: {
-          category: 'theme',
-          key: `layout.${key}`,
-          value: value as any,
-        },
-      });
-    }
+    // Update theme settings
+    themeSettings = {
+      ...themeSettings,
+      ...theme,
+      updatedAt: new Date().toISOString(),
+    };
 
-    // Save colors
-    for (const [key, value] of Object.entries(body.colors || {})) {
-      await prisma.appSettings.upsert({
-        where: {
-          category_key: {
-            category: 'theme',
-            key: `colors.${key}`,
-          },
-        },
-        update: { value: value as any },
-        create: {
-          category: 'theme',
-          key: `colors.${key}`,
-          value: value as any,
-        },
-      });
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: 'Theme updated successfully',
+      theme: themeSettings,
+    });
   } catch (error) {
-    console.error('Theme save error:', error);
-    return NextResponse.json({ error: 'Failed to save theme' }, { status: 500 });
+    console.error('Error updating theme:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to update theme settings' },
+      { status: 500 }
+    );
   }
 }
