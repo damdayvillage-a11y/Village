@@ -94,7 +94,7 @@ __mocks__
 
 # Storybook files - not needed in production
 .storybook
-stories/
+src/stories/
 storybook-static/
 
 # Tools and CI files - not needed in production
