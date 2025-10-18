@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth/config';
 import prisma from '@/lib/db/prisma';
 
 export async function POST(request: NextRequest) {
@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
         hostName: booking.homestay.owner.name,
         checkIn: booking.checkIn,
         checkOut: booking.checkOut,
-        totalAmount: booking.totalPrice,
+        totalAmount: typeof booking.pricing === 'object' && booking.pricing !== null ? 
+          (booking.pricing as any).total || 0 : 0,
         guestName: booking.guest.name,
       },
     };

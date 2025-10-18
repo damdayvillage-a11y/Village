@@ -57,17 +57,18 @@ export async function POST(request: NextRequest) {
       // Write file to disk
       await writeFile(filepath, buffer);
 
+      // Calculate simple checksum (could use crypto for production)
+      const checksum = Buffer.from(buffer).toString('base64').substring(0, 32);
+
       // Create database record
       const mediaRecord = await prisma.media.create({
         data: {
-          name: file.name,
           filename,
-          type: getFileType(file.type),
           mimeType: file.type,
           size: file.size,
           url: `/uploads/${filename}`,
-          folder: folder || null,
-          tags: [],
+          checksum,
+          uploadedBy: session?.user?.id || undefined,
         },
       });
 

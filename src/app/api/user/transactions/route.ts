@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth/config';
 import prisma from '@/lib/db/prisma';
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,35 @@ export async function GET(request: NextRequest) {
 
     const transactions = await prisma.payment.findMany({
       where: {
-        userId: session.user.id,
+        OR: [
+          {
+            booking: {
+              guestId: session.user.id,
+            },
+          },
+          {
+            order: {
+              customerId: session.user.id,
+            },
+          },
+        ],
+      },
+      include: {
+        booking: {
+          select: {
+            id: true,
+            homestay: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        order: {
+          select: {
+            id: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',

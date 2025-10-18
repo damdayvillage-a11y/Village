@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth/config';
 import prisma from '@/lib/db/prisma';
 
 export async function POST(
@@ -62,15 +62,24 @@ export async function POST(
       refundPercentage = 50;
     }
 
-    const refundAmount = (booking.totalPrice * refundPercentage) / 100;
+    // Calculate refund amount from pricing JSON
+    const pricingData = booking.pricing as any;
+    const totalPrice = typeof pricingData === 'object' && pricingData !== null ? 
+      (pricingData.total || 0) : 0;
+    const refundAmount = (totalPrice * refundPercentage) / 100;
 
-    // Update booking status
+    // Update booking status (remove non-existent fields)
     const updatedBooking = await prisma.booking.update({
       where: { id: bookingId },
       data: {
         status: 'CANCELLED',
-        cancelledAt: new Date(),
-        cancellationReason: reason,
+        // cancelledAt and cancellationReason fields don't exist in schema
+        // Store cancellation info in carbonFootprint JSON field as workaround
+        carbonFootprint: {
+          ...(typeof booking.carbonFootprint === 'object' ? booking.carbonFootprint as any : {}),
+          cancelledAt: new Date().toISOString(),
+          cancellationReason: reason,
+        },
       },
     });
 

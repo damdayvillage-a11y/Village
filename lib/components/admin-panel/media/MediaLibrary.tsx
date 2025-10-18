@@ -218,7 +218,7 @@ export const MediaLibrary: React.FC<MediaLibraryProps> = ({
         <div className="text-sm text-gray-600 flex items-center gap-2">
           <Badge>{filteredFiles.length} files</Badge>
           {selectedFiles.size > 0 && (
-            <Badge variant="secondary">{selectedFiles.size} selected</Badge>
+            <Badge variant="info">{selectedFiles.size} selected</Badge>
           )}
         </div>
       </div>
@@ -240,14 +240,15 @@ export const MediaLibrary: React.FC<MediaLibraryProps> = ({
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           {filteredFiles.map((file) => (
-            <Card
+            <div
               key={file.id}
               className={`cursor-pointer hover:shadow-lg transition-shadow ${
                 selectedFiles.has(file.id) ? 'ring-2 ring-blue-500' : ''
               }`}
               onClick={() => handleSelect(file)}
             >
-              <CardContent className="p-3">
+              <Card>
+                <CardContent className="p-3">
                 <div className="aspect-square bg-gray-100 rounded-md mb-2 flex items-center justify-center overflow-hidden">
                   {file.type === 'image' ? (
                     <img
@@ -291,6 +292,7 @@ export const MediaLibrary: React.FC<MediaLibraryProps> = ({
                 </div>
               </CardContent>
             </Card>
+            </div>
           ))}
         </div>
       ) : (
@@ -320,7 +322,7 @@ export const MediaLibrary: React.FC<MediaLibraryProps> = ({
                       <span className="text-sm">{file.name}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <Badge variant="secondary">{file.type}</Badge>
+                      <Badge variant="info">{file.type}</Badge>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {formatFileSize(file.size)}

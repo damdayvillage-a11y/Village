@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     const files = await prisma.media.findMany({
       where,
-      orderBy: { uploadedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       take: 100,
     });
 

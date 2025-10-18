@@ -169,7 +169,7 @@ export const SEOControls: React.FC = () => {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <Label htmlFor="title">Page Title</Label>
-                    <Badge variant={analysis.titleOk ? 'default' : 'destructive'}>
+                    <Badge variant={analysis.titleOk ? 'default' : 'error'}>
                       {analysis.titleLength} chars
                     </Badge>
                   </div>
@@ -187,7 +187,7 @@ export const SEOControls: React.FC = () => {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <Label htmlFor="description">Meta Description</Label>
-                    <Badge variant={analysis.descriptionOk ? 'default' : 'destructive'}>
+                    <Badge variant={analysis.descriptionOk ? 'default' : 'error'}>
                       {analysis.descriptionLength} chars
                     </Badge>
                   </div>
@@ -268,13 +268,13 @@ export const SEOControls: React.FC = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center justify-between">
                       <span>Title Length:</span>
-                      <Badge variant={analysis.titleOk ? 'default' : 'destructive'}>
+                      <Badge variant={analysis.titleOk ? 'default' : 'error'}>
                         {analysis.titleOk ? 'Good' : 'Needs Improvement'}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Description Length:</span>
-                      <Badge variant={analysis.descriptionOk ? 'default' : 'destructive'}>
+                      <Badge variant={analysis.descriptionOk ? 'default' : 'error'}>
                         {analysis.descriptionOk ? 'Good' : 'Needs Improvement'}
                       </Badge>
                     </div>

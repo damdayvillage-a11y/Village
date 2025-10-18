@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth/config';
 import prisma from '@/lib/db/prisma';
 import crypto from 'crypto';
 
@@ -53,14 +53,10 @@ export async function POST(request: NextRequest) {
         amount: 0, // Will be updated from Razorpay webhook
         currency: 'INR',
         status: 'COMPLETED',
-        provider: 'RAZORPAY',
-        transactionId: razorpay_payment_id,
-        metadata: {
-          razorpay_order_id,
-          razorpay_payment_id,
-          razorpay_signature,
-        },
-        userId: session.user.id,
+        method: 'RAZORPAY',
+        razorpayId: razorpay_payment_id,
+        bookingId: bookingId || undefined,
+        orderId: orderId || undefined,
       },
     });
 
@@ -70,7 +66,7 @@ export async function POST(request: NextRequest) {
         where: { id: bookingId },
         data: {
           status: 'CONFIRMED',
-          paymentId: payment.id,
+          paymentRef: payment.id,
         },
       });
 
@@ -93,7 +89,6 @@ export async function POST(request: NextRequest) {
         where: { id: orderId },
         data: {
           status: 'CONFIRMED',
-          paymentId: payment.id,
         },
       });
 

@@ -55,11 +55,11 @@ export async function POST(request: NextRequest) {
             key,
           },
         },
-        update: { value },
+        update: { value: value as any },
         create: {
           category: 'branding',
           key,
-          value,
+          value: value as any,
         },
       });
     }

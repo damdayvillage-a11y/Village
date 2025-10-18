@@ -33,8 +33,8 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    if (seoSetting) {
-      return NextResponse.json({ path, ...seoSetting.value });
+    if (seoSetting && typeof seoSetting.value === 'object' && seoSetting.value !== null) {
+      return NextResponse.json({ path, ...(seoSetting.value as any) });
     }
 
     // Return default if not found

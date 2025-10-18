@@ -69,11 +69,11 @@ export async function POST(request: NextRequest) {
             key: `fonts.${key}`,
           },
         },
-        update: { value },
+        update: { value: value as any },
         create: {
           category: 'theme',
           key: `fonts.${key}`,
-          value,
+          value: value as any,
         },
       });
     }
@@ -87,11 +87,11 @@ export async function POST(request: NextRequest) {
             key: `layout.${key}`,
           },
         },
-        update: { value },
+        update: { value: value as any },
         create: {
           category: 'theme',
           key: `layout.${key}`,
-          value,
+          value: value as any,
         },
       });
     }
@@ -105,11 +105,11 @@ export async function POST(request: NextRequest) {
             key: `colors.${key}`,
           },
         },
-        update: { value },
+        update: { value: value as any },
         create: {
           category: 'theme',
           key: `colors.${key}`,
-          value,
+          value: value as any,
         },
       });
     }
