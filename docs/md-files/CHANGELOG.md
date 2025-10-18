@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - PR13: Admin Control Center Enhancement (2025-10-18)
+- **Feature Toggle Dashboard**: WordPress-style feature management
+  - Enable/disable features dynamically
+  - 8 feature toggles (Homestays, Marketplace, Tours, Blog, Projects, Carbon Credits, IoT, Analytics)
+  - Status indicators (Active, Beta, Planned)
+  - Configuration requirements display
+  - Database-backed feature state
+- **Branding Manager**: Complete brand identity control
+  - Site name and tagline customization
+  - Color scheme editor (Primary, Secondary, Accent)
+  - Live preview of branding changes
+  - Logo upload support (structure ready)
+  - Favicon upload support (structure ready)
+  - Real-time color picker
+- **API Key Manager**: Secure external service configuration
+  - Support for 5 services (Razorpay, Stripe, SendGrid, Google Drive, Twilio)
+  - API key validation and testing
+  - Secure key storage with visibility toggle
+  - Connection testing functionality
+  - Last tested timestamps
+  - Status badges (Valid, Invalid, Not Configured)
+- **Admin Control Center Page**: Unified admin interface
+  - Tab-based navigation (Features, Branding, API Keys)
+  - Clean WordPress-style interface
+  - Responsive design
+  - Integrated all control center components
+
+### API Endpoints - PR13 (2 new)
+- `GET/POST /api/admin/branding` - Manage branding settings
+- `GET/PATCH /api/admin/features` - Feature toggle management
+
+### Components Created - PR13 (4)
+- `FeatureToggleDashboard.tsx` - Feature management interface
+- `BrandingManager.tsx` - Brand identity editor
+- `APIKeyManager.tsx` - API key configuration
+- `control-center/page.tsx` - Main control center page
+
+### Infrastructure - PR13
+- Database-backed feature toggles via AppSettings
+- Secure API key storage
+- Real-time feature enable/disable
+- Admin-only access control
+
 ### Added - PR12 Phase 5: Booking Flow (2025-10-18)
 - **Booking Components**: Complete booking flow UI components
   - GuestInformationForm: Comprehensive guest details form with validation

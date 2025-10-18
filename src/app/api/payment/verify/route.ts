@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Verify signature
     const hmac = crypto.createHmac('sha256', razorpayKeySecret);
-    hmac.update(\`\${razorpay_order_id}|\${razorpay_payment_id}\`);
+    hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
     const generatedSignature = hmac.digest('hex');
 
     if (generatedSignature !== razorpay_signature) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
           type: 'BOOKING',
           title: 'Booking Confirmed',
           message: 'Your booking has been confirmed. Payment received successfully.',
-          actionUrl: \`/user-panel/bookings/\${bookingId}\`,
+          actionUrl: `/user-panel/bookings/${bookingId}`,
           metadata: {
             bookingId,
             paymentId: payment.id,
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
           type: 'ORDER',
           title: 'Order Confirmed',
           message: 'Your order has been confirmed. Payment received successfully.',
-          actionUrl: \`/user-panel/orders/\${orderId}\`,
+          actionUrl: `/user-panel/orders/${orderId}`,
           metadata: {
             orderId,
             paymentId: payment.id,

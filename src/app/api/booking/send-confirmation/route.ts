@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     // For now, we'll just log and return success
     const emailContent = {
       to: email,
-      subject: \`Booking Confirmation - \${booking.homestay.name}\`,
+      subject: `Booking Confirmation - ${booking.homestay.name}`,
       bookingDetails: {
         confirmationNumber: booking.id,
         homestayName: booking.homestay.name,

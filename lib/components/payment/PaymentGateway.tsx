@@ -78,7 +78,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         amount: data.amount,
         currency: data.currency,
         name: 'Damday Village',
-        description: bookingId ? \`Booking #\${bookingId}\` : \`Order #\${orderId}\`,
+        description: bookingId ? `Booking #${bookingId}` : `Order #${orderId}`,
         order_id: data.orderId,
         handler: async (response: any) => {
           // Verify payment on server

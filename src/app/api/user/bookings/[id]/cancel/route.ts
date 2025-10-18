@@ -80,8 +80,8 @@ export async function POST(
         userId: session.user.id,
         type: 'BOOKING',
         title: 'Booking Cancelled',
-        message: \`Your booking for \${booking.homestay.name} has been cancelled. \${refundPercentage > 0 ? \`Refund: ₹\${refundAmount}\` : 'No refund applicable.'}\`,
-        actionUrl: \`/user-panel/bookings/\${bookingId}\`,
+        message: `Your booking for ${booking.homestay.name} has been cancelled. ${refundPercentage > 0 ? `Refund: ₹${refundAmount}` : 'No refund applicable.'}`,
+        actionUrl: `/user-panel/bookings/${bookingId}`,
         metadata: {
           bookingId,
           refundAmount,

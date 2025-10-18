@@ -94,13 +94,13 @@ export const TransactionHistory: React.FC = () => {
 
   const downloadReceipt = async (transactionId: string) => {
     try {
-      const response = await fetch(\`/api/payment/receipt/\${transactionId}\`);
+      const response = await fetch(`/api/payment/receipt/${transactionId}`);
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = \`receipt-\${transactionId}.pdf\`;
+        a.download = `receipt-${transactionId}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const razorpayOrder = await razorpay.orders.create({
       amount: amount * 100, // Convert to paise
       currency: currency,
-      receipt: \`rcpt_\${bookingId || orderId || Date.now()}\`,
+      receipt: `rcpt_${bookingId || orderId || Date.now()}`,
       notes: {
         bookingId: bookingId || '',
         orderId: orderId || '',

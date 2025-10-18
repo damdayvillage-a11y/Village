@@ -79,7 +79,7 @@ export const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
       try {
         await navigator.share({
           title: 'Booking Confirmation',
-          text: \`Booking confirmed for \${booking.homestayName}\`,
+          text: `Booking confirmed for ${booking.homestayName}`,
           url: window.location.href,
         });
       } catch (error) {

@@ -61,7 +61,7 @@ export const GuestInformationForm: React.FC<GuestInformationFormProps> = ({
     if (formData.numberOfGuests < 1) {
       newErrors.numberOfGuests = 'At least 1 guest required';
     } else if (formData.numberOfGuests > maxGuests) {
-      newErrors.numberOfGuests = \`Maximum \${maxGuests} guests allowed\`;
+      newErrors.numberOfGuests = `Maximum ${maxGuests} guests allowed`;
     }
 
     setErrors(newErrors);
