@@ -2,13 +2,67 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Suspense } from 'react';
 import { Button } from '@/lib/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
+import { Card, CardContent } from '@/lib/components/ui/Card';
 import { Badge } from '@/lib/components/ui/Badge';
 import { LiveData } from '@/lib/components/ui/LiveData';
-import { AuthNavigation } from '@/lib/components/ui/AuthNavigation';
+import { HomestayCard } from '@/lib/components/public/HomestayCard';
+import { ProductCard } from '@/lib/components/public/ProductCard';
+import { StatsCounter } from '@/lib/components/public/StatsCounter';
+import {
+  getFeaturedHomestaysData,
+  getFeaturedProductsData,
+  getVillageStatsData,
+} from '@/lib/data/public';
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch all data in parallel
+  const [homestaysResult, productsResult, statsResult] = await Promise.all([
+    getFeaturedHomestaysData(),
+    getFeaturedProductsData(),
+    getVillageStatsData(),
+  ]);
+
+  const featuredHomestays = homestaysResult.data || [];
+  const featuredProducts = productsResult.data || [];
+  const villageStats = statsResult.data;
+
+  // Structured Data for SEO (JSON-LD)
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristDestination',
+    name: 'Damday Village',
+    description: 'A pioneering carbon-neutral, culturally-rich, and technologically progressive model village nestled at 2,100m elevation in the pristine Kumaon Himalayas',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Pithoragarh',
+      addressRegion: 'Uttarakhand',
+      addressCountry: 'IN',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 29.5830,
+      longitude: 80.2180,
+      elevation: '2100',
+    },
+    url: 'https://village-app.captain.damdayvillage.com',
+    image: 'https://village-app.captain.damdayvillage.com/village-hero.jpg',
+    amenityFeature: [
+      { '@type': 'LocationFeatureSpecification', name: 'Carbon Neutral' },
+      { '@type': 'LocationFeatureSpecification', name: 'Solar Powered' },
+      { '@type': 'LocationFeatureSpecification', name: 'IoT Enabled' },
+      { '@type': 'LocationFeatureSpecification', name: 'Homestays' },
+      { '@type': 'LocationFeatureSpecification', name: 'Local Marketplace' },
+    ],
+  };
+
   return (
+    <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -39,6 +93,54 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Village Statistics - Real Data */}
+          {villageStats && (
+            <div className="mb-12">
+              <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+                Live Village Statistics
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {villageStats.homestays && (
+                  <StatsCounter
+                    end={villageStats.homestays.total}
+                    label={villageStats.homestays.label}
+                  />
+                )}
+                {villageStats.products && (
+                  <StatsCounter
+                    end={villageStats.products.total}
+                    label={villageStats.products.label}
+                  />
+                )}
+                {villageStats.bookings && (
+                  <StatsCounter
+                    end={villageStats.bookings.total}
+                    label={villageStats.bookings.label}
+                  />
+                )}
+                {villageStats.users && (
+                  <StatsCounter
+                    end={villageStats.users.total}
+                    label={villageStats.users.label}
+                  />
+                )}
+                {villageStats.reviews && (
+                  <StatsCounter
+                    end={villageStats.reviews.total}
+                    label={villageStats.reviews.label}
+                    suffix={` (${villageStats.reviews.avgRating}★)`}
+                  />
+                )}
+                {villageStats.carbonOffset && (
+                  <StatsCounter
+                    end={villageStats.carbonOffset.total}
+                    label={villageStats.carbonOffset.label}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Live Environmental Data */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
@@ -60,131 +162,79 @@ export default function HomePage() {
                 🌐 360° Village Tour
               </Button>
             </Link>
-            <Link href="/book-homestay">
+            <Link href="/homestays">
               <Button variant="outline" size="lg">
-                🏠 Book Homestay
+                🏠 Browse Homestays
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Features Grid with Enhanced Visuals */}
-        <div className="grid md:grid-cols-3 gap-8 mt-16">
-          <Card className="p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        {/* Featured Homestays - Real Data */}
+        {featuredHomestays.length > 0 && (
+          <div className="mt-20">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Featured Homestays</h2>
+                <p className="text-gray-600 mt-2">Experience authentic Himalayan hospitality</p>
               </div>
+              <Link href="/homestays">
+                <Button variant="outline">View All Homestays →</Button>
+              </Link>
             </div>
-            <h3 className="text-xl font-semibold mb-3 text-gray-900">3D Digital Twin</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Explore Damday Village through immersive 3D visualization featuring authentic Himalayan architecture and real-time environmental data.
-            </p>
-            <Badge className="mt-3 bg-primary-50 text-primary-700 border border-primary-200">
-              Real-time Data
-            </Badge>
-          </Card>
-
-          <Card className="p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredHomestays.slice(0, 6).map((homestay: any) => (
+                <HomestayCard
+                  key={homestay.id}
+                  id={homestay.id}
+                  name={homestay.name}
+                  description={homestay.description}
+                  location={homestay.location}
+                  pricePerNight={homestay.pricePerNight}
+                  maxGuests={homestay.maxGuests}
+                  image={homestay.image}
+                  rating={homestay.rating}
+                  reviewCount={homestay.reviewCount}
+                  amenities={homestay.amenities}
+                />
+              ))}
             </div>
-            <h3 className="text-xl font-semibold mb-3 text-gray-900">100% Carbon Neutral</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Powered entirely by solar energy with 24/7 monitoring of environmental impact and carbon footprint reduction.
-            </p>
-            <Badge className="mt-3 bg-green-50 text-green-700 border border-green-200">
-              -2.5 tons CO₂/year
-            </Badge>
-          </Card>
-
-          <Card className="p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold mb-3 text-gray-900">Smart IoT Network</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Advanced sensor network monitoring air quality, energy usage, weather conditions, and microgrid performance.
-            </p>
-            <Badge className="mt-3 bg-blue-50 text-blue-700 border border-blue-200">
-              15 Active Sensors
-            </Badge>
-          </Card>
-        </div>
-
-        {/* Available Features & Services */}
-        <div className="mt-20 text-center">
-          <h2 className="text-3xl font-display font-bold text-gray-900 mb-4">
-            Available Services
-          </h2>
-          <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
-            Explore our range of sustainable tourism and community development services
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-green-700 mb-2">Homestay Booking</h4>
-              <p className="text-sm text-green-600 mb-3">Authentic village accommodations with local families</p>
-              <Badge className="bg-green-100 text-green-700 border border-green-300">
-                ₹2,500-3,500/night
-              </Badge>
-            </Card>
-            
-            <Card className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-orange-700 mb-2">Local Marketplace</h4>
-              <p className="text-sm text-orange-600 mb-3">Handcrafted products from village artisans</p>
-              <Badge className="bg-orange-100 text-orange-700 border border-orange-300">
-                25+ Products
-              </Badge>
-            </Card>
-            
-            <Card className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-purple-700 mb-2">AR Cultural Tours</h4>
-              <p className="text-sm text-purple-600 mb-3">Interactive 360° cultural experiences</p>
-              <Badge className="bg-purple-100 text-purple-700 border border-purple-300">
-                5 Tour Routes
-              </Badge>
-            </Card>
-            
-            <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-blue-700 mb-2">Community Projects</h4>
-              <p className="text-sm text-blue-600 mb-3">Transparent development initiatives</p>
-              <Badge className="bg-blue-100 text-blue-700 border border-blue-300">
-                8 Active Projects
-              </Badge>
-            </Card>
           </div>
-        </div>
+        )}
+
+        {/* Featured Products - Real Data */}
+        {featuredProducts.length > 0 && (
+          <div className="mt-20">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Local Marketplace</h2>
+                <p className="text-gray-600 mt-2">Authentic handcrafted products from village artisans</p>
+              </div>
+              <Link href="/marketplace">
+                <Button variant="outline">View All Products →</Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {featuredProducts.slice(0, 8).map((product: any) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  description={product.description}
+                  price={product.price}
+                  stock={product.stock}
+                  inStock={product.inStock}
+                  image={product.image}
+                  category={product.category}
+                  locallySourced={product.locallySourced}
+                  carbonFootprint={product.carbonFootprint}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
+    </>
   );
 }

@@ -90,7 +90,9 @@ function checkStartupConfiguration() {
     const dummyValues = [
       'dummy-secret-for-build',
       'dummy-secret-for-build-only-not-secure',
+      'dummy-secret-for-build-only-not-secure-min32chars',
       'your-nextauth-secret-key',
+      'change-this-to-a-random-secret-min-32-chars',
       'change-me',
       'secret',
     ];
@@ -182,7 +184,7 @@ function checkStartupConfiguration() {
         
         console.log(chalk.green('✅ Database connection successful!'));
         
-        // Check if admin user exists (non-blocking warning)
+        // Check if admin user exists and auto-create if missing
         try {
           const adminUser = await prisma.user.findUnique({
             where: { email: 'admin@damdayvillage.org' }
@@ -190,14 +192,106 @@ function checkStartupConfiguration() {
           
           if (!adminUser) {
             console.log(chalk.yellow('⚠️  Admin user not found in database'));
-            console.log(chalk.yellow('   To create admin user, run: npm run db:seed'));
-            console.log(chalk.yellow('   Or visit: /api/admin/init to auto-create'));
-            console.log(chalk.yellow('   Default credentials: admin@damdayvillage.org / Admin@123'));
-            warnings.push('Admin user not found - run db:seed or visit /api/admin/init');
+            console.log(chalk.blue('🔧 Auto-creating admin user...'));
+            
+            try {
+              // Hash password using bcryptjs (available in production)
+              const bcryptjs = require('bcryptjs');
+              const adminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin@123';
+              const salt = await bcryptjs.genSalt(12);
+              const hashedPassword = await bcryptjs.hash(adminPassword, salt);
+              
+              // Create admin user
+              const newAdmin = await prisma.user.create({
+                data: {
+                  email: 'admin@damdayvillage.org',
+                  name: 'Village Administrator',
+                  role: 'ADMIN',
+                  password: hashedPassword,
+                  verified: true,
+                  active: true,
+                  preferences: {
+                    language: 'en',
+                    notifications: true,
+                  },
+                },
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                  role: true,
+                }
+              });
+              
+              console.log(chalk.green('✅ Admin user created successfully!'));
+              console.log(chalk.blue(`   Email: ${newAdmin.email}`));
+              console.log(chalk.blue(`   Role: ${newAdmin.role}`));
+              console.log(chalk.blue(`   Password: ${adminPassword}`));
+              console.log(chalk.yellow('   ⚠️  IMPORTANT: Change this password immediately after first login!'));
+            } catch (createError) {
+              console.log(chalk.red('❌ Failed to auto-create admin user:', createError.message));
+              console.log(chalk.yellow('   To create admin user manually:'));
+              console.log(chalk.yellow('   • Visit: https://your-domain.com/api/admin/init'));
+              console.log(chalk.yellow('   • Or run: npm run db:seed'));
+              warnings.push('Admin user creation failed - visit /api/admin/init or run db:seed');
+            }
           } else {
             console.log(chalk.green('✅ Admin user exists'));
             console.log(chalk.blue(`   Email: ${adminUser.email}`));
             console.log(chalk.blue(`   Role: ${adminUser.role}`));
+          }
+          
+          // Also check and create host user if missing
+          const hostUser = await prisma.user.findUnique({
+            where: { email: 'host@damdayvillage.org' }
+          });
+          
+          if (!hostUser) {
+            console.log(chalk.yellow('⚠️  Host user not found in database'));
+            console.log(chalk.blue('🔧 Auto-creating host user...'));
+            
+            try {
+              const bcryptjs = require('bcryptjs');
+              const hostPassword = process.env.HOST_DEFAULT_PASSWORD || 'Host@123';
+              const salt = await bcryptjs.genSalt(12);
+              const hashedPassword = await bcryptjs.hash(hostPassword, salt);
+              
+              // Create host user
+              const newHost = await prisma.user.create({
+                data: {
+                  email: 'host@damdayvillage.org',
+                  name: 'Raj Singh',
+                  role: 'HOST',
+                  password: hashedPassword,
+                  verified: true,
+                  active: true,
+                  phone: '+91-9876543210',
+                  preferences: {
+                    language: 'hi',
+                    notifications: true,
+                  },
+                },
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                  role: true,
+                }
+              });
+              
+              console.log(chalk.green('✅ Host user created successfully!'));
+              console.log(chalk.blue(`   Email: ${newHost.email}`));
+              console.log(chalk.blue(`   Role: ${newHost.role}`));
+              console.log(chalk.blue(`   Password: ${hostPassword}`));
+              console.log(chalk.yellow('   ⚠️  IMPORTANT: Change this password immediately after first login!'));
+            } catch (createError) {
+              console.log(chalk.red('❌ Failed to auto-create host user:', createError.message));
+              console.log(chalk.yellow('   You can create it manually via the admin panel after logging in'));
+            }
+          } else {
+            console.log(chalk.green('✅ Host user exists'));
+            console.log(chalk.blue(`   Email: ${hostUser.email}`));
+            console.log(chalk.blue(`   Role: ${hostUser.role}`));
           }
         } catch (adminCheckError) {
           console.log(chalk.yellow('⚠️  Could not verify admin user (database may need migration)'));
@@ -228,9 +322,9 @@ function checkStartupConfiguration() {
       console.log(chalk.red(`   • ${error}`));
     });
     console.log(chalk.yellow('\n📚 For help, see:'));
-    console.log(chalk.yellow('   • docs/AUTH_ERROR_HANDLING.md'));
-    console.log(chalk.yellow('   • ADMIN_PANEL_SETUP.md'));
-    console.log(chalk.yellow('   • PRODUCTION_READINESS.md\n'));
+    console.log(chalk.yellow('   • Visit /help/admin-500 in your browser for instant diagnostics'));
+    console.log(chalk.yellow('   • Check /admin-panel/status for system health'));
+    console.log(chalk.yellow('   • CAPGUIDE.md - Complete CapRover deployment guide\n'));
     
     if (nodeEnv === 'production') {
       console.log(chalk.red('🛑 Cannot start in production mode with these errors.\n'));
@@ -238,7 +332,10 @@ function checkStartupConfiguration() {
       console.log(chalk.yellow('   1. Replace all $$cap_*$$ placeholders with actual values'));
       console.log(chalk.yellow('   2. Generate NEXTAUTH_SECRET: openssl rand -base64 32'));
       console.log(chalk.yellow('   3. Set NEXTAUTH_URL to your actual domain (e.g., https://damdayvillage.com)'));
-      console.log(chalk.yellow('   4. Configure DATABASE_URL with real PostgreSQL credentials\n'));
+      console.log(chalk.yellow('   4. Configure DATABASE_URL with real PostgreSQL credentials'));
+      console.log(chalk.yellow('\n🔗 After fixing and deploying, visit these URLs:'));
+      console.log(chalk.yellow('   • https://your-domain.com/help/admin-500 - Fix guide'));
+      console.log(chalk.yellow('   • https://your-domain.com/api/admin/init - Create admin user\n'));
       process.exit(1);
     } else {
       console.log(chalk.yellow('⚠️  Starting anyway (development mode)...\n'));

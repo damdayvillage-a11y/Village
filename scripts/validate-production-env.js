@@ -38,7 +38,9 @@ const NO_DUMMY_VALUES = [
   { var: 'DATABASE_URL', dummyValue: 'postgresql://dummy:dummy@localhost:5432/dummy' },
   { var: 'NEXTAUTH_SECRET', dummyValue: 'dummy-secret-for-build' },
   { var: 'NEXTAUTH_SECRET', dummyValue: 'dummy-secret-for-build-only-not-secure' },
+  { var: 'NEXTAUTH_SECRET', dummyValue: 'dummy-secret-for-build-only-not-secure-min32chars' },
   { var: 'NEXTAUTH_SECRET', dummyValue: 'your-nextauth-secret-key' },
+  { var: 'NEXTAUTH_SECRET', dummyValue: 'change-this-to-a-random-secret-min-32-chars' },
 ];
 
 /**

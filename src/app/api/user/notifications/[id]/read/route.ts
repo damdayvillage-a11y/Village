@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
+import prisma from '@/lib/db/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,15 +12,34 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const notificationId = params.id;
 
-    // TODO: Replace with actual database update when Prisma is properly set up
-    // For now, just return success
-    console.log(`Marking notification ${notificationId} as read for user ${session.user?.email}`);
+    // Get user from database
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Mark notification as read (only if it belongs to the user)
+    const updatedNotification = await prisma.notification.updateMany({
+      where: { 
+        id: notificationId,
+        userId: user.id
+      },
+      data: { read: true }
+    });
+
+    if (updatedNotification.count === 0) {
+      return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

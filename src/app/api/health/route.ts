@@ -1,7 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkDatabaseHealth } from '../../../../lib/db';
+import { PrismaClient } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
+
+// Check if admin user exists
+async function checkAdminUser() {
+  try {
+    const db = new PrismaClient();
+    try {
+      const adminUser = await db.user.findFirst({
+        where: { 
+          email: 'admin@damdayvillage.org',
+          role: 'ADMIN'
+        },
+        select: { id: true, email: true, verified: true }
+      });
+      
+      return {
+        status: adminUser ? 'healthy' : 'missing',
+        exists: !!adminUser,
+        verified: adminUser?.verified || false,
+        message: adminUser 
+          ? 'Admin user configured' 
+          : 'Admin user not found - run seed script'
+      };
+    } finally {
+      await db.$disconnect();
+    }
+  } catch (error) {
+    return {
+      status: 'error',
+      exists: false,
+      message: error instanceof Error ? error.message : 'Failed to check admin user'
+    };
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,6 +43,12 @@ export async function GET(request: NextRequest) {
     
     // Check if database is healthy or skipped (during build)
     const dbHealthy = dbHealth.status === 'healthy' || dbHealth.status === 'skip';
+    
+    // Check admin user only if database is healthy
+    let adminCheck = { status: 'skip', exists: false, message: 'Database not ready' };
+    if (dbHealth.status === 'healthy') {
+      adminCheck = await checkAdminUser();
+    }
     
     const health = {
       status: dbHealthy ? 'healthy' : 'degraded',
@@ -18,6 +58,7 @@ export async function GET(request: NextRequest) {
       uptime: process.uptime(),
       services: {
         database: dbHealth,
+        admin: adminCheck,
         api: { status: 'healthy', message: 'API is responding' }
       },
       deployment: {

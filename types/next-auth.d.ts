@@ -30,5 +30,6 @@ declare module 'next-auth/jwt' {
     role: UserRole;
     verified: boolean;
     provider: string;
+    lastLoginUpdate?: number;
   }
 }

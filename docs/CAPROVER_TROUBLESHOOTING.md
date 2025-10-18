@@ -95,11 +95,8 @@ Check CapRover build logs for:
 
 ### Step 2: Test Locally
 ```bash
-# Test simplified build
+# Test production build
 docker build -t village-test -f Dockerfile.simple .
-
-# Test with debugging
-docker build -t village-debug -f Dockerfile.debug .
 
 # Run debugging scripts
 ./scripts/debug-npm-install.sh
@@ -173,8 +170,8 @@ Ensure your CapRover server has:
 ### If Simple Build Also Fails
 1. Check CapRover server resources
 2. Verify environment variables are set
-3. Test with `Dockerfile.debug` locally
-4. Review build logs for specific errors
+3. Review build logs for specific errors
+4. Test build locally with same environment
 
 ## Advanced Debugging
 
