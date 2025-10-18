@@ -8,61 +8,18 @@ import { LiveData } from '@/lib/components/ui/LiveData';
 import { HomestayCard } from '@/lib/components/public/HomestayCard';
 import { ProductCard } from '@/lib/components/public/ProductCard';
 import { StatsCounter } from '@/lib/components/public/StatsCounter';
-
-// Fetch featured homestays
-async function getFeaturedHomestays() {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/public/featured-homestays`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) return { success: false, data: [] };
-    const result = await res.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching homestays:', error);
-    return { success: false, data: [] };
-  }
-}
-
-// Fetch featured products
-async function getFeaturedProducts() {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/public/featured-products`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) return { success: false, data: [] };
-    const result = await res.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return { success: false, data: [] };
-  }
-}
-
-// Fetch village stats
-async function getVillageStats() {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/public/village-stats`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) return { success: false, data: null };
-    const result = await res.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    return { success: false, data: null };
-  }
-}
+import {
+  getFeaturedHomestaysData,
+  getFeaturedProductsData,
+  getVillageStatsData,
+} from '@/lib/data/public';
 
 export default async function HomePage() {
   // Fetch all data in parallel
   const [homestaysResult, productsResult, statsResult] = await Promise.all([
-    getFeaturedHomestays(),
-    getFeaturedProducts(),
-    getVillageStats(),
+    getFeaturedHomestaysData(),
+    getFeaturedProductsData(),
+    getVillageStatsData(),
   ]);
 
   const featuredHomestays = homestaysResult.data || [];
