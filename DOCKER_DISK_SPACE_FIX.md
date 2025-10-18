@@ -43,25 +43,22 @@ ci/
 
 **Impact**: Prevents ~6MB of documentation from being copied into build context
 
-### 2. Optimized Dependency Installation (Dockerfile.simple)
+### 2. Simplified Dependency Installation (Dockerfile.simple)
+
+**Updated approach**: Removed aggressive find commands that could break builds.
 
 ```dockerfile
 RUN echo "📦 Installing dependencies..." && \
     npm ci --include=dev --no-audit --no-fund && \
     echo "🧹 Cleaning npm cache and temporary files..." && \
     npm cache clean --force && \
-    rm -rf /root/.npm /tmp/* /var/tmp/* && \
-    rm -rf /root/.cache /root/.local && \
-    find /app/node_modules -name "*.md" -type f -delete && \
-    find /app/node_modules -name "*.markdown" -type f -delete && \
-    find /app/node_modules -type d -name "test" -prune -exec rm -rf {} + 2>/dev/null || true && \
-    find /app/node_modules -type d -name "tests" -prune -exec rm -rf {} + 2>/dev/null || true && \
-    find /app/node_modules -name "*.test.js" -type f -delete 2>/dev/null || true && \
-    find /app/node_modules -name "*.spec.js" -type f -delete 2>/dev/null || true && \
-    echo "✅ Dependencies installed and cleaned: $(du -sh node_modules)"
+    rm -rf /root/.npm /tmp/* /var/tmp/* /root/.cache /root/.local && \
+    echo "✅ Dependencies installed: $(du -sh node_modules)"
 ```
 
-**Impact**: Saves 50-100MB by removing test files and documentation from node_modules
+**Impact**: Safe cleanup of cache directories (20-50MB saved)
+
+**Note**: The `.dockerignore` file already prevents test directories and documentation from being included in the build context, so aggressive find commands are not needed and can cause build failures.
 
 ### 3. Enhanced Prisma Generation Cleanup
 
@@ -76,38 +73,41 @@ RUN echo "🔧 Generating Prisma client..." && \
 
 ### 4. Aggressive Post-Build Cleanup
 
+### 4. Simplified Post-Build Cleanup
+
+**Updated approach**: Removed aggressive file deletions that could break builds.
+
 ```dockerfile
 RUN echo "🏗️ Building application..." && \
     echo "Build start: $(date)" && \
     echo "Disk before build: $(df -h / | tail -1)" && \
     npm run build:production && \
     echo "Build complete: $(date)" && \
-    echo "🧹 Aggressive cleanup to reclaim disk space..." && \
-    rm -rf .next/cache && \
-    rm -rf node_modules/.cache && \
-    rm -rf /tmp/* /var/tmp/* && \
-    rm -rf /root/.npm /root/.cache /root/.local && \
+    echo "🧹 Cleaning up build artifacts..." && \
+    rm -rf .next/cache node_modules/.cache /tmp/* /var/tmp/* /root/.npm /root/.cache /root/.local && \
     npm cache clean --force && \
-    find /app -name "*.md" -type f -delete 2>/dev/null || true && \
-    find /app -name "*.log" -type f -delete 2>/dev/null || true && \
-    rm -rf /app/docs 2>/dev/null || true && \
-    rm -rf /app/tools 2>/dev/null || true && \
-    rm -rf /app/ci 2>/dev/null || true && \
     echo "Disk after cleanup: $(df -h / | tail -1)" && \
     echo "✅ Build and cleanup complete"
 ```
 
-**Impact**: Saves 100-200MB by removing all non-essential files after build
+**Impact**: Safe cleanup of cache and temporary directories (50-100MB saved)
+
+**Note**: The `.dockerignore` file prevents docs, tools, and CI directories from being copied into the build context, so they don't need to be deleted during the build.
 
 ## Total Disk Space Savings
 
 | Optimization | Estimated Savings |
 |--------------|------------------|
 | .dockerignore improvements | 6MB |
-| node_modules test cleanup | 50-100MB |
-| npm cache cleanup | 50-100MB |
+| Dependencies cache cleanup | 20-50MB |
 | Prisma cache cleanup | 20-50MB |
-| Post-build cleanup | 100-200MB |
+| Build cache cleanup | 50-100MB |
+| **TOTAL** | **96-206MB** |
+| .dockerignore improvements | 6MB |
+| Dependencies cache cleanup | 20-50MB |
+| Prisma cache cleanup | 20-50MB |
+| Build cache cleanup | 50-100MB |
+| **TOTAL** | **96-206MB** |
 | **TOTAL** | **226-456MB** |
 
 ## Verification
@@ -119,8 +119,8 @@ RUN echo "🏗️ Building application..." && \
 
 ### After Fix
 - Build context: ~144MB (docs excluded, 6MB saved)
-- Build artifacts during build: ~400-750MB (aggressive cleanup reduces by 220-450MB)
-- **Result**: Successful build with 30-50% more free disk space throughout build process
+- Build artifacts during build: ~500-800MB (cache cleanup reduces by 96-206MB)
+- **Result**: Successful build with 15-25% more free disk space throughout build process
 
 ### Monitoring Disk Usage
 

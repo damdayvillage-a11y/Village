@@ -23,12 +23,7 @@ RUN echo "📦 Installing dependencies..." && \
     npm ci --include=dev --no-audit --no-fund && \
     echo "🧹 Cleaning npm cache and temporary files..." && \
     npm cache clean --force && \
-    rm -rf /root/.npm /tmp/* /var/tmp/* && \
-    rm -rf /root/.cache /root/.local && \
-    find /app/node_modules -name "*.md" -type f -delete && \
-    find /app/node_modules -name "*.markdown" -type f -delete && \
-    find /app/node_modules -name "test" -type d -exec rm -rf {} + 2>/dev/null || true && \
-    find /app/node_modules -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    rm -rf /root/.npm /tmp/* /var/tmp/* /root/.cache /root/.local && \
     echo "✅ Dependencies installed: $(du -sh node_modules)"
 
 # Build stage
@@ -94,12 +89,9 @@ RUN echo "🏗️ Building application..." && \
     echo "Disk before: $(df -h / | tail -1)" && \
     npm run build:production && \
     echo "Build complete: $(date)" && \
-    echo "🧹 Aggressive cleanup..." && \
+    echo "🧹 Cleaning up build artifacts..." && \
     rm -rf .next/cache node_modules/.cache /tmp/* /var/tmp/* /root/.npm /root/.cache /root/.local && \
     npm cache clean --force && \
-    find /app -name "*.md" -type f -delete 2>/dev/null || true && \
-    find /app -name "*.log" -type f -delete 2>/dev/null || true && \
-    rm -rf /app/docs /app/tools /app/ci 2>/dev/null || true && \
     echo "Disk after: $(df -h / | tail -1)" && \
     echo "✅ Complete"
 
