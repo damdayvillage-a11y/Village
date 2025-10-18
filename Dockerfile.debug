@@ -10,8 +10,16 @@ WORKDIR /app
 ARG DATABASE_URL
 ARG CAPROVER_GIT_COMMIT_SHA
 
-# Install debugging tools
-RUN apk add --no-cache curl wget procps htop
+# Install debugging tools and build dependencies for native modules
+RUN apk add --no-cache \
+    curl \
+    wget \
+    procps \
+    htop \
+    python3 \
+    make \
+    g++ \
+    linux-headers
 
 # Set Node.js memory limit and optimization flags for build
 ENV NODE_OPTIONS="--max-old-space-size=4096 --max-semi-space-size=1024"
