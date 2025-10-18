@@ -11,7 +11,18 @@ ARG DATABASE_URL
 ARG CAPROVER_GIT_COMMIT_SHA
 
 # Install debugging tools
-RUN apk add --no-cache curl wget procps htop
+RUN apk add --no-cache \
+    curl \
+    wget \
+    procps \
+    htop
+
+# Install build dependencies for native modules (argon2, etc.)
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    linux-headers
 
 # Set Node.js memory limit and optimization flags for build
 ENV NODE_OPTIONS="--max-old-space-size=4096 --max-semi-space-size=1024"

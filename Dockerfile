@@ -3,6 +3,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install build dependencies for native modules (argon2, etc.)
+# These are needed for npm ci to compile native dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    linux-headers
+
 # Accept build arguments from CapRover (optional)
 ARG DATABASE_URL
 ARG CAPROVER_GIT_COMMIT_SHA
