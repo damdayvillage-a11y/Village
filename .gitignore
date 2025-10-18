@@ -94,10 +94,13 @@ contracts/cache/
 
 # Memory artifacts (keep in repo but ignore temp files)
 docs/memory/temp/
+docs/memory/screenshots/
 /generated/prisma
 
 *storybook.log
 
 # TypeScript build info
 tsconfig.tsbuildinfo
+
+# Large documentation files
 memory2.md
