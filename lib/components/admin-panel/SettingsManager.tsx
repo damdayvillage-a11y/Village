@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/lib/components/ui/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
+import { Input } from '@/lib/components/ui/Input';
+import { Label } from '@/lib/components/ui/label';
+import { Switch } from '@/lib/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/lib/components/ui/tabs';
+import { Badge } from '@/lib/components/ui/Badge';
+import { useToast } from '@/lib/hooks/use-toast';
 import { 
   Save, 
   RefreshCw, 
@@ -259,10 +259,13 @@ export default function SettingsManager() {
               id={inputKey}
               type={isVisible || !setting.sensitive ? 'text' : 'password'}
               value={setting.masked ? '••••••••' : setting.value || ''}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 if (!setting.masked) {
                   const newSettings = { ...settings };
-                  newSettings[category as keyof Settings][key].value = e.target.value;
+                  const categorySettings = newSettings[category as keyof Settings];
+                  if (categorySettings && key in categorySettings) {
+                    (categorySettings as any)[key].value = e.target.value;
+                  }
                   setSettings(newSettings as Settings);
                 }
               }}
