@@ -15,6 +15,11 @@ const logConfig = process.env.NODE_ENV === 'production'
   ? ['error', 'warn'] 
   : ['query', 'error', 'warn'];
 
+// Use a dummy URL during build if DATABASE_URL is not set
+const databaseUrl = !process.env.DATABASE_URL || isBuildTime
+  ? 'postgresql://dummy:dummy@localhost:5432/dummy'
+  : process.env.DATABASE_URL;
+
 // Enhanced Prisma client configuration with connection pooling and timeouts
 export const prisma = 
   globalThis.prisma ??
@@ -23,7 +28,7 @@ export const prisma =
     errorFormat: 'minimal',
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: databaseUrl,
       },
     },
   });
