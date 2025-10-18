@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/lib/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Badge } from '@/lib/components/ui/Badge';
@@ -68,11 +68,7 @@ export function BookingManagement() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadBookings();
-  }, [statusFilter, startDate, endDate]);
-
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     try {
       setError(null);
       const params = new URLSearchParams();
@@ -100,7 +96,11 @@ export function BookingManagement() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [statusFilter, startDate, endDate]);
+
+  useEffect(() => {
+    loadBookings();
+  }, [loadBookings]);
 
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
     try {

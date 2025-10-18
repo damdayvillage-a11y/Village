@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import prisma from '@/lib/db/prisma';
+import { EmailNotificationService } from '@/lib/notifications/email';
+import { format } from 'date-fns';
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -42,37 +44,48 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // In production, integrate with email service (SendGrid, AWS SES, etc.)
-    // For now, we'll just log and return success
-    const emailContent = {
-      to: email,
-      subject: `Booking Confirmation - ${booking.homestay.name}`,
-      bookingDetails: {
-        confirmationNumber: booking.id,
-        homestayName: booking.homestay.name,
-        hostName: booking.homestay.owner.name,
-        checkIn: booking.checkIn,
-        checkOut: booking.checkOut,
-        totalAmount: typeof booking.pricing === 'object' && booking.pricing !== null ? 
-          (booking.pricing as any).total || 0 : 0,
-        guestName: booking.guest.name,
-      },
-    };
+    // Extract pricing information
+    const pricing = typeof booking.pricing === 'object' && booking.pricing !== null ? 
+      booking.pricing as any : {};
+    const totalAmount = pricing.total || 0;
 
-    console.log('Sending confirmation email:', emailContent);
+    // Send confirmation email using the email service
+    const emailSent = await EmailNotificationService.sendBookingConfirmation({
+      guestEmail: email,
+      guestName: booking.guest.name,
+      homestayTitle: booking.homestay.name,
+      hostName: booking.homestay.owner.name,
+      checkInDate: format(new Date(booking.checkIn), 'PPP'),
+      checkOutDate: format(new Date(booking.checkOut), 'PPP'),
+      guests: booking.guests,
+      totalAmount,
+      currency: 'INR',
+      bookingId: booking.id,
+      bookingReference: booking.id.substring(0, 8).toUpperCase()
+    });
 
-    // TODO: Implement actual email sending
-    // Example with SendGrid:
-    // await sendGrid.send({
-    //   to: email,
-    //   from: 'noreply@damdayvillage.com',
-    //   subject: emailContent.subject,
-    //   html: generateEmailTemplate(emailContent.bookingDetails),
-    // });
+    if (!emailSent) {
+      console.warn('Email sending failed, but continuing...');
+      // Don't fail the request if email fails - just log it
+    }
+
+    // Also send notification to host
+    await EmailNotificationService.sendHostNotification({
+      hostEmail: booking.homestay.owner.email,
+      hostName: booking.homestay.owner.name,
+      homestayTitle: booking.homestay.name,
+      guestName: booking.guest.name,
+      checkInDate: format(new Date(booking.checkIn), 'PPP'),
+      checkOutDate: format(new Date(booking.checkOut), 'PPP'),
+      guests: booking.guests,
+      bookingReference: booking.id.substring(0, 8).toUpperCase(),
+      guestContact: booking.guest.email
+    });
 
     return NextResponse.json({
       success: true,
-      message: 'Confirmation email sent successfully',
+      message: emailSent ? 'Confirmation email sent successfully' : 'Booking confirmed (email service unavailable)',
+      emailSent
     });
   } catch (error) {
     console.error('Send confirmation email error:', error);

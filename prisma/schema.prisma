@@ -57,6 +57,7 @@ model User {
   carbonCredit     CarbonCredit?
   achievements     UserAchievement[]
   wishlist         Wishlist[]
+  articles         Article[]         @relation("ArticleAuthor")
   
   // NextAuth.js relations
   accounts         Account[]
@@ -744,4 +745,82 @@ model AppSettings {
   @@unique([category, key])
   @@index([category])
   @@map("app_settings")
+}
+
+// ==================== ARTICLE MODELS ====================
+
+model Article {
+  id          String        @id @default(cuid())
+  title       String
+  content     String        @db.Text
+  excerpt     String?
+  slug        String        @unique
+  authorId    String
+  status      ArticleStatus @default(DRAFT)
+  publishedAt DateTime?
+  views       Int           @default(0)
+  featured    Boolean       @default(false)
+  tags        Json?         // Array of tags
+  metadata    Json?         // SEO metadata
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  author User @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  
+  @@index([authorId])
+  @@index([status])
+  @@index([publishedAt])
+  @@map("articles")
+}
+
+enum ArticleStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+// ==================== COMPLAINT/SUGGESTION MODELS ====================
+
+model Complaint {
+  id            String          @id @default(cuid())
+  type          ComplaintType
+  title         String
+  description   String          @db.Text
+  authorId      String
+  status        ComplaintStatus @default(OPEN)
+  priority      Priority        @default(MEDIUM)
+  category      String?
+  adminResponse String?         @db.Text
+  resolvedBy    String?         // Admin user ID
+  resolvedAt    DateTime?
+  metadata      Json?           // Additional metadata
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  @@index([authorId])
+  @@index([status])
+  @@index([type])
+  @@map("complaints")
+}
+
+enum ComplaintType {
+  COMPLAINT
+  SUGGESTION
+  FEEDBACK
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  REVIEWED
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }

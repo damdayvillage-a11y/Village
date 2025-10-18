@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp,
   TrendingDown,
@@ -64,7 +64,7 @@ export default function AnalyticsDashboard() {
   });
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
 
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     setLoading(true);
     try {
       // In a real implementation, this would fetch from API
@@ -122,7 +122,7 @@ export default function AnalyticsDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Generate realistic monthly data with some variance
   function generateMonthlyData(min: number, max: number, months: number): MonthlyData[] {
@@ -144,7 +144,7 @@ export default function AnalyticsDashboard() {
 
   useEffect(() => {
     loadAnalytics();
-  }, []);
+  }, [loadAnalytics]);
 
   const formatCurrency = (amount: number): string => {
     return `₹${amount.toLocaleString('en-IN')}`;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
+import prisma from '@/lib/db/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,35 +9,28 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // TODO: Replace with actual database queries when Prisma is properly set up
-    // For now, return mock data
-    const articles = [
-      {
-        id: '1',
-        title: 'Village Life in the Himalayas',
-        status: 'published',
-        publishedAt: new Date(Date.now() - 86400000).toISOString(),
-        views: 234
+    // Fetch user's articles from database
+    const articles = await prisma.article.findMany({
+      where: {
+        authorId: session.user.id
       },
-      {
-        id: '2',
-        title: 'Sustainable Tourism Practices',
-        status: 'draft',
-        publishedAt: null,
-        views: 0
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        publishedAt: true,
+        views: true,
+        createdAt: true,
+        updatedAt: true
       },
-      {
-        id: '3',
-        title: 'Traditional Crafts of Damday Village',
-        status: 'review',
-        publishedAt: null,
-        views: 0
+      orderBy: {
+        updatedAt: 'desc'
       }
-    ];
+    });
 
     return NextResponse.json(articles);
   } catch (error) {
@@ -49,30 +43,39 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, content, status = 'draft' } = await request.json();
+    const { title, content, status = 'DRAFT', excerpt, tags } = await request.json();
 
     if (!title || !content) {
       return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
     }
 
-    // TODO: Replace with actual database insert when Prisma is properly set up
-    const newArticle = {
-      id: Date.now().toString(),
-      title,
-      content,
-      status,
-      authorId: session.user?.email,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      publishedAt: status === 'published' ? new Date().toISOString() : null,
-      views: 0
-    };
+    // Generate slug from title
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') + 
+      '-' + Date.now();
 
-    console.log('Creating new article:', newArticle);
+    // Normalize status to uppercase for consistency
+    const normalizedStatus = status ? status.toUpperCase() : 'DRAFT';
+
+    // Create article in database
+    const newArticle = await prisma.article.create({
+      data: {
+        title,
+        content,
+        excerpt,
+        slug,
+        status: normalizedStatus,
+        authorId: session.user.id,
+        publishedAt: normalizedStatus === 'PUBLISHED' ? new Date() : null,
+        tags: tags || [],
+      }
+    });
 
     return NextResponse.json(newArticle, { status: 201 });
   } catch (error) {
