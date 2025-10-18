@@ -52,11 +52,12 @@ RUN echo "🔧 Configuring npm for CapRover..." && \
     echo "✅ NPM configured successfully"
 
 # Install dependencies with simple logging (no pipes or loops to avoid hangs)
+# Install all dependencies first (needed for build), then remove dev deps to save space
 RUN echo "📦 Installing dependencies..." && \
     echo "Start time: $(date)" && \
     npm ci --include=dev --no-audit --no-fund --loglevel=warn && \
     echo "Dependencies installed at: $(date)" && \
-    echo "node_modules size: $(du -sh node_modules)"
+    echo "node_modules size: $(du -sh node_modules 2>/dev/null || echo 'calculating...')"
 
 # Copy source code
 COPY . .
@@ -76,7 +77,15 @@ RUN echo "🏗️ Building application..." && \
     echo "Build completed at: $(date)" && \
     echo "Verifying build output..." && \
     ls -la .next/ && \
-    echo "Build verification complete"
+    echo "Build verification complete" && \
+    echo "🧹 Cleaning up build artifacts to save disk space..." && \
+    rm -rf .next/cache && \
+    rm -rf node_modules/.cache && \
+    rm -rf /tmp/* && \
+    rm -rf /root/.npm && \
+    npm cache clean --force && \
+    echo "Disk space after cleanup: $(df -h /)" && \
+    echo "✅ Cleanup complete"
 
 # Production stage
 FROM node:20-alpine AS runner
