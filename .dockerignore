@@ -36,7 +36,9 @@ Thumbs.db
 
 # Documentation - not needed in production build
 docs/
+docs/**
 *.md
+**/*.md
 README.md
 CHANGELOG.md
 LICENSE
@@ -47,6 +49,8 @@ SECURITY_SUMMARY.md
 DOCKER_BUILD_OPTIMIZATION.md
 CAPROVER_DEPLOYMENT_FIX.md
 BUILD_OPTIMIZATION_V2.md
+DOCKER_FIX_SUMMARY.md
+QUICK_FIX_V2.md
 
 # Docker files - don't need other Dockerfiles in the build
 Dockerfile
@@ -95,8 +99,11 @@ storybook-static/
 
 # Tools and CI files - not needed in production
 tools/
+tools/**
 ci/
+ci/**
 .github/
+.github/**
 .gitlab-ci.yml
 .travis.yml
 .circleci/
