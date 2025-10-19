@@ -116,12 +116,23 @@ export default function ProductEditor({ productId, onSave, onCancel }: ProductEd
   };
 
   const handleAddImage = () => {
-    if (imageUrl.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        images: [...prev.images, imageUrl.trim()],
-      }));
-      setImageUrl('');
+    const trimmedUrl = imageUrl.trim();
+    if (trimmedUrl) {
+      // Basic URL validation to prevent XSS
+      try {
+        const url = new URL(trimmedUrl);
+        if (url.protocol === 'http:' || url.protocol === 'https:') {
+          setFormData((prev) => ({
+            ...prev,
+            images: [...prev.images, trimmedUrl],
+          }));
+          setImageUrl('');
+        } else {
+          setError('Only HTTP/HTTPS URLs are allowed');
+        }
+      } catch {
+        setError('Please enter a valid URL');
+      }
     }
   };
 
