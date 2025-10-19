@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
         pending: 0,
         confirmed: 0,
         checkedIn: 0,
-        completed: 0,
+        checkedOut: 0,
         cancelled: 0,
       },
       revenue: {
@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
       const total = pricing?.total || 0;
       analytics.revenue.total += total;
 
-      if (booking.status === 'COMPLETED') {
+      if (booking.status === 'CHECKED_OUT') {
         analytics.revenue.completed += total;
       } else if (booking.status === 'PENDING' || booking.status === 'CONFIRMED') {
         analytics.revenue.pending += total;
