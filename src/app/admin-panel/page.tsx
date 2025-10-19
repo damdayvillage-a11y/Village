@@ -32,7 +32,8 @@ import {
   Package,
   Cpu,
   TrendingUp,
-  DollarSign
+  DollarSign,
+  Leaf
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
@@ -174,18 +175,20 @@ export default function AdminPanelPage() {
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, section: 'main' },
-    { id: 'users', label: 'User Management', icon: Users, section: 'main' },
+    { id: 'users', label: 'User Management', icon: Users, section: 'main', href: '/admin-panel/users' },
     { id: 'bookings', label: 'Booking Management', icon: Calendar, section: 'operations' },
     { id: 'complaints', label: 'Reviews & Complaints', icon: MessageSquare, section: 'operations' },
-    { id: 'marketplace', label: 'Marketplace Admin', icon: ShoppingBag, section: 'commerce' },
-    { id: 'products', label: 'Product Management', icon: Package, section: 'commerce' },
+    { id: 'carbon-credits', label: 'Carbon Credits', icon: Leaf, section: 'operations', href: '/admin-panel/carbon-credits' },
+    { id: 'marketplace', label: 'Marketplace Admin', icon: ShoppingBag, section: 'commerce', href: '/admin-panel/marketplace/orders' },
+    { id: 'products', label: 'Product Management', icon: Package, section: 'commerce', href: '/admin-panel/marketplace/products' },
     { id: 'content', label: 'Content Editor', icon: Edit3, section: 'content' },
     { id: 'pages', label: 'Page Manager', icon: FileText, section: 'content' },
-    { id: 'media', label: 'Media Manager', icon: Camera, section: 'content' },
+    { id: 'media', label: 'Media Manager', icon: Camera, section: 'content', href: '/admin-panel/media' },
     { id: 'devices', label: 'IoT Devices', icon: Cpu, section: 'monitoring' },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, section: 'monitoring' },
+    { id: 'control-center', label: 'Control Center', icon: Settings, section: 'settings', href: '/admin-panel/control-center' },
     { id: 'theme', label: 'Theme Customizer', icon: Palette, section: 'settings' },
-    { id: 'system', label: 'System Settings', icon: Settings, section: 'settings' }
+    { id: 'system', label: 'System Settings', icon: Database, section: 'settings' }
   ];
 
   const renderDashboard = () => (
@@ -621,6 +624,24 @@ export default function AdminPanelPage() {
                 <div className="space-y-1">
                   {group.items.map((item) => {
                     const Icon = item.icon;
+                    const isCurrentPage = item.href ? false : activeTab === item.id;
+                    
+                    if (item.href) {
+                      return (
+                        <Link
+                          key={item.id}
+                          href={item.href}
+                          className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900`}
+                          onClick={() => {
+                            if (window.innerWidth < 1024) setSidebarOpen(false);
+                          }}
+                        >
+                          <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    }
+                    
                     return (
                       <button
                         key={item.id}
@@ -629,14 +650,14 @@ export default function AdminPanelPage() {
                           if (window.innerWidth < 1024) setSidebarOpen(false);
                         }}
                         className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                          activeTab === item.id
+                          isCurrentPage
                             ? 'bg-primary-100 text-primary-700'
                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         }`}
                       >
                         <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
                         <span className="truncate">{item.label}</span>
-                        {activeTab === item.id && (
+                        {isCurrentPage && (
                           <ChevronRight className="h-4 w-4 ml-auto" />
                         )}
                       </button>
