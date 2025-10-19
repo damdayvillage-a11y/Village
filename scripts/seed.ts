@@ -224,6 +224,91 @@ async function main() {
     console.log('✅ Created product:', product.name);
   }
 
+  // Create Carbon Credits for users
+  const adminCarbonCredit = await db.carbonCredit.upsert({
+    where: { userId: adminUser.id },
+    update: {},
+    create: {
+      userId: adminUser.id,
+      balance: 150.5,
+      totalEarned: 200.5,
+      totalSpent: 50.0
+    }
+  });
+
+  const hostCarbonCredit = await db.carbonCredit.upsert({
+    where: { userId: hostUser.id },
+    update: {},
+    create: {
+      userId: hostUser.id,
+      balance: 75.0,
+      totalEarned: 100.0,
+      totalSpent: 25.0
+    }
+  });
+
+  console.log('✅ Created carbon credits for users');
+
+  // Create sample Carbon Transactions
+  const transactions = [
+    {
+      userId: adminUser.id,
+      carbonCreditId: adminCarbonCredit.id,
+      type: 'EARN',
+      amount: 50.0,
+      reason: 'Initial bonus',
+      description: 'Welcome bonus for joining the carbon credit program'
+    },
+    {
+      userId: adminUser.id,
+      carbonCreditId: adminCarbonCredit.id,
+      type: 'EARN',
+      amount: 25.5,
+      reason: 'Sustainable travel',
+      description: 'Carbon credits earned for using bicycle instead of vehicle'
+    },
+    {
+      userId: adminUser.id,
+      carbonCreditId: adminCarbonCredit.id,
+      type: 'SPEND',
+      amount: -25.0,
+      reason: 'Carbon offset purchase',
+      description: 'Purchased carbon offsets for air travel'
+    },
+    {
+      userId: hostUser.id,
+      carbonCreditId: hostCarbonCredit.id,
+      type: 'EARN',
+      amount: 50.0,
+      reason: 'Initial bonus',
+      description: 'Welcome bonus for joining the carbon credit program'
+    },
+    {
+      userId: hostUser.id,
+      carbonCreditId: hostCarbonCredit.id,
+      type: 'EARN',
+      amount: 30.0,
+      reason: 'Solar energy usage',
+      description: 'Carbon credits for using 100% solar energy'
+    },
+    {
+      userId: hostUser.id,
+      carbonCreditId: hostCarbonCredit.id,
+      type: 'SPEND',
+      amount: -15.0,
+      reason: 'Tree planting',
+      description: 'Spent credits on community tree planting initiative'
+    }
+  ];
+
+  for (const transactionData of transactions) {
+    await db.carbonTransaction.create({
+      data: transactionData
+    });
+  }
+
+  console.log('✅ Created sample carbon transactions');
+
   console.log('\n🎉 Database seeded successfully!');
   console.log('\nSample data created:');
   console.log('- 1 Village (Damday Village)');
@@ -232,6 +317,8 @@ async function main() {
   console.log('- 3 IoT Devices');
   console.log('- 1 Community Project');
   console.log('- 3 Marketplace Products');
+  console.log('- 2 Carbon Credit Accounts');
+  console.log('- 6 Carbon Transactions');
   console.log('\n🔑 Login with these credentials:');
   console.log(`   Admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
   console.log(`   Host: ${HOST_EMAIL} / ${HOST_PASSWORD}`);
