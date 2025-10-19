@@ -28,7 +28,7 @@ import {
   AlignCenter,
   AlignRight,
   Link,
-  Image,
+  Image as ImageIcon,
   Code,
   Save,
   Eye,
@@ -143,7 +143,7 @@ export function ContentBlockEditor({
                 <Link className="h-4 w-4" />
               </Button>
               <Button size="sm" variant="ghost">
-                <Image className="h-4 w-4" />
+                <ImageIcon className="h-4 w-4" />
               </Button>
               <Button
                 size="sm"
