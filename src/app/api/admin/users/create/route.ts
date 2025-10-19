@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
 import * as argon2 from 'argon2';
+import { EmailNotificationService } from '@/lib/notifications/email';
 
 /**
  * POST /api/admin/users/create
@@ -123,16 +124,26 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Send welcome email if requested
+    // Send welcome email if requested
     let emailSent = false;
     if (sendWelcomeEmail) {
       try {
-        // Email sending logic would go here
-        // For now, we'll just log it
-        console.log(`Welcome email would be sent to ${email}`);
-        emailSent = true;
+        emailSent = await EmailNotificationService.sendWelcomeEmail({
+          email: user.email,
+          name: user.name || 'User',
+          role: user.role,
+          password: generatedPassword || undefined,
+          loginUrl: process.env.NEXTAUTH_URL ? `${process.env.NEXTAUTH_URL}/auth/signin` : undefined,
+        });
+        
+        if (emailSent) {
+          console.log(`✅ Welcome email sent successfully to ${email}`);
+        } else {
+          console.log(`⚠️ Welcome email sending failed for ${email} - check email configuration`);
+        }
       } catch (emailError) {
         console.error('Failed to send welcome email:', emailError);
+        emailSent = false;
       }
     }
 
