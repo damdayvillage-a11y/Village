@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/carbon/stats
  * Get carbon credit statistics
