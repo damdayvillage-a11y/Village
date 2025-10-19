@@ -41,6 +41,14 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [formData, setFormData] = useState({
+    email: '',
+    name: '',
+    role: 'GUEST' as any,
+    autoPassword: true,
+    sendEmail: false,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -68,6 +76,55 @@ export default function UsersPage() {
 
   const handleCreateUser = () => {
     setShowCreateModal(true);
+  };
+
+  const handleSubmitCreateUser = async () => {
+    if (!formData.email || !formData.name) {
+      alert('Email and name are required');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/admin/users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          name: formData.name,
+          role: formData.role,
+          autoPassword: formData.autoPassword,
+          sendEmail: formData.sendEmail,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setShowCreateModal(false);
+        setFormData({
+          email: '',
+          name: '',
+          role: 'GUEST',
+          autoPassword: true,
+          sendEmail: false,
+        });
+        await fetchUsers();
+
+        if (result.generatedPassword) {
+          alert(`User created successfully!\n\nGenerated Password: ${result.generatedPassword}\n\nPlease save this password and share it with the user.`);
+        } else {
+          alert('User created successfully!');
+        }
+      } else {
+        const error = await response.json();
+        alert(error.message || error.error || 'Failed to create user');
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('Failed to create user. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleToggleUserStatus = async (userId: string, currentStatus: string) => {
@@ -415,16 +472,32 @@ export default function UsersPage() {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <Input type="email" placeholder="user@example.com" />
+                  <label className="block text-sm font-medium mb-1">Email *</label>
+                  <Input 
+                    type="email" 
+                    placeholder="user@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    disabled={isSubmitting}
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Name</label>
-                  <Input placeholder="Full Name" />
+                  <label className="block text-sm font-medium mb-1">Name *</label>
+                  <Input 
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    disabled={isSubmitting}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Role</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <select 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                    disabled={isSubmitting}
+                  >
                     <option value="GUEST">Guest</option>
                     <option value="HOST">Host</option>
                     <option value="SELLER">Seller</option>
@@ -435,13 +508,25 @@ export default function UsersPage() {
                   </select>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" id="autoPassword" />
+                  <input 
+                    type="checkbox" 
+                    id="autoPassword"
+                    checked={formData.autoPassword}
+                    onChange={(e) => setFormData({ ...formData, autoPassword: e.target.checked })}
+                    disabled={isSubmitting}
+                  />
                   <label htmlFor="autoPassword" className="text-sm">
                     Auto-generate password
                   </label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" id="sendEmail" />
+                  <input 
+                    type="checkbox" 
+                    id="sendEmail"
+                    checked={formData.sendEmail}
+                    onChange={(e) => setFormData({ ...formData, sendEmail: e.target.checked })}
+                    disabled={isSubmitting}
+                  />
                   <label htmlFor="sendEmail" className="text-sm">
                     Send welcome email
                   </label>
@@ -449,11 +534,27 @@ export default function UsersPage() {
               </div>
             </CardContent>
             <div className="p-6 border-t flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setFormData({
+                    email: '',
+                    name: '',
+                    role: 'GUEST',
+                    autoPassword: true,
+                    sendEmail: false,
+                  });
+                }}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
-              <Button onClick={() => setShowCreateModal(false)}>
-                Create User
+              <Button 
+                onClick={handleSubmitCreateUser}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Create User'}
               </Button>
             </div>
           </Card>
