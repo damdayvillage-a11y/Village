@@ -175,19 +175,20 @@ export default function AdminPanelPage() {
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, section: 'main' },
-    { id: 'users', label: 'User Management', icon: Users, section: 'main' },
+    { id: 'users', label: 'User Management', icon: Users, section: 'main', href: '/admin-panel/users' },
     { id: 'bookings', label: 'Booking Management', icon: Calendar, section: 'operations' },
     { id: 'complaints', label: 'Reviews & Complaints', icon: MessageSquare, section: 'operations' },
     { id: 'carbon-credits', label: 'Carbon Credits', icon: Leaf, section: 'operations', href: '/admin-panel/carbon-credits' },
-    { id: 'marketplace', label: 'Marketplace Admin', icon: ShoppingBag, section: 'commerce' },
-    { id: 'products', label: 'Product Management', icon: Package, section: 'commerce' },
+    { id: 'marketplace', label: 'Marketplace Admin', icon: ShoppingBag, section: 'commerce', href: '/admin-panel/marketplace/orders' },
+    { id: 'products', label: 'Product Management', icon: Package, section: 'commerce', href: '/admin-panel/marketplace/products' },
     { id: 'content', label: 'Content Editor', icon: Edit3, section: 'content' },
     { id: 'pages', label: 'Page Manager', icon: FileText, section: 'content' },
-    { id: 'media', label: 'Media Manager', icon: Camera, section: 'content' },
+    { id: 'media', label: 'Media Manager', icon: Camera, section: 'content', href: '/admin-panel/media' },
     { id: 'devices', label: 'IoT Devices', icon: Cpu, section: 'monitoring' },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, section: 'monitoring' },
+    { id: 'control-center', label: 'Control Center', icon: Settings, section: 'settings', href: '/admin-panel/control-center' },
     { id: 'theme', label: 'Theme Customizer', icon: Palette, section: 'settings' },
-    { id: 'system', label: 'System Settings', icon: Settings, section: 'settings' }
+    { id: 'system', label: 'System Settings', icon: Database, section: 'settings' }
   ];
 
   const renderDashboard = () => (
