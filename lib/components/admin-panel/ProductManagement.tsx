@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/lib/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Badge } from '@/lib/components/ui/Badge';
@@ -61,11 +61,7 @@ export function ProductManagement() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadProducts();
-  }, [categoryFilter, statusFilter]);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setError(null);
       const params = new URLSearchParams();
@@ -90,7 +86,11 @@ export function ProductManagement() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [categoryFilter, statusFilter]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
     try {

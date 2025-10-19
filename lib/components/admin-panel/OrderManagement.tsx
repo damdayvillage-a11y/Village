@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/lib/components/ui/Button';
 import { Card, CardContent } from '@/lib/components/ui/Card';
 import { Badge } from '@/lib/components/ui/Badge';
@@ -54,11 +54,7 @@ export function OrderManagement() {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  useEffect(() => {
-    loadOrders();
-  }, [statusFilter]);
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
       setError(null);
       const params = new URLSearchParams();
@@ -80,7 +76,11 @@ export function OrderManagement() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
 
   const updateOrderStatus = async (orderId: string, newStatus: string, trackingNumber?: string) => {
     try {

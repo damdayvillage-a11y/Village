@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Wifi, 
   WifiOff, 
@@ -65,11 +65,7 @@ export default function IoTDeviceManagement() {
     villageId: ''
   });
 
-  useEffect(() => {
-    loadDevices();
-  }, [statusFilter]);
-
-  const loadDevices = async () => {
+  const loadDevices = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -89,7 +85,11 @@ export default function IoTDeviceManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadDevices();
+  }, [loadDevices]);
 
   const filteredDevices = devices.filter((device) =>
     device.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
