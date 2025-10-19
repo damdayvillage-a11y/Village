@@ -280,6 +280,8 @@ Complete carbon credit tracking and management system for monitoring environment
 
 ### Database Schema
 
+> **Note**: The schema examples below are for documentation purposes and may not reflect the exact current implementation. For the actual schema, refer to `/prisma/schema.prisma`.
+
 #### CarbonCredit Model
 ```prisma
 model CarbonCredit {
