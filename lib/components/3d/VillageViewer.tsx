@@ -121,7 +121,7 @@ const VillageViewer: React.FC<VillageViewerProps> = ({
           cancelAnimationFrame(frameRef.current);
         }
         renderer.domElement.removeEventListener('mousemove', handleMouseMove);
-        if (mount && renderer.domElement) {
+        if (mount && mount.contains(renderer.domElement)) {
           mount.removeChild(renderer.domElement);
         }
         renderer.dispose();
