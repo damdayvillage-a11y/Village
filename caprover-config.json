@@ -1,0 +1,62 @@
+{
+  "$schema": "https://caprover.com/schemas/captain-definition-v2.json",
+  "schemaVersion": 2,
+  "templateId": "smart-carbon-free-village",
+  "dockerfilePath": "./Dockerfile.simple",
+  "description": "Smart Carbon-Free Village Platform - Production Configuration",
+  "documentation": "https://github.com/damdayvillage-a11y/Village/blob/main/docs/DEPLOY.md",
+  "variables": {
+    "NODE_ENV": {
+      "label": "Node Environment",
+      "description": "Should be 'production' for production deployments",
+      "defaultValue": "production",
+      "validRegex": "^(development|production|test)$"
+    },
+    "NEXTAUTH_URL": {
+      "label": "NextAuth URL",
+      "description": "Full URL of your application (e.g., https://village.example.com)",
+      "defaultValue": "https://your-domain.com",
+      "validRegex": "^https?:\\/\\/.+"
+    },
+    "NEXTAUTH_SECRET": {
+      "label": "NextAuth Secret",
+      "description": "Generate with: openssl rand -base64 32",
+      "defaultValue": "",
+      "validRegex": "^.{32,}$"
+    },
+    "DATABASE_URL": {
+      "label": "Database URL",
+      "description": "PostgreSQL connection string. For CapRover internal: postgresql://user:pass@srv-captain--postgres:5432/villagedb",
+      "defaultValue": "postgresql://damdiyal:password@srv-captain--postgres:5432/villagedb",
+      "validRegex": "^postgres(ql)?:\\/\\/.+"
+    },
+    "NEXT_TELEMETRY_DISABLED": {
+      "label": "Disable Next.js Telemetry",
+      "description": "Set to '1' to disable telemetry",
+      "defaultValue": "1",
+      "validRegex": "^[01]$"
+    },
+    "GENERATE_SOURCEMAP": {
+      "label": "Generate Source Maps",
+      "description": "Set to 'false' for production to reduce build size",
+      "defaultValue": "false",
+      "validRegex": "^(true|false)$"
+    },
+    "CI": {
+      "label": "CI Mode",
+      "description": "Set to 'true' for optimized CI builds",
+      "defaultValue": "true",
+      "validRegex": "^(true|false)$"
+    }
+  },
+  "instructions": {
+    "start": "Before deployment, ensure you have:\n1. PostgreSQL database created (use CapRover One-Click Apps)\n2. Generated NEXTAUTH_SECRET: openssl rand -base64 32\n3. Configured your custom domain in CapRover\n4. Enabled SSL/HTTPS for your domain",
+    "end": "After deployment:\n1. SSH into the app container: docker exec -it $(docker ps | grep srv-captain--village | awk '{print $1}') sh\n2. Run migrations: npx prisma db push\n3. Seed database: npm run db:seed\n4. Verify admin: npm run admin:verify\n5. Visit https://your-domain.com/api/health to verify\n6. Login at https://your-domain.com/admin-panel/login\n\nDefault credentials:\n- Admin: admin@damdayvillage.org / Admin@123\n- Host: host@damdayvillage.org / Host@123\n\n⚠️ IMPORTANT: Change default passwords immediately!\n\nSee docs/DEPLOY.md for complete guide."
+  },
+  "notes": {
+    "memory": "Optimized for 2GB VPS. Build uses max 1GB memory. If build fails with OOM, enable swap: sudo fallocate -l 1G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile",
+    "database": "Use srv-captain--postgres:5432 for CapRover internal PostgreSQL or external managed database URL",
+    "build_time": "Build typically takes 5-10 minutes depending on server resources",
+    "health_check": "Application exposes /api/health endpoint for monitoring"
+  }
+}

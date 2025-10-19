@@ -135,19 +135,39 @@ function AdminLoginContent() {
         <div className="bg-white rounded-lg shadow-2xl p-8">
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-start">
-                <AlertTriangle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-red-800 text-sm">{error}</p>
                   {(error.includes('Service temporarily unavailable') || 
                     error.includes('configuration') || 
                     error.includes('contact support')) && (
-                    <Link 
-                      href="/admin-panel/status" 
-                      className="mt-2 inline-block text-sm text-purple-600 hover:text-purple-700 underline font-medium"
-                    >
-                      Check System Status
-                    </Link>
+                    <div className="mt-3 space-y-2">
+                      <Link 
+                        href="/admin-panel/status" 
+                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-purple-700 bg-purple-100 rounded-md hover:bg-purple-200 transition-colors"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        View System Diagnostics
+                      </Link>
+                      <div className="text-xs text-gray-600 mt-2">
+                        Need help? Check the{' '}
+                        <a 
+                          href="/api/admin/init" 
+                          target="_blank"
+                          className="text-purple-600 hover:text-purple-700 underline"
+                        >
+                          admin setup endpoint
+                        </a>
+                        {' '}or see the{' '}
+                        <Link 
+                          href="/help/admin-500" 
+                          className="text-purple-600 hover:text-purple-700 underline"
+                        >
+                          complete fix guide
+                        </Link>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
