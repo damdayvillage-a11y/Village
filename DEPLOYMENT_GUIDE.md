@@ -231,8 +231,10 @@ If deployment fails:
 For issues or questions:
 1. Check build logs in CapRover/Coolify dashboard
 2. Review application logs
-3. Refer to repository documentation
-4. Check SECURITY_SUMMARY.md for security-related issues
+3. **SSH Command Issues?** See [SSH Troubleshooting Guide](./docs/SSH_TROUBLESHOOTING.md)
+4. **Admin Login Issues?** See [Quick SSH Reference](./docs/QUICK_SSH_REFERENCE.md)
+5. Refer to repository documentation
+6. Check SECURITY_SUMMARY.md for security-related issues
 
 ## Version Information
 

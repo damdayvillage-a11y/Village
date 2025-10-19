@@ -1,5 +1,22 @@
 # Production Deployment Guide
 
+## ⚠️ IMPORTANT: Running Commands via SSH
+
+If you're SSHing into your CapRover server to run commands, **you must run them inside the Docker container**, not on the host machine.
+
+**Quick examples:**
+```bash
+# ❌ WRONG (on host - will fail)
+npm run db:seed
+
+# ✅ CORRECT (in container)
+docker exec -it $(docker ps | grep srv-captain--village | awk '{print $1}') npm run db:seed
+```
+
+**See:** [Quick SSH Reference](./QUICK_SSH_REFERENCE.md) | [Full SSH Troubleshooting Guide](./SSH_TROUBLESHOOTING.md)
+
+---
+
 ## Overview
 
 This guide provides step-by-step instructions for deploying the Smart Carbon-Free Village application to CapRover on a 2GB VPS.
@@ -253,6 +270,13 @@ Create initial data and admin user:
 npm run db:seed
 ```
 
+**⚠️ IMPORTANT:** If you're running this via SSH on your CapRover server, you must run it **inside the Docker container**, not on the host. See [Quick SSH Reference](./QUICK_SSH_REFERENCE.md) for correct commands.
+
+**Inside Docker container (on CapRover):**
+```bash
+docker exec -it $(docker ps | grep srv-captain--village | awk '{print $1}') npm run db:seed
+```
+
 This will create:
 - Admin user: `admin@damdayvillage.org` / `Admin@123`
 - Host user: `host@damdayvillage.org` / `Host@123`
@@ -264,6 +288,11 @@ This will create:
 
 ```bash
 npm run admin:verify
+```
+
+**⚠️ IMPORTANT:** If running via SSH on CapRover, run inside the container:
+```bash
+docker exec -it $(docker ps | grep srv-captain--village | awk '{print $1}') npm run admin:verify
 ```
 
 Expected output:

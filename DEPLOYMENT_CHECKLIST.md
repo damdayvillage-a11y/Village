@@ -356,15 +356,14 @@ git push caprover <commit-hash>:main
 - [CapRover Troubleshooting](./docs/CAPROVER_TROUBLESHOOTING.md)
 - [Environment Variables](./docs/md-files/ENVIRONMENT_VARIABLES.md)
 
-## Support
+## Support and Resources
 
-If you encounter issues:
-
-1. Check the troubleshooting section above
-2. Review CapRover app logs
-3. Check server disk space: `df -h /`
-4. Review Docker logs: `docker logs <container-name>`
-5. Consult documentation in `docs/` directory
+- **Documentation**: See `/docs` directory for additional guides
+- **SSH Commands**: See [Quick SSH Reference](./docs/QUICK_SSH_REFERENCE.md) for running commands in container
+- **Admin Login Issues**: See [SSH Troubleshooting Guide](./docs/SSH_TROUBLESHOOTING.md)
+- **Troubleshooting**: See `TROUBLESHOOTING.md` for common issues
+- **CapRover Docs**: https://caprover.com/docs/
+- **Repository Issues**: https://github.com/damdayvillage-a11y/Village/issues
 
 ---
 
