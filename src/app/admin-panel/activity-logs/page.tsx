@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,11 +39,7 @@ export default function ActivityLogViewer() {
   const [filterType, setFilterType] = useState("all");
   const [filterLevel, setFilterLevel] = useState("all");
 
-  useEffect(() => {
-    fetchLogs();
-  }, [filterType, filterLevel]);
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(
@@ -56,7 +52,11 @@ export default function ActivityLogViewer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterType, filterLevel]);
+
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
 
   const exportLogs = () => {
     console.log("Exporting logs...");

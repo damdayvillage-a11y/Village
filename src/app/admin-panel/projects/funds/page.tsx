@@ -70,7 +70,7 @@ export default function FundManagementPage() {
       if (res.ok) {
         const data = await res.json();
         setTransactions(data.transactions || []);
-        setStats(data.stats || stats);
+        setStats(prevStats => data.stats || prevStats);
       }
     } catch (error) {
       console.error('Failed to fetch transactions:', error);

@@ -77,7 +77,7 @@ export default function ProjectsPage() {
       if (res.ok) {
         const data = await res.json();
         setProjects(data.projects || []);
-        setStats(data.stats || stats);
+        setStats(prevStats => data.stats || prevStats);
       }
     } catch (error) {
       console.error('Failed to fetch projects:', error);
