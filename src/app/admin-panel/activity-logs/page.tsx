@@ -45,6 +45,9 @@ export default function ActivityLogViewer() {
       const response = await fetch(
         `/api/admin/activity?type=${filterType}&level=${filterLevel}`
       );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setLogs(data.logs || []);
     } catch (error) {

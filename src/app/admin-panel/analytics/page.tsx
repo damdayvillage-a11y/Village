@@ -64,6 +64,9 @@ export default function AnalyticsDashboard() {
     setLoading(true);
     try {
       const response = await fetch(`/api/admin/analytics?range=${timeRange}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setAnalytics(data);
     } catch (error) {
