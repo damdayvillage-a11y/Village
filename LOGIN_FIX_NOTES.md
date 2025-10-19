@@ -18,20 +18,31 @@ Even though environment variables (DATABASE_URL, NEXTAUTH_URL, NEXTAUTH_SECRET) 
 
 ## Solutions Implemented
 
-### 1. Updated `.env.caprover` with Actual NEXTAUTH_SECRET
+### 1. Updated `.env.caprover` with Proper NEXTAUTH_SECRET Configuration
 
 **File**: `.env.caprover`
 
-**Change**: Replaced the placeholder with the actual secret value from the production server:
+**Change**: Updated the NEXTAUTH_SECRET placeholder with clear instructions:
 ```bash
 # Before:
 NEXTAUTH_SECRET=[GENERATE_WITH_openssl_rand_-base64_32]
 
 # After:
-NEXTAUTH_SECRET=sZNs1VXSGeDu8Dgs2lkwLPx9jm8676S1kPEA6pzoH8c=
+NEXTAUTH_SECRET=REPLACE_WITH_YOUR_SECRET_FROM_OPENSSL_RAND_BASE64_32
+
+# With added warning:
+# ⚠️  IMPORTANT: Set this in your CapRover App Config environment variables!
+# DO NOT commit the actual secret value to this file!
+# The actual production value should only exist in CapRover environment variables.
 ```
 
-**Why**: Ensures the environment configuration file matches the production environment and removes any ambiguity.
+**Important Note**: The actual production secret value (e.g., `sZNs1VXSGeDu8Dgs2lkwLPx9jm8676S1kPEA6pzoH8c=`) should **ONLY** be set in the CapRover application's environment variables settings, **NOT** in this committed file. This file serves as a template.
+
+**Why**: 
+- Prevents accidentally committing production secrets to version control
+- Ensures security best practices are followed
+- The template file helps users understand what needs to be configured
+- The actual secret remains secure in the deployment platform's environment variables
 
 ### 2. Enhanced User Creation in `startup-check.js`
 
@@ -124,6 +135,29 @@ if (!adminUser.active || !adminUser.verified) {
 
 ## Expected Behavior After Fix
 
+### Setting Up Environment Variables
+
+**Critical**: Before deploying, you **MUST** set these environment variables in your CapRover application's "App Configs" -> "Environmental Variables" section:
+
+```bash
+# Required variables to set in CapRover:
+NEXTAUTH_URL=https://damdayvillage.com
+NEXTAUTH_SECRET=<generate-your-own-with-openssl-rand-base64-32>
+DATABASE_URL=postgresql://username:password@srv-captain--postgres:5432/villagedb
+
+# Optional (will use defaults if not set):
+RUN_MIGRATIONS=true
+RUN_SEED=true
+ADMIN_DEFAULT_PASSWORD=Admin@123
+HOST_DEFAULT_PASSWORD=Host@123
+```
+
+**Security Note**: 
+- Generate your own unique NEXTAUTH_SECRET: `openssl rand -base64 32`
+- Use strong database credentials
+- Never commit these actual values to your repository
+- The `.env.caprover` file in the repository is just a **template**
+
 ### On First Deployment
 1. Application starts and runs migrations (if `RUN_MIGRATIONS=true`)
 2. Seed script creates admin and host users with:
@@ -155,11 +189,15 @@ if (!adminUser.active || !adminUser.verified) {
 
 ### 1. Verify Environment Variables
 ```bash
-# In CapRover app settings, verify:
+# In CapRover App Configs -> Environmental Variables, verify these are set:
 NEXTAUTH_URL=https://damdayvillage.com
-NEXTAUTH_SECRET=sZNs1VXSGeDu8Dgs2lkwLPx9jm8676S1kPEA6pzoH8c=
-DATABASE_URL=postgresql://postgres:Damdiyal%40975635@srv-captain--postgres:5432/villagedb
+NEXTAUTH_SECRET=<your-unique-secret-generated-with-openssl>
+DATABASE_URL=postgresql://username:password@srv-captain--postgres:5432/villagedb
+RUN_MIGRATIONS=true
+RUN_SEED=true
 ```
+
+**Note**: Replace `<your-unique-secret-generated-with-openssl>` with the actual output from `openssl rand -base64 32`, and replace `username:password` with your actual database credentials.
 
 ### 2. Check Startup Logs
 After deployment, check the logs for:
@@ -206,13 +244,19 @@ No database migrations or manual SQL commands needed!
 
 ## Environment Variables Reference
 
-### Required for Production
+### Required for Production (Set in CapRover Environment Variables)
 ```bash
 NODE_ENV=production
 NEXTAUTH_URL=https://damdayvillage.com
-NEXTAUTH_SECRET=sZNs1VXSGeDu8Dgs2lkwLPx9jm8676S1kPEA6pzoH8c=
-DATABASE_URL=postgresql://postgres:Damdiyal%40975635@srv-captain--postgres:5432/villagedb
+NEXTAUTH_SECRET=<generate-your-own-with-openssl-rand-base64-32>
+DATABASE_URL=postgresql://username:password@srv-captain--postgres:5432/villagedb
 ```
+
+**Important**: 
+- Generate NEXTAUTH_SECRET with: `openssl rand -base64 32`
+- Replace `username:password` with your actual database credentials
+- Set these values in CapRover's "App Configs" -> "Environmental Variables"
+- Do NOT commit actual secrets to the repository
 
 ### Optional for First Deployment
 ```bash
