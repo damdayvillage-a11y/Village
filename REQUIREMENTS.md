@@ -198,6 +198,11 @@ To transform Damday Village into a globally recognized example of sustainable de
 - **FR6.5**: Spend credits on offsets
 - **FR6.6**: Transfer credits between users
 - **FR6.7**: Transaction history
+- **FR6.8**: Admin dashboard with carbon statistics
+- **FR6.9**: View all users with carbon credits
+- **FR6.10**: Manual credit adjustment by admins
+- **FR6.11**: Carbon credit transaction filtering and search
+- **FR6.12**: Export carbon credit reports
 
 ### FR7: Admin Panel
 - **FR7.1**: Dashboard with system statistics
@@ -215,6 +220,7 @@ To transform Damday Village into a globally recognized example of sustainable de
 - **FR7.13**: Backup and restore
 - **FR7.14**: Activity logging
 - **FR7.15**: Analytics and reports
+- **FR7.16**: Carbon credit management and monitoring
 
 ### FR8: User Panel
 - **FR8.1**: Personal dashboard with stats
