@@ -1,5 +1,7 @@
 # Smart Carbon-Free Village
 
+**🚨 ADMIN LOGIN ISSUES?** See [HOW_TO_FIX_ADMIN_LOGIN.md](./HOW_TO_FIX_ADMIN_LOGIN.md) for quick fixes!
+
 A futuristic platform for Damday Village featuring carbon footprint tracking, IoT integrations, tourism booking, and sustainable living solutions.
 
 ## 🎉 Production Ready
