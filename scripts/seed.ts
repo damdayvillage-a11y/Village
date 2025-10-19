@@ -47,6 +47,8 @@ async function main() {
       role: 'ADMIN',
       password: hashedAdminPassword,
       verified: true,
+      active: true,
+      emailVerified: new Date(),
       preferences: {
         language: 'en',
         notifications: true
@@ -65,6 +67,8 @@ async function main() {
       role: 'HOST',
       password: hashedHostPassword,
       verified: true,
+      active: true,
+      emailVerified: new Date(),
       phone: '+91-9876543210',
       preferences: {
         language: 'hi',

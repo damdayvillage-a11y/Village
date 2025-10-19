@@ -202,7 +202,7 @@ function checkStartupConfiguration() {
               const salt = await bcryptjs.genSalt(12);
               const hashedPassword = await bcryptjs.hash(adminPassword, salt);
               
-              // Create admin user
+              // Create admin user with all required fields
               const newAdmin = await prisma.user.create({
                 data: {
                   email: 'admin@damdayvillage.org',
@@ -211,6 +211,7 @@ function checkStartupConfiguration() {
                   password: hashedPassword,
                   verified: true,
                   active: true,
+                  emailVerified: new Date(), // Set email as verified
                   preferences: {
                     language: 'en',
                     notifications: true,
@@ -221,12 +222,16 @@ function checkStartupConfiguration() {
                   email: true,
                   name: true,
                   role: true,
+                  verified: true,
+                  active: true,
                 }
               });
               
               console.log(chalk.green('✅ Admin user created successfully!'));
               console.log(chalk.blue(`   Email: ${newAdmin.email}`));
               console.log(chalk.blue(`   Role: ${newAdmin.role}`));
+              console.log(chalk.blue(`   Verified: ${newAdmin.verified}`));
+              console.log(chalk.blue(`   Active: ${newAdmin.active}`));
               console.log(chalk.blue(`   Password: ${adminPassword}`));
               console.log(chalk.yellow('   ⚠️  IMPORTANT: Change this password immediately after first login!'));
             } catch (createError) {
@@ -240,6 +245,36 @@ function checkStartupConfiguration() {
             console.log(chalk.green('✅ Admin user exists'));
             console.log(chalk.blue(`   Email: ${adminUser.email}`));
             console.log(chalk.blue(`   Role: ${adminUser.role}`));
+            console.log(chalk.blue(`   Verified: ${adminUser.verified}`));
+            console.log(chalk.blue(`   Active: ${adminUser.active}`));
+            
+            // Check if admin user needs to be updated (missing active or verified fields)
+            if (!adminUser.active || !adminUser.verified) {
+              console.log(chalk.yellow('⚠️  Admin user needs update (active or verified field is false)'));
+              console.log(chalk.blue('🔧 Updating admin user...'));
+              try {
+                const updatedAdmin = await prisma.user.update({
+                  where: { email: 'admin@damdayvillage.org' },
+                  data: {
+                    active: true,
+                    verified: true,
+                    emailVerified: adminUser.emailVerified || new Date(),
+                  },
+                  select: {
+                    id: true,
+                    email: true,
+                    verified: true,
+                    active: true,
+                  }
+                });
+                console.log(chalk.green('✅ Admin user updated successfully!'));
+                console.log(chalk.blue(`   Verified: ${updatedAdmin.verified}`));
+                console.log(chalk.blue(`   Active: ${updatedAdmin.active}`));
+              } catch (updateError) {
+                console.log(chalk.red('❌ Failed to update admin user:', updateError.message));
+                warnings.push('Admin user update failed - may need manual intervention');
+              }
+            }
           }
           
           // Also check and create host user if missing
@@ -257,7 +292,7 @@ function checkStartupConfiguration() {
               const salt = await bcryptjs.genSalt(12);
               const hashedPassword = await bcryptjs.hash(hostPassword, salt);
               
-              // Create host user
+              // Create host user with all required fields
               const newHost = await prisma.user.create({
                 data: {
                   email: 'host@damdayvillage.org',
@@ -266,6 +301,7 @@ function checkStartupConfiguration() {
                   password: hashedPassword,
                   verified: true,
                   active: true,
+                  emailVerified: new Date(), // Set email as verified
                   phone: '+91-9876543210',
                   preferences: {
                     language: 'hi',
@@ -277,12 +313,16 @@ function checkStartupConfiguration() {
                   email: true,
                   name: true,
                   role: true,
+                  verified: true,
+                  active: true,
                 }
               });
               
               console.log(chalk.green('✅ Host user created successfully!'));
               console.log(chalk.blue(`   Email: ${newHost.email}`));
               console.log(chalk.blue(`   Role: ${newHost.role}`));
+              console.log(chalk.blue(`   Verified: ${newHost.verified}`));
+              console.log(chalk.blue(`   Active: ${newHost.active}`));
               console.log(chalk.blue(`   Password: ${hostPassword}`));
               console.log(chalk.yellow('   ⚠️  IMPORTANT: Change this password immediately after first login!'));
             } catch (createError) {
@@ -293,6 +333,36 @@ function checkStartupConfiguration() {
             console.log(chalk.green('✅ Host user exists'));
             console.log(chalk.blue(`   Email: ${hostUser.email}`));
             console.log(chalk.blue(`   Role: ${hostUser.role}`));
+            console.log(chalk.blue(`   Verified: ${hostUser.verified}`));
+            console.log(chalk.blue(`   Active: ${hostUser.active}`));
+            
+            // Check if host user needs to be updated (missing active or verified fields)
+            if (!hostUser.active || !hostUser.verified) {
+              console.log(chalk.yellow('⚠️  Host user needs update (active or verified field is false)'));
+              console.log(chalk.blue('🔧 Updating host user...'));
+              try {
+                const updatedHost = await prisma.user.update({
+                  where: { email: 'host@damdayvillage.org' },
+                  data: {
+                    active: true,
+                    verified: true,
+                    emailVerified: hostUser.emailVerified || new Date(),
+                  },
+                  select: {
+                    id: true,
+                    email: true,
+                    verified: true,
+                    active: true,
+                  }
+                });
+                console.log(chalk.green('✅ Host user updated successfully!'));
+                console.log(chalk.blue(`   Verified: ${updatedHost.verified}`));
+                console.log(chalk.blue(`   Active: ${updatedHost.active}`));
+              } catch (updateError) {
+                console.log(chalk.red('❌ Failed to update host user:', updateError.message));
+                warnings.push('Host user update failed - may need manual intervention');
+              }
+            }
           }
         } catch (adminCheckError) {
           console.log(chalk.yellow('⚠️  Could not verify admin user (database may need migration)'));
