@@ -31,11 +31,14 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 )
 Select.displayName = "Select"
 
-// Simple wrappers for compatibility with shadcn-style API
+// Compatibility shims for shadcn-style API
+// These components provide a compatible API surface but use native HTML select elements
+// SelectTrigger and SelectValue are not rendered as the native select handles the trigger display
 const SelectTrigger = ({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) => null
 
 const SelectValue = ({ placeholder }: { placeholder?: string }) => null
 
+// SelectContent passes through children as they become option elements in the select
 const SelectContent = ({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <>{children}</>
 )

@@ -84,6 +84,12 @@ export async function POST(req: NextRequest) {
     const totalDays = 30;
     const occupancyRate = totalBookings / totalDays;
 
+    // Default pricing configuration
+    // TODO: These should be fetched from homestay-specific or global settings
+    const DEFAULT_CLEANING_FEE = 50;
+    const DEFAULT_SERVICE_FEE_PERCENT = 10;
+    const DEFAULT_TAX_PERCENT = 12;
+
     // Calculate pricing
     const pricingResult = await calculateBookingPrice(
       {
@@ -95,9 +101,9 @@ export async function POST(req: NextRequest) {
       },
       {
         basePricePerNight: parseFloat(homestay.basePrice.toString()),
-        cleaningFee: 50, // Default cleaning fee, should be from homestay settings
-        serviceFeePercent: 10, // Default 10% service fee
-        taxPercent: 12, // Default 12% tax
+        cleaningFee: DEFAULT_CLEANING_FEE,
+        serviceFeePercent: DEFAULT_SERVICE_FEE_PERCENT,
+        taxPercent: DEFAULT_TAX_PERCENT,
         currentOccupancyRate: occupancyRate,
       }
     );
