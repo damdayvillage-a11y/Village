@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
 import { Badge } from '@/lib/components/ui/Badge';
@@ -48,12 +48,7 @@ export const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
 }) => {
   const [emailSent, setEmailSent] = useState(false);
 
-  useEffect(() => {
-    // Send confirmation email
-    sendConfirmationEmail();
-  }, []);
-
-  const sendConfirmationEmail = async () => {
+  const sendConfirmationEmail = useCallback(async () => {
     try {
       const response = await fetch('/api/booking/send-confirmation', {
         method: 'POST',
@@ -72,7 +67,12 @@ export const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
     } catch (error) {
       console.error('Failed to send confirmation email:', error);
     }
-  };
+  }, [booking.bookingId, booking.guestInfo.email]);
+
+  useEffect(() => {
+    // Send confirmation email
+    sendConfirmationEmail();
+  }, [sendConfirmationEmail]);
 
   const handleShare = async () => {
     if (navigator.share) {
