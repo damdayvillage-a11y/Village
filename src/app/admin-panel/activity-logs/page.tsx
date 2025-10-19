@@ -225,7 +225,7 @@ export default function ActivityLogViewer() {
                   <div className="flex items-center gap-2 mb-1">
                     <p className="font-semibold">{log.action}</p>
                     {getLevelIcon(log.level)}
-                    <Badge variant="outline" className="ml-auto">
+                    <Badge variant="default" className="ml-auto">
                       {log.type}
                     </Badge>
                   </div>

@@ -273,9 +273,9 @@ export default function SystemMonitoring() {
                 <Badge
                   variant={
                     error.level === "error"
-                      ? "destructive"
+                      ? "error"
                       : error.level === "warning"
-                      ? "secondary"
+                      ? "warning"
                       : "default"
                   }
                 >
