@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
@@ -48,11 +48,7 @@ export default function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    fetchProducts();
-  }, [categoryFilter, statusFilter]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -70,7 +66,11 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryFilter, statusFilter]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleToggleStatus = async (productId: string, currentStatus: boolean) => {
     try {

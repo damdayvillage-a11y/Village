@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Search, ShoppingCart, Heart, SlidersHorizontal, Grid, List } from 'lucide-react';
 import { Card } from '@/lib/components/ui/Card';
@@ -41,20 +41,7 @@ export default function MarketplacePage() {
   const [cart, setCart] = useState<{[key: string]: number}>({});
   const [categories, setCategories] = useState<string[]>(['All']);
 
-  useEffect(() => {
-    fetchProducts();
-    loadCartFromStorage();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortProducts();
-  }, [products, searchTerm, selectedCategory, sortBy, priceRange]);
-
-  useEffect(() => {
-    saveCartToStorage();
-  }, [cart]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/public/products');
@@ -73,9 +60,9 @@ export default function MarketplacePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterAndSortProducts = () => {
+  const filterAndSortProducts = useCallback(() => {
     let filtered = [...products];
 
     // Search filter
@@ -106,18 +93,31 @@ export default function MarketplacePage() {
     });
 
     setFilteredProducts(filtered);
-  };
+  }, [products, searchTerm, selectedCategory, sortBy, priceRange]);
 
-  const loadCartFromStorage = () => {
+  const loadCartFromStorage = useCallback(() => {
     const savedCart = localStorage.getItem('villageCart');
     if (savedCart) {
       setCart(JSON.parse(savedCart));
     }
-  };
+  }, []);
 
-  const saveCartToStorage = () => {
+  const saveCartToStorage = useCallback(() => {
     localStorage.setItem('villageCart', JSON.stringify(cart));
-  };
+  }, [cart]);
+
+  useEffect(() => {
+    fetchProducts();
+    loadCartFromStorage();
+  }, [fetchProducts, loadCartFromStorage]);
+
+  useEffect(() => {
+    filterAndSortProducts();
+  }, [filterAndSortProducts]);
+
+  useEffect(() => {
+    saveCartToStorage();
+  }, [saveCartToStorage]);
 
   const addToCart = (productId: string) => {
     setCart(prev => ({

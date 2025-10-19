@@ -5,7 +5,7 @@
  * Complete user profile editing with role assignment and status management
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
@@ -45,13 +45,7 @@ export const UserEditor: React.FC<UserEditorProps> = ({ userId, onSave, onCancel
   });
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (userId) {
-      fetchUser();
-    }
-  }, [userId]);
-
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     if (!userId) return;
 
     setLoading(true);
@@ -77,7 +71,13 @@ export const UserEditor: React.FC<UserEditorProps> = ({ userId, onSave, onCancel
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchUser();
+    }
+  }, [userId, fetchUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

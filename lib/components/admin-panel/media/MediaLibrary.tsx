@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
@@ -43,11 +43,7 @@ export const MediaLibrary: React.FC<MediaLibraryProps> = ({
   const [selectedFolder, setSelectedFolder] = useState<string>('all');
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    fetchMedia();
-  }, [selectedFolder, filterType]);
-
-  const fetchMedia = async () => {
+  const fetchMedia = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -64,7 +60,11 @@ export const MediaLibrary: React.FC<MediaLibraryProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedFolder, filterType]);
+
+  useEffect(() => {
+    fetchMedia();
+  }, [fetchMedia]);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadFiles = event.target.files;

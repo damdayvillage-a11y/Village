@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/lib/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Input } from '@/lib/components/ui/Input';
@@ -55,12 +55,7 @@ export default function SettingsManager() {
   const [testingKeys, setTestingKeys] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
-  // Fetch settings on mount
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/settings');
@@ -76,7 +71,12 @@ export default function SettingsManager() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  // Fetch settings on mount
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const updateSetting = async (category: string, key: string, value: any) => {
     try {

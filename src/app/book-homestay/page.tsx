@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { format, addDays } from 'date-fns';
 import { Card } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
@@ -159,14 +159,7 @@ export default function BookHomestayPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate pricing when homestay or dates change
-  useEffect(() => {
-    if (selectedHomestay && searchFilters.checkIn && searchFilters.checkOut) {
-      calculatePricing();
-    }
-  }, [selectedHomestay, searchFilters]);
-
-  const calculatePricing = async () => {
+  const calculatePricing = useCallback(async () => {
     if (!selectedHomestay) return;
 
     const pricingEngine = new DynamicPricingEngine({
@@ -188,7 +181,14 @@ export default function BookHomestayPage() {
     } catch (error) {
       console.error('Pricing calculation failed:', error);
     }
-  };
+  }, [selectedHomestay, searchFilters]);
+
+  // Calculate pricing when homestay or dates change
+  useEffect(() => {
+    if (selectedHomestay && searchFilters.checkIn && searchFilters.checkOut) {
+      calculatePricing();
+    }
+  }, [selectedHomestay, searchFilters, calculatePricing]);
 
   const handleHomestaySelect = (homestay: Homestay) => {
     setSelectedHomestay(homestay);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Palette, Type, Layout, Code, Save, RotateCcw, Download, Upload, 
   Image, Sliders, Eye, Check, X
@@ -209,16 +209,7 @@ export default function ThemeCustomizer() {
   const [saving, setSaving] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  useEffect(() => {
-    loadTheme();
-  }, []);
-
-  useEffect(() => {
-    // Apply theme to DOM in real-time
-    applyThemeToDOM();
-  }, [theme]);
-
-  const loadTheme = async () => {
+  const loadTheme = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/theme');
       if (response.ok) {
@@ -230,7 +221,39 @@ export default function ThemeCustomizer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const applyThemeToDOM = useCallback(() => {
+    // Apply CSS variables to root
+    const root = document.documentElement;
+    root.style.setProperty('--theme-primary', theme.primaryColor);
+    root.style.setProperty('--theme-secondary', theme.secondaryColor);
+    root.style.setProperty('--theme-background', theme.backgroundColor);
+    root.style.setProperty('--theme-text', theme.textColor);
+    root.style.setProperty('--theme-border', theme.borderColor);
+    root.style.setProperty('--theme-font-family', theme.fontFamily);
+    root.style.setProperty('--theme-font-size', `${theme.fontSize}px`);
+    root.style.setProperty('--theme-line-height', theme.lineHeight.toString());
+    root.style.setProperty('--theme-border-radius', `${theme.borderRadius}px`);
+    
+    // Apply custom CSS
+    let styleEl = document.getElementById('custom-theme-css');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'custom-theme-css';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = theme.customCSS;
+  }, [theme]);
+
+  useEffect(() => {
+    loadTheme();
+  }, [loadTheme]);
+
+  useEffect(() => {
+    // Apply theme to DOM in real-time
+    applyThemeToDOM();
+  }, [applyThemeToDOM]);
 
   const saveTheme = async () => {
     setSaving(true);
@@ -299,29 +322,6 @@ export default function ThemeCustomizer() {
       }
     };
     reader.readAsText(file);
-  };
-
-  const applyThemeToDOM = () => {
-    // Apply CSS variables to root
-    const root = document.documentElement;
-    root.style.setProperty('--theme-primary', theme.primaryColor);
-    root.style.setProperty('--theme-secondary', theme.secondaryColor);
-    root.style.setProperty('--theme-background', theme.backgroundColor);
-    root.style.setProperty('--theme-text', theme.textColor);
-    root.style.setProperty('--theme-border', theme.borderColor);
-    root.style.setProperty('--theme-font-family', theme.fontFamily);
-    root.style.setProperty('--theme-font-size', `${theme.fontSize}px`);
-    root.style.setProperty('--theme-line-height', theme.lineHeight.toString());
-    root.style.setProperty('--theme-border-radius', `${theme.borderRadius}px`);
-    
-    // Apply custom CSS
-    let styleEl = document.getElementById('custom-theme-css');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'custom-theme-css';
-      document.head.appendChild(styleEl);
-    }
-    styleEl.textContent = theme.customCSS;
   };
 
   const updateTheme = (key: keyof ThemeSettings, value: any) => {

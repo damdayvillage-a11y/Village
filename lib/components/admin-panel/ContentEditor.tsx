@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
@@ -40,11 +40,7 @@ export function ContentEditor({ page, onSave }: ContentEditorProps) {
   const [viewportMode, setViewportMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
-  useEffect(() => {
-    loadPageContent();
-  }, [page]);
-
-  const loadPageContent = async () => {
+  const loadPageContent = useCallback(async () => {
     try {
       // Load actual page content from API
       const response = await fetch(`/api/admin/content?page=${encodeURIComponent(page)}`);
@@ -119,7 +115,11 @@ export function ContentEditor({ page, onSave }: ContentEditorProps) {
       // Set empty blocks on error
       setBlocks([]);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    loadPageContent();
+  }, [loadPageContent]);
 
   const updateBlock = (blockId: string, newContent: any) => {
     setBlocks(prev => prev.map(block => 

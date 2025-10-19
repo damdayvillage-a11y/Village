@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/lib/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Badge } from '@/lib/components/ui/Badge';
@@ -69,11 +69,7 @@ export function ReviewManagement() {
     },
   ];
 
-  useEffect(() => {
-    loadReviews();
-  }, [ratingFilter]);
-
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     try {
       setError(null);
       const params = new URLSearchParams();
@@ -96,7 +92,11 @@ export function ReviewManagement() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [ratingFilter]);
+
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
 
   const deleteReview = async (reviewId: string) => {
     if (!confirm('Are you sure you want to delete this review?')) return;
