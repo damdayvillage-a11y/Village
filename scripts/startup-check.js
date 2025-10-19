@@ -122,6 +122,7 @@ function checkStartupConfiguration() {
     console.log(chalk.red('❌ DATABASE_URL: NOT SET'));
     console.log(chalk.yellow('   This is required for database connectivity.'));
     console.log(chalk.yellow('   Example: DATABASE_URL=postgresql://user:pass@host:5432/db'));
+    console.log(chalk.yellow('   The application will not be able to connect to the database.'));
   } else {
     const dbUrl = process.env.DATABASE_URL;
     
@@ -154,7 +155,7 @@ function checkStartupConfiguration() {
         console.log(chalk.green(`✅ DATABASE_URL: ${maskedUrl}`));
         
         // Warn if using localhost in production
-        if (nodeEnv === 'production' && dbUrl.includes('localhost')) {
+        if (nodeEnv === 'production' && (dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1'))) {
           warnings.push('DATABASE_URL points to localhost in production');
           console.log(chalk.yellow('   ⚠️  Warning: Using localhost in production'));
         }
