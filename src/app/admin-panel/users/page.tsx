@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
@@ -50,11 +50,7 @@ export default function UsersPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [roleFilter, statusFilter, searchQuery]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -72,7 +68,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [roleFilter, statusFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleCreateUser = () => {
     setShowCreateModal(true);

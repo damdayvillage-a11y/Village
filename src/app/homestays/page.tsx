@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, SlidersHorizontal, Grid, List, MapPin } from 'lucide-react';
 import { HomestayCard } from '@/lib/components/public/HomestayCard';
 import { Button } from '@/lib/components/ui/Button';
@@ -37,15 +37,7 @@ export default function HomestaysPage() {
   const [guestFilter, setGuestFilter] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    fetchHomestays();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortHomestays();
-  }, [homestays, searchTerm, sortBy, priceRange, guestFilter]);
-
-  const fetchHomestays = async () => {
+  const fetchHomestays = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/public/homestays');
@@ -58,9 +50,9 @@ export default function HomestaysPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterAndSortHomestays = () => {
+  const filterAndSortHomestays = useCallback(() => {
     let filtered = [...homestays];
 
     // Search filter
@@ -89,7 +81,15 @@ export default function HomestaysPage() {
     });
 
     setFilteredHomestays(filtered);
-  };
+  }, [homestays, searchTerm, sortBy, priceRange, guestFilter]);
+
+  useEffect(() => {
+    fetchHomestays();
+  }, [fetchHomestays]);
+
+  useEffect(() => {
+    filterAndSortHomestays();
+  }, [filterAndSortHomestays]);
 
   if (loading) {
     return (
