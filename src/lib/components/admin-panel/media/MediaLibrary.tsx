@@ -233,12 +233,10 @@ export function MediaLibrary({ key }: MediaLibraryProps) {
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedFile(null)}
         >
-          <Card 
-            className="max-w-4xl w-full max-h-[90vh] overflow-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <CardContent className="p-6">
-              <div className="grid md:grid-cols-2 gap-6">
+          <div onClick={(e) => e.stopPropagation()}>
+            <Card className="max-w-4xl w-full max-h-[90vh] overflow-auto">
+              <CardContent className="p-6">
+                <div className="grid md:grid-cols-2 gap-6">
                 {/* Preview */}
                 <div className="bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center min-h-[300px]">
                   {selectedFile.mimeType.startsWith('image/') ? (
@@ -334,6 +332,7 @@ export function MediaLibrary({ key }: MediaLibraryProps) {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       )}
     </div>
