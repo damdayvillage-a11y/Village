@@ -93,7 +93,11 @@ export const authOptions: NextAuthOptions = {
 
             // Invalid credentials - user not found or no password
             if (!user || !user.password) {
-              console.warn(`Login attempt for non-existent or passwordless user: ${credentials.email}`);
+              if (!user) {
+                console.warn(`Login attempt for non-existent user: ${credentials.email}`);
+              } else {
+                console.warn(`Login attempt for user without password: ${credentials.email}`);
+              }
               return null;
             }
 
@@ -110,18 +114,18 @@ export const authOptions: NextAuthOptions = {
 
             // User not verified
             if (!user.verified) {
-              console.warn(`Login attempt for unverified user: ${credentials.email}`);
+              console.warn(`Login attempt for unverified user: ${credentials.email} (verified=${user.verified})`);
               return null;
             }
 
             // User account deactivated
             if (!user.active) {
-              console.warn(`Login attempt for deactivated user: ${credentials.email}`);
+              console.warn(`Login attempt for deactivated user: ${credentials.email} (active=${user.active})`);
               return null;
             }
 
             // Success - return user object
-            console.log(`Successful login for user: ${credentials.email}`);
+            console.log(`Successful login for user: ${credentials.email} (verified=${user.verified}, active=${user.active})`);
             return {
               id: user.id,
               email: user.email,
