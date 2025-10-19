@@ -518,21 +518,31 @@ enum DeviceStatus {
 // ==================== CONTENT & MEDIA MODELS ====================
 
 model Media {
-  id        String    @id @default(cuid())
-  filename  String
-  url       String
-  mimeType  String
-  size      Int
-  checksum  String
-  ipfsCid   String?   // IPFS content identifier
-  tags      Json?     // Array of tags
+  id            String   @id @default(cuid())
+  filename      String
+  originalName  String
+  mimeType      String
+  size          Int
+  width         Int?
+  height        Int?
+  url           String
+  thumbnailUrl  String?
+  storageProvider String @default("local") // local, cloudinary, s3
+  ipfsCid       String?   // IPFS content identifier
+  folder        String?
+  tags          String[]
+  alt           String?
+  caption       String?
+  checksum      String
+  uploadedBy    String?
+  uploader      User?    @relation(fields: [uploadedBy], references: [id])
+  usageCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   
-  // Relations
-  uploadedBy String?
-  uploader   User? @relation(fields: [uploadedBy], references: [id])
-  
-  createdAt DateTime @default(now())
-  
+  @@index([uploadedBy])
+  @@index([folder])
+  @@index([mimeType])
   @@map("media")
 }
 

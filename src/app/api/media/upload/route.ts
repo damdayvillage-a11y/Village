@@ -3,9 +3,21 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { UserRole } from '@prisma/client';
 import prisma from '@/lib/db/prisma';
-import { writeFile, mkdir } from 'fs/promises';
+import { mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import {
+  isAllowedFileType,
+  isAllowedFileSize,
+  getFileCategory,
+  generateUniqueFilename,
+} from '@/src/lib/storage-config';
+import {
+  processImage,
+  isValidImage,
+  getImageDimensions,
+  calculateChecksum,
+} from '@/src/lib/image-processor';
 
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads');
 
@@ -14,15 +26,6 @@ async function ensureUploadDir() {
   if (!existsSync(UPLOAD_DIR)) {
     await mkdir(UPLOAD_DIR, { recursive: true });
   }
-}
-
-function getFileType(mimeType: string): 'image' | 'video' | 'document' | 'other' {
-  if (mimeType.startsWith('image/')) return 'image';
-  if (mimeType.startsWith('video/')) return 'video';
-  if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('word')) {
-    return 'document';
-  }
-  return 'other';
 }
 
 export async function POST(request: NextRequest) {
@@ -36,48 +39,96 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
-    const folder = formData.get('folder') as string | null;
+    const folder = (formData.get('folder') as string) || null;
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 });
     }
 
     const uploadedFiles = [];
+    const errors = [];
 
     for (const file of files) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      try {
+        // Validate file type
+        if (!isAllowedFileType(file.type)) {
+          errors.push(`${file.name}: File type not allowed`);
+          continue;
+        }
 
-      // Generate unique filename
-      const timestamp = Date.now();
-      const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filename = `${timestamp}-${safeName}`;
-      const filepath = join(UPLOAD_DIR, filename);
+        // Validate file size
+        if (!isAllowedFileSize(file.size)) {
+          errors.push(`${file.name}: File too large`);
+          continue;
+        }
 
-      // Write file to disk
-      await writeFile(filepath, buffer);
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
 
-      // Calculate simple checksum (could use crypto for production)
-      const checksum = Buffer.from(buffer).toString('base64').substring(0, 32);
+        // Generate unique filename
+        const filename = generateUniqueFilename(file.name);
+        const fileCategory = getFileCategory(file.type);
 
-      // Create database record
-      const mediaRecord = await prisma.media.create({
-        data: {
-          filename,
-          mimeType: file.type,
-          size: file.size,
-          url: `/uploads/${filename}`,
-          checksum,
-          uploadedBy: session?.user?.id || undefined,
-        },
-      });
+        let width: number | undefined;
+        let height: number | undefined;
+        let thumbnailUrl: string | undefined;
+        let finalUrl = `/uploads/${filename}`;
 
-      uploadedFiles.push(mediaRecord);
+        // Process images
+        if (fileCategory === 'image' && (await isValidImage(buffer))) {
+          const processed = await processImage({
+            buffer,
+            filename,
+            uploadDir: UPLOAD_DIR,
+            generateThumbnail: true,
+          });
+
+          width = processed.width;
+          height = processed.height;
+          
+          // Update URLs to use optimized versions
+          const optimizedFilename = filename.replace(/\.[^.]+$/, '.webp');
+          finalUrl = `/uploads/${optimizedFilename}`;
+          thumbnailUrl = `/uploads/thumb_${optimizedFilename}`;
+        } else {
+          // For non-images, just save the file
+          const { writeFile } = await import('fs/promises');
+          await writeFile(join(UPLOAD_DIR, filename), buffer);
+        }
+
+        // Calculate checksum
+        const checksum = await calculateChecksum(buffer);
+
+        // Create database record
+        const mediaRecord = await prisma.media.create({
+          data: {
+            filename: filename.replace(/\.[^.]+$/, '.webp'), // Store webp filename
+            originalName: file.name,
+            mimeType: file.type,
+            size: file.size,
+            width,
+            height,
+            url: finalUrl,
+            thumbnailUrl,
+            storageProvider: 'local',
+            folder,
+            tags: [],
+            checksum,
+            uploadedBy: session?.user?.id || undefined,
+          },
+        });
+
+        uploadedFiles.push(mediaRecord);
+      } catch (error) {
+        console.error(`Error processing ${file.name}:`, error);
+        errors.push(`${file.name}: Processing failed`);
+      }
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      files: uploadedFiles 
+    return NextResponse.json({
+      success: uploadedFiles.length > 0,
+      files: uploadedFiles,
+      errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
     console.error('Upload error:', error);
