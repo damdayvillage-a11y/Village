@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, TransactionType } from '@prisma/client';
 import { SAMPLE_DEVICES } from '../lib/sample-devices';
 import { hashPassword } from '../lib/auth/password';
 
@@ -253,48 +253,48 @@ async function main() {
   const transactions = [
     {
       userId: adminUser.id,
-      carbonCreditId: adminCarbonCredit.id,
-      type: 'EARN',
+      creditId: adminCarbonCredit.id,
+      type: TransactionType.EARN,
       amount: 50.0,
       reason: 'Initial bonus',
       description: 'Welcome bonus for joining the carbon credit program'
     },
     {
       userId: adminUser.id,
-      carbonCreditId: adminCarbonCredit.id,
-      type: 'EARN',
+      creditId: adminCarbonCredit.id,
+      type: TransactionType.EARN,
       amount: 25.5,
       reason: 'Sustainable travel',
       description: 'Carbon credits earned for using bicycle instead of vehicle'
     },
     {
       userId: adminUser.id,
-      carbonCreditId: adminCarbonCredit.id,
-      type: 'SPEND',
+      creditId: adminCarbonCredit.id,
+      type: TransactionType.SPEND,
       amount: -25.0,
       reason: 'Carbon offset purchase',
       description: 'Purchased carbon offsets for air travel'
     },
     {
       userId: hostUser.id,
-      carbonCreditId: hostCarbonCredit.id,
-      type: 'EARN',
+      creditId: hostCarbonCredit.id,
+      type: TransactionType.EARN,
       amount: 50.0,
       reason: 'Initial bonus',
       description: 'Welcome bonus for joining the carbon credit program'
     },
     {
       userId: hostUser.id,
-      carbonCreditId: hostCarbonCredit.id,
-      type: 'EARN',
+      creditId: hostCarbonCredit.id,
+      type: TransactionType.EARN,
       amount: 30.0,
       reason: 'Solar energy usage',
       description: 'Carbon credits for using 100% solar energy'
     },
     {
       userId: hostUser.id,
-      carbonCreditId: hostCarbonCredit.id,
-      type: 'SPEND',
+      creditId: hostCarbonCredit.id,
+      type: TransactionType.SPEND,
       amount: -15.0,
       reason: 'Tree planting',
       description: 'Spent credits on community tree planting initiative'

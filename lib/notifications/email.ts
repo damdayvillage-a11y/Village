@@ -52,6 +52,14 @@ export interface HostNotificationData {
   guestContact?: string;
 }
 
+export interface WelcomeEmailData {
+  email: string;
+  name: string;
+  role: string;
+  password?: string;
+  loginUrl?: string;
+}
+
 export class EmailNotificationService {
   private static async sendWithSendGrid(msg: any): Promise<boolean> {
     try {
@@ -344,5 +352,164 @@ export class EmailNotificationService {
     };
 
     return await this.sendEmail(msg);
+  }
+
+  static async sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean> {
+    const loginUrl = data.loginUrl || process.env.NEXTAUTH_URL ? `${process.env.NEXTAUTH_URL}/auth/signin` : '';
+    const formattedRole = data.role.toLowerCase().replace(/_/g, ' ');
+    
+    const msg = {
+      to: data.email,
+      from: process.env.FROM_EMAIL || 'welcome@damdayvillage.com',
+      subject: `Welcome to Damday Village - Your Account is Ready!`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Welcome to Damday Village</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+            .credentials-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981; }
+            .credential-row { margin: 10px 0; padding: 8px 0; }
+            .credential-label { font-weight: bold; color: #374151; display: block; margin-bottom: 4px; }
+            .credential-value { color: #6b7280; font-family: monospace; background: #f3f4f6; padding: 8px; border-radius: 4px; display: inline-block; }
+            .cta-button { background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: bold; }
+            .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+            .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px; margin: 15px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🏔️ Welcome to Damday Village!</h1>
+              <p>Your account has been created successfully</p>
+            </div>
+            
+            <div class="content">
+              <p>Dear ${data.name},</p>
+              
+              <p>Welcome to Damday Village - India's Smart Carbon-Free Model Village! We're excited to have you join our community as a <strong>${formattedRole}</strong>.</p>
+              
+              <div class="credentials-box">
+                <h3>🔑 Your Account Credentials</h3>
+                <div class="credential-row">
+                  <span class="credential-label">Email:</span>
+                  <span class="credential-value">${data.email}</span>
+                </div>
+                ${data.password ? `
+                <div class="credential-row">
+                  <span class="credential-label">Temporary Password:</span>
+                  <span class="credential-value">${data.password}</span>
+                </div>
+                <div class="warning">
+                  <strong>⚠️ Security Notice:</strong> Your temporary password is shown above. Please change it immediately after your first login. This password will only be shown once in this email.
+                </div>
+                ` : `
+                <div class="credential-row">
+                  <span class="credential-label">Password:</span>
+                  <span class="credential-value">Set by administrator</span>
+                </div>
+                <p><em>Your password has been set by the administrator. Please contact them if you need to reset it.</em></p>
+                `}
+              </div>
+              
+              <h3>🌿 What You Can Do</h3>
+              <p>Based on your role as <strong>${formattedRole}</strong>, you have access to:</p>
+              <ul>
+                ${EmailNotificationService.getRoleFeatures(data.role)}
+              </ul>
+              
+              <h3>🚀 Get Started</h3>
+              ${loginUrl ? `
+              <p>Click the button below to log in to your account and explore the platform:</p>
+              
+              <a href="${loginUrl}" class="cta-button">Log In to Your Account</a>
+              ` : `
+              <p>Please contact your administrator for the login URL to access your account.</p>
+              `}
+              
+              <h3>📚 Resources</h3>
+              <ul>
+                <li><strong>Platform Guide:</strong> Learn how to use the platform effectively</li>
+                <li><strong>Community Guidelines:</strong> Our rules and best practices</li>
+                <li><strong>Support Center:</strong> Get help when you need it</li>
+                <li><strong>Contact Us:</strong> support@damdayvillage.com</li>
+              </ul>
+              
+              <p>If you have any questions or need assistance, our support team is here to help.</p>
+              
+              <p>Welcome aboard!</p>
+              
+              <p>Warm regards,<br>The Damday Village Team</p>
+            </div>
+            
+            <div class="footer">
+              <p>Damday Village - Smart Carbon-Free Model Village<br>
+              Gangolihat, Pithoragarh, Uttarakhand 262524, India</p>
+              <p>This is an automated email. Please do not reply directly to this message.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    return await this.sendEmail(msg);
+  }
+
+  private static getRoleFeatures(role: string): string {
+    const features: { [key: string]: string[] } = {
+      'ADMIN': [
+        'Full system administration and configuration',
+        'User management and role assignment',
+        'Content management and publishing',
+        'Analytics and reporting dashboard',
+        'System monitoring and maintenance',
+      ],
+      'VILLAGE_COUNCIL': [
+        'Community project management',
+        'Voting and governance participation',
+        'Fund allocation review',
+        'Village information updates',
+      ],
+      'HOST': [
+        'Create and manage homestay listings',
+        'Manage bookings and availability',
+        'Guest communication',
+        'Earnings and analytics dashboard',
+      ],
+      'SELLER': [
+        'Product listing and management',
+        'Order processing and fulfillment',
+        'Inventory management',
+        'Sales analytics',
+      ],
+      'OPERATOR': [
+        'IoT device management',
+        'System monitoring',
+        'Content moderation',
+        'Technical support',
+      ],
+      'GUEST': [
+        'Browse and book homestays',
+        'Purchase products from marketplace',
+        'Earn and manage carbon credits',
+        'Participate in community activities',
+      ],
+      'RESEARCHER': [
+        'Access environmental data',
+        'Download research datasets',
+        'View system analytics',
+        'Export data for analysis',
+      ],
+    };
+
+    const roleFeatures = features[role] || features['GUEST'];
+    return roleFeatures.map(feature => `<li>${feature}</li>`).join('\n                ');
   }
 }
