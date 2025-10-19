@@ -1,5 +1,7 @@
 # Smart Carbon-Free Village
 
+**🚨 ADMIN LOGIN ISSUES?** See [HOW_TO_FIX_ADMIN_LOGIN.md](./HOW_TO_FIX_ADMIN_LOGIN.md) for quick fixes!
+
 A futuristic platform for Damday Village featuring carbon footprint tracking, IoT integrations, tourism booking, and sustainable living solutions.
 
 ## 🎉 Production Ready
@@ -37,6 +39,8 @@ A futuristic platform for Damday Village featuring carbon footprint tracking, Io
 
 ### 🆘 Getting Errors?
 
+- **"Unable to sign in" error?** See [Quick SSH Reference](./docs/QUICK_SSH_REFERENCE.md) - Learn how to run commands inside Docker container
+- **npm commands not working on SSH?** See [SSH Troubleshooting Guide](./docs/SSH_TROUBLESHOOTING.md) - Complete guide for SSH users
 - **500 Error?** Visit `/help/admin-500` (English) or `/help/admin-500-hi` (हिंदी) on your deployed app
 - **Need diagnostics?** Check `/admin-panel/status` for system health
 - **See full guide:** [CAPGUIDE.md](./docs/md-files/CAPGUIDE.md) has complete troubleshooting

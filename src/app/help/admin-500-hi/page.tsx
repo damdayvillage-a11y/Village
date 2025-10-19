@@ -180,6 +180,17 @@ export default function Admin500HelpPageHindi() {
               <Terminal className="h-5 w-5" />
               जल्दी Commands (Container Shell में चलाएं)
             </h3>
+            
+            <div className="bg-orange-900 border border-orange-700 rounded p-3 mb-4 text-sm">
+              <p className="font-semibold mb-2">⚠️ महत्वपूर्ण: SSH के माध्यम से Commands चलाना</p>
+              <p className="text-orange-100">
+                अगर आप अपने server में SSH करते हैं, तो commands को <span className="font-semibold">Docker container के अंदर</span> चलाएं, host पर नहीं:
+              </p>
+              <div className="bg-gray-900 px-3 py-2 rounded mt-2 font-mono text-xs">
+                docker exec -it $(docker ps | grep srv-captain--village | awk '{'{print $1}'}') npm run db:seed
+              </div>
+            </div>
+            
             <div className="space-y-3 text-sm font-mono">
               <div>
                 <div className="text-gray-400 mb-1"># Database migrations चलाएं</div>
@@ -218,12 +229,34 @@ export default function Admin500HelpPageHindi() {
             <div className="space-y-2 text-sm">
               <div>
                 <a 
-                  href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPROVER_500_FIX_GUIDE_HINDI.md"
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/docs/QUICK_SSH_REFERENCE.md"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1 font-semibold"
                 >
-                  ⭐ संपूर्ण 500 Error समाधान गाइड (हिंदी में)
+                  ⭐ Quick SSH Reference (Container में Commands चलाना)
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              <div>
+                <a 
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/docs/SSH_TROUBLESHOOTING.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1 font-semibold"
+                >
+                  🔧 Complete SSH Troubleshooting Guide
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              <div>
+                <a 
+                  href="https://github.com/damdayvillage-a11y/Village/blob/main/CAPROVER_500_FIX_GUIDE_HINDI.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 hover:text-purple-700 underline flex items-center gap-1"
+                >
+                  संपूर्ण 500 Error समाधान गाइड (हिंदी में)
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
