@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,16 +39,15 @@ export default function ActivityLogViewer() {
   const [filterType, setFilterType] = useState("all");
   const [filterLevel, setFilterLevel] = useState("all");
 
-  useEffect(() => {
-    fetchLogs();
-  }, [filterType, filterLevel]);
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(
         `/api/admin/activity?type=${filterType}&level=${filterLevel}`
       );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setLogs(data.logs || []);
     } catch (error) {
@@ -56,7 +55,11 @@ export default function ActivityLogViewer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterType, filterLevel]);
+
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
 
   const exportLogs = () => {
     console.log("Exporting logs...");
@@ -225,7 +228,7 @@ export default function ActivityLogViewer() {
                   <div className="flex items-center gap-2 mb-1">
                     <p className="font-semibold">{log.action}</p>
                     {getLevelIcon(log.level)}
-                    <Badge variant="outline" className="ml-auto">
+                    <Badge variant="default" className="ml-auto">
                       {log.type}
                     </Badge>
                   </div>

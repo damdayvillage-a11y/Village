@@ -155,16 +155,16 @@ export default function FeatureFlagsPage() {
                   <Badge
                     variant={
                       feature.category === "CORE"
-                        ? "default"
+                        ? "success"
                         : feature.category === "BETA"
-                        ? "secondary"
-                        : "outline"
+                        ? "warning"
+                        : "default"
                     }
                   >
                     {feature.category}
                   </Badge>
                   <Badge
-                    variant={feature.enabled ? "default" : "secondary"}
+                    variant={feature.enabled ? "success" : "default"}
                   >
                     {feature.enabled ? "ENABLED" : "DISABLED"}
                   </Badge>
@@ -206,7 +206,7 @@ export default function FeatureFlagsPage() {
                     <Label className="text-sm">User Targeting</Label>
                     <div className="flex gap-2 mt-1">
                       {feature.userTargeting.map((role) => (
-                        <Badge key={role} variant="outline">
+                        <Badge key={role} variant="info">
                           {role}
                         </Badge>
                       ))}
