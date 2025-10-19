@@ -355,7 +355,8 @@ export class EmailNotificationService {
   }
 
   static async sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean> {
-    const loginUrl = data.loginUrl || 'https://village-app.captain.damdayvillage.com/auth/signin';
+    const loginUrl = data.loginUrl || process.env.NEXTAUTH_URL ? `${process.env.NEXTAUTH_URL}/auth/signin` : '';
+    const formattedRole = data.role.toLowerCase().replace(/_/g, ' ');
     
     const msg = {
       to: data.email,
@@ -392,7 +393,7 @@ export class EmailNotificationService {
             <div class="content">
               <p>Dear ${data.name},</p>
               
-              <p>Welcome to Damday Village - India's Smart Carbon-Free Model Village! We're excited to have you join our community as a <strong>${data.role.toLowerCase().replace('_', ' ')}</strong>.</p>
+              <p>Welcome to Damday Village - India's Smart Carbon-Free Model Village! We're excited to have you join our community as a <strong>${formattedRole}</strong>.</p>
               
               <div class="credentials-box">
                 <h3>🔑 Your Account Credentials</h3>
@@ -402,11 +403,11 @@ export class EmailNotificationService {
                 </div>
                 ${data.password ? `
                 <div class="credential-row">
-                  <span class="credential-label">Password:</span>
+                  <span class="credential-label">Temporary Password:</span>
                   <span class="credential-value">${data.password}</span>
                 </div>
                 <div class="warning">
-                  <strong>⚠️ Important:</strong> Please change your password after your first login for security reasons.
+                  <strong>⚠️ Security Notice:</strong> Your temporary password is shown above. Please change it immediately after your first login. This password will only be shown once in this email.
                 </div>
                 ` : `
                 <div class="credential-row">
@@ -418,15 +419,19 @@ export class EmailNotificationService {
               </div>
               
               <h3>🌿 What You Can Do</h3>
-              <p>Based on your role as <strong>${data.role.toLowerCase().replace('_', ' ')}</strong>, you have access to:</p>
+              <p>Based on your role as <strong>${formattedRole}</strong>, you have access to:</p>
               <ul>
-                ${this.getRoleFeatures(data.role)}
+                ${EmailNotificationService.getRoleFeatures(data.role)}
               </ul>
               
               <h3>🚀 Get Started</h3>
+              ${loginUrl ? `
               <p>Click the button below to log in to your account and explore the platform:</p>
               
               <a href="${loginUrl}" class="cta-button">Log In to Your Account</a>
+              ` : `
+              <p>Please contact your administrator for the login URL to access your account.</p>
+              `}
               
               <h3>📚 Resources</h3>
               <ul>
