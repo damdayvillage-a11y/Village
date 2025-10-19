@@ -11,13 +11,13 @@ import {
   isAllowedFileSize,
   getFileCategory,
   generateUniqueFilename,
-} from '@/src/lib/storage-config';
+} from '@/lib/storage-config';
 import {
   processImage,
   isValidImage,
   getImageDimensions,
   calculateChecksum,
-} from '@/src/lib/image-processor';
+} from '@/lib/image-processor';
 
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads');
 

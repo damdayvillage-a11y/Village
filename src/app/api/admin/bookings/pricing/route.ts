@@ -85,19 +85,22 @@ export async function POST(req: NextRequest) {
     const occupancyRate = totalBookings / totalDays;
 
     // Calculate pricing
-    const pricingResult = calculateBookingPrice({
-      homestayId,
-      basePrice: parseFloat(homestay.basePrice.toString()),
-      checkIn: checkInDate,
-      checkOut: checkOutDate,
-      guests,
-      promoCode,
-      occupancyRate,
-      priceOverrides: priceOverrides.map(po => ({
-        date: po.date,
-        price: parseFloat(po.priceOverride?.toString() || '0'),
-      })),
-    });
+    const pricingResult = await calculateBookingPrice(
+      {
+        homestayId,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        guests,
+        promoCode,
+      },
+      {
+        basePricePerNight: parseFloat(homestay.basePrice.toString()),
+        cleaningFee: 50, // Default cleaning fee, should be from homestay settings
+        serviceFeePercent: 10, // Default 10% service fee
+        taxPercent: 12, // Default 12% tax
+        currentOccupancyRate: occupancyRate,
+      }
+    );
 
     // Cache pricing for 5 minutes
     // TODO: Implement Redis caching for better performance

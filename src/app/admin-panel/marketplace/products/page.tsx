@@ -361,7 +361,7 @@ export default function ProductsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="secondary">{product.category}</Badge>
+                        <Badge variant="default">{product.category}</Badge>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
@@ -389,7 +389,7 @@ export default function ProductsPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant={product.active ? 'success' : 'secondary'}>
+                        <Badge variant={product.active ? 'success' : 'default'}>
                           {product.active ? 'Active' : 'Inactive'}
                         </Badge>
                       </td>

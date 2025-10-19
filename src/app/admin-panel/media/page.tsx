@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { MediaLibrary } from '@/lib/components/admin-panel/media/MediaLibrary';
-import { ImageUploader } from '@/src/components/admin/ImageUploader';
+import { ImageUploader } from '@/components/admin/ImageUploader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/lib/components/ui/tabs';
 
