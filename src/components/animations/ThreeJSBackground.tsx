@@ -11,7 +11,7 @@ import { ParticleSystem } from '@/lib/three/ParticleSystem';
 import { getTheme } from '@/lib/three/ColorThemes';
 
 interface ThreeJSBackgroundProps {
-  preset?: 'nature' | 'tech' | 'sunset' | 'night';
+  preset?: 'government' | 'nature' | 'tech' | 'sunset' | 'night';
   particleCount?: number;
   animationSpeed?: number;
   enableInteraction?: boolean;

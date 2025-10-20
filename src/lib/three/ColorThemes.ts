@@ -12,6 +12,13 @@ export interface ColorTheme {
 }
 
 export const ColorThemes: Record<string, ColorTheme> = {
+  government: {
+    name: 'Government',
+    background: 0x0a3d62, // Deep navy blue - professional government color
+    particles: [0xff9933, 0xffffff, 0x138808, 0x000080], // Saffron, White, Green, Navy (Indian tricolor inspired)
+    shapes: 0x138808,
+    fog: 0x1a4d72,
+  },
   nature: {
     name: 'Nature',
     background: 0x0a4d3c,
@@ -43,5 +50,5 @@ export const ColorThemes: Record<string, ColorTheme> = {
 };
 
 export function getTheme(name: string): ColorTheme {
-  return ColorThemes[name] || ColorThemes.nature;
+  return ColorThemes[name] || ColorThemes.government;
 }
