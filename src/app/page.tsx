@@ -8,6 +8,7 @@ import { LiveData } from '@/lib/components/ui/LiveData';
 import { HomestayCard } from '@/lib/components/public/HomestayCard';
 import { ProductCard } from '@/lib/components/public/ProductCard';
 import { StatsCounter } from '@/lib/components/public/StatsCounter';
+import { ThreeJSBackground } from '@/components/animations/ThreeJSBackground';
 import {
   getFeaturedHomestaysData,
   getFeaturedProductsData,
@@ -63,31 +64,39 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+      {/* Three.js Animated Background */}
+      <ThreeJSBackground 
+        preset="nature" 
+        particleCount={800}
+        animationSpeed={1.0}
+        enableInteraction={true}
+      />
+      
+    <div className="min-h-screen relative">
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-display font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6 drop-shadow-lg animate-fade-in">
             Welcome to{' '}
-            <span className="text-primary-600">Smart Carbon-Free Village</span>
+            <span className="text-emerald-300 animate-pulse-slow">Smart Carbon-Free Village</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto text-balance">
+          <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto text-balance drop-shadow-md">
             Experience Damday Village in Pithoragarh - a pioneering carbon-neutral, 
             culturally-rich, and technologically progressive model village 
             nestled at 2,100m elevation in the pristine Kumaon Himalayas.
           </p>
           
           {/* Real-time Village Stats */}
-          <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm">
-            <div className="flex items-center px-4 py-2 bg-white/80 rounded-full border border-green-200">
+          <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm animate-slide-up">
+            <div className="flex items-center px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-green-200 shadow-lg hover:scale-105 transition-transform">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
               <span className="text-green-700 font-medium">Solar Grid: 45kW Active</span>
             </div>
-            <div className="flex items-center px-4 py-2 bg-white/80 rounded-full border border-blue-200">
+            <div className="flex items-center px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-blue-200 shadow-lg hover:scale-105 transition-transform">
               <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
               <span className="text-blue-700 font-medium">Air Quality: Excellent (AQI: 18)</span>
             </div>
-            <div className="flex items-center px-4 py-2 bg-white/80 rounded-full border border-purple-200">
+            <div className="flex items-center px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-purple-200 shadow-lg hover:scale-105 transition-transform">
               <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
               <span className="text-purple-700 font-medium">Carbon Neutral: 100%</span>
             </div>
@@ -95,7 +104,7 @@ export default async function HomePage() {
 
           {/* Village Statistics - Real Data */}
           {villageStats && (
-            <div className="mb-12">
+            <div className="mb-12 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
               <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
                 Live Village Statistics
               </h2>
@@ -142,11 +151,11 @@ export default async function HomePage() {
           )}
 
           {/* Live Environmental Data */}
-          <div className="mb-12">
+          <div className="mb-12 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
             <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
               Live Environmental Data
             </h2>
-            <Suspense fallback={<div className="text-center">Loading live data...</div>}>
+            <Suspense fallback={<div className="text-center text-gray-600">Loading live data...</div>}>
               <LiveData />
             </Suspense>
           </div>
@@ -172,7 +181,7 @@ export default async function HomePage() {
 
         {/* Featured Homestays - Real Data */}
         {featuredHomestays.length > 0 && (
-          <div className="mt-20">
+          <div className="mt-20 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900">Featured Homestays</h2>
@@ -204,7 +213,7 @@ export default async function HomePage() {
 
         {/* Featured Products - Real Data */}
         {featuredProducts.length > 0 && (
-          <div className="mt-20">
+          <div className="mt-20 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900">Local Marketplace</h2>
