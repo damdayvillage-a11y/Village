@@ -3,6 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
 
+// Force dynamic rendering - this route uses request parameters
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+
 /**
  * GET /api/admin/content
  * Fetch content blocks for a specific page

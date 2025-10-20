@@ -288,6 +288,70 @@ git push caprover main
 - Only production dependencies
 - ~2 minutes, ~200-400MB final image
 
+## Automated Docker Cleanup
+
+### Preventing Disk Space Issues
+
+**NEW**: Automated cleanup scripts to prevent "no space left on device" errors during builds.
+
+#### Quick Setup (CapRover/Production Servers)
+
+```bash
+# SSH into your server
+ssh root@your-server
+
+# Navigate to app directory (adjust path as needed)
+cd /var/lib/docker/volumes/captain--my-village-app/_data
+
+# Run one-time cleanup
+sudo ./scripts/auto-docker-cleanup.sh
+
+# Setup automated daily cleanup (runs at 2:00 AM)
+sudo ./scripts/setup-auto-cleanup.sh
+```
+
+#### Manual Cleanup
+
+```bash
+# Run cleanup script manually anytime
+sudo ./scripts/auto-docker-cleanup.sh
+
+# View cleanup logs
+tail -f /var/log/docker-cleanup.log
+```
+
+#### What Gets Cleaned
+
+The automated cleanup script removes:
+- Stopped containers
+- Unused networks
+- Unused volumes (be careful with data)
+- Dangling images
+- Build cache (when disk space < 5GB)
+- Old images (older than 48 hours, when disk space < 5GB)
+- Old Docker logs (older than 7 days)
+
+#### Customization
+
+Edit `/scripts/auto-docker-cleanup.sh` to customize:
+```bash
+MIN_FREE_SPACE_GB=5    # Trigger aggressive cleanup below 5GB
+RETENTION_HOURS=48     # Keep images from last 48 hours
+```
+
+#### Monitoring
+
+```bash
+# Check scheduled cleanup jobs
+crontab -l
+
+# View real-time cleanup
+sudo ./scripts/auto-docker-cleanup.sh
+
+# Check Docker disk usage
+docker system df -v
+```
+
 ## Resource Monitoring
 
 ### During Build
