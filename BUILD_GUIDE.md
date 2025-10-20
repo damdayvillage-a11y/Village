@@ -3,9 +3,9 @@
 ## Memory Requirements
 
 ### Docker Build Requirements
-- **Minimum RAM**: 3GB available memory
-- **Recommended RAM**: 4GB or higher
-- **Node.js Heap Size**: 2048MB (2GB)
+- **Minimum RAM**: 4GB available memory (increased from 3GB)
+- **Recommended RAM**: 6GB or higher
+- **Node.js Heap Size**: 3072MB (3GB) - increased for PWA builds
 - **Build Time**: 6-10 minutes on standard hardware
 
 ### Error Code 137 (Out of Memory)
@@ -14,25 +14,33 @@ If you see error code 137 during Docker build, it means the build process ran ou
 **Common Causes:**
 1. Insufficient memory allocated to Docker
 2. Too many simultaneous processes
-3. Large application with many dependencies
+3. Large application with many dependencies (Next.js + PWA + Three.js)
 4. PWA service worker generation consuming memory
+5. Server has less than 4GB total RAM
 
 **Solutions:**
-1. Increase Docker memory allocation (Docker Desktop → Settings → Resources)
-2. Use the memory-optimized build configuration (already set to 2048MB)
+1. Increase Docker memory allocation (Docker Desktop → Settings → Resources → Memory → 6GB minimum)
+2. Use the memory-optimized build configuration (already set to 3GB heap)
 3. Close other applications to free up system memory
-4. Consider using a cloud build service with guaranteed resources
+4. Add swap space if running on Linux with limited RAM (see below)
+5. Consider using a cloud build service with guaranteed resources
+6. For CapRover: Ensure server has at least 4GB RAM, or use a separate build server
 
 ## Docker Build Process
 
 ### Standard Docker Build
 ```bash
-# Build with default settings (2GB heap)
+# Build with default settings (3GB heap)
 docker build -f Dockerfile.simple -t village-app:latest .
 
-# Build with custom memory limit
+# Build with custom memory limit (if 3GB is not enough)
 docker build -f Dockerfile.simple \
-  --build-arg BUILD_MEMORY_LIMIT=3072 \
+  --build-arg BUILD_MEMORY_LIMIT=4096 \
+  -t village-app:latest .
+
+# For low-memory environments (not recommended, may fail)
+docker build -f Dockerfile.simple \
+  --build-arg BUILD_MEMORY_LIMIT=2048 \
   -t village-app:latest .
 ```
 
@@ -47,7 +55,8 @@ CapRover automatically builds from the Dockerfile. To ensure successful builds:
    ```
 
 2. **Increase Server Memory** if builds fail:
-   - Minimum 2GB RAM free during build
+   - Minimum 4GB RAM free during build (increased from 2GB)
+   - Recommended 6GB+ total RAM for comfortable builds
    - Consider upgrading server or using build server
 
 3. **Monitor Build Logs**:
@@ -60,13 +69,15 @@ CapRover automatically builds from the Dockerfile. To ensure successful builds:
 # Build using docker-compose
 docker-compose -f docker-compose.coolify.yml build
 
-# Set memory limits in docker-compose.coolify.yml
+# Set memory limits in docker-compose.coolify.yml (already configured)
 services:
   app:
     deploy:
       resources:
         limits:
-          memory: 4G
+          memory: 6G  # Minimum for reliable builds
+        reservations:
+          memory: 3G
 ```
 
 ## Local Development Build
@@ -85,20 +96,20 @@ node --version  # Should be v20.x or higher
 # Build for development
 npm run build
 
-# Build with increased memory
-NODE_OPTIONS='--max-old-space-size=2048' npm run build
+# Build with increased memory (now default: 3GB)
+NODE_OPTIONS='--max-old-space-size=3072' npm run build
 ```
 
 ### Production Build
 ```bash
-# Standard production build (2GB heap)
+# Standard production build (3GB heap)
 npm run build:production
 
 # Safe production build (skips type checking)
 npm run build:production-safe
 
-# Custom memory allocation
-NODE_OPTIONS='--max-old-space-size=3072' npm run build
+# Custom memory allocation (if needed)
+NODE_OPTIONS='--max-old-space-size=4096' npm run build
 ```
 
 ## Build Optimization Tips
@@ -106,8 +117,9 @@ NODE_OPTIONS='--max-old-space-size=3072' npm run build
 ### 1. Reduce Memory Usage
 - **Disable Source Maps**: Already set (`GENERATE_SOURCEMAP=false`)
 - **Skip Type Checking**: Use `build:production-safe` script
-- **Limit PWA Cache**: Reduced to 3MB maximum file size
+- **Limit PWA Cache**: Reduced to 2MB maximum file size
 - **Clean Build Cache**: Run `rm -rf .next` before building
+- **Reduce Parallelism**: Set `UV_THREADPOOL_SIZE=64` (already configured)
 
 ### 2. Speed Up Builds
 - **Use SSD**: Significantly faster than HDD
@@ -131,28 +143,48 @@ npm run build  # Uses cache when possible
 **Problem**: Out of memory during build
 
 **Solutions**:
-1. Increase Docker memory to 4GB minimum
-2. Close other applications
+1. Increase Docker memory to 6GB minimum (Docker Desktop → Settings → Resources)
+2. Close other applications to free RAM
 3. Use swap file if on Linux:
    ```bash
-   # Create 4GB swap file
-   sudo fallocate -l 4G /swapfile
+   # Create 8GB swap file (2x increased from 4GB)
+   sudo fallocate -l 8G /swapfile
    sudo chmod 600 /swapfile
    sudo mkswap /swapfile
    sudo swapon /swapfile
+   # Make permanent
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
    ```
-4. Build on a machine with more RAM
+4. Build on a machine with more RAM (6GB+ recommended)
 5. Use cloud build service (GitHub Actions, CircleCI, etc.)
+6. For CapRover on low-memory VPS:
+   ```bash
+   # Create swap before deploying
+   sudo fallocate -l 8G /swapfile
+   sudo chmod 600 /swapfile
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
+   # Then deploy
+   git push caprover main
+   ```
 
 ### Build Fails with "JavaScript heap out of memory"
 **Problem**: Node.js ran out of heap memory
 
 **Solutions**:
-1. Already fixed with `NODE_OPTIONS='--max-old-space-size=2048'`
+1. Already fixed with `NODE_OPTIONS='--max-old-space-size=3072'` (3GB)
 2. Increase further if needed:
    ```bash
+   # For development
    NODE_OPTIONS='--max-old-space-size=4096' npm run build
+   
+   # For Docker build
+   docker build -f Dockerfile.simple \
+     --build-arg BUILD_MEMORY_LIMIT=4096 \
+     -t village-app:latest .
    ```
+3. Ensure Docker has at least 6GB allocated
+4. Check if other processes are consuming memory: `docker stats`
 
 ### Build Succeeds but Takes Too Long
 **Problem**: Build takes >15 minutes
@@ -211,11 +243,31 @@ SKIP_DB_DURING_BUILD=true
 
 ### Memory Configuration
 ```bash
-# Node.js heap size (default: 2048MB)
-NODE_OPTIONS='--max-old-space-size=2048'
+# Node.js heap size (default: 3072MB)
+NODE_OPTIONS='--max-old-space-size=3072'
 
 # Docker build argument
-BUILD_MEMORY_LIMIT=2048
+BUILD_MEMORY_LIMIT=3072
+```
+
+### CapRover Specific Settings
+For CapRover deployments on low-memory servers (< 4GB RAM):
+```bash
+# SSH into your server
+ssh root@your-server
+
+# Create swap space
+sudo fallocate -l 8G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Verify swap is active
+free -h
+
+# Then deploy
+git push caprover main
 ```
 
 ## Build Stages Overview
@@ -280,9 +332,10 @@ jobs:
 ```
 
 ### Memory Recommendations for CI/CD
-- **GitHub Actions**: ubuntu-latest has 7GB RAM (sufficient)
-- **CircleCI**: Use `resource_class: large` (4GB RAM minimum)
-- **GitLab CI**: Use `tags: [large]` for sufficient resources
+- **GitHub Actions**: ubuntu-latest has 7GB RAM (sufficient) ✅
+- **CircleCI**: Use `resource_class: large` (4GB RAM minimum) or `xlarge` (8GB recommended)
+- **GitLab CI**: Use `tags: [large]` for sufficient resources (8GB recommended)
+- **CapRover**: Server needs 4GB+ RAM, or add 8GB swap space
 
 ## Build Performance Metrics
 
@@ -314,4 +367,5 @@ jobs:
 
 **Last Updated**: 2025-10-20  
 **Applies to**: Docker builds, CapRover, Coolify, local development  
-**Memory Config**: 2048MB default (adjustable)
+**Memory Config**: 3072MB default (3GB), adjustable up to 4GB+
+**Critical Fix**: Increased from 2GB to 3GB to resolve OOM issues during PWA build
