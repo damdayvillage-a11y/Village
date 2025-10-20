@@ -7,7 +7,9 @@
 # SSH to your server
 ssh root@your-server
 
-# Navigate to app directory
+# Navigate to app directory (adjust path for your deployment)
+# For CapRover: cd /var/lib/docker/volumes/captain--<app-name>/_data
+# For manual Docker: cd /path/to/your/app
 cd /var/lib/docker/volumes/captain--my-village-app/_data
 
 # Setup automated cleanup (runs daily at 2 AM)
@@ -41,7 +43,7 @@ docker system df
 
 ## ⚙️ Configuration
 
-Edit `/scripts/auto-docker-cleanup.sh`:
+Edit `./scripts/auto-docker-cleanup.sh`:
 
 ```bash
 MIN_FREE_SPACE_GB=5    # Trigger aggressive cleanup below 5GB
@@ -93,10 +95,10 @@ grep docker-cleanup /var/log/syslog
 ### Permission Denied
 ```bash
 # Ensure script is executable
-chmod +x /scripts/auto-docker-cleanup.sh
+chmod +x ./scripts/auto-docker-cleanup.sh
 
 # Run with sudo
-sudo /scripts/auto-docker-cleanup.sh
+sudo ./scripts/auto-docker-cleanup.sh
 ```
 
 ### Not Enough Space Freed
