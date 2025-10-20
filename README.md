@@ -277,11 +277,14 @@ docker run -d \
 - ⚡ Build Time: 6-10 minutes
 - 📦 Image Size: 200-400MB
 - 🎯 Success Rate: 95%+
-- 💾 **Memory Requirement**: 3GB+ RAM (4GB recommended)
+- 💾 **Memory Requirement**: 4GB+ RAM (6GB recommended)
+- 🔧 **Node.js Heap**: 3GB for PWA builds
 
 **Build Fix (2025-10-20):**
 - ✅ Fixed Docker build OOM error (code 137)
-- ✅ Increased memory allocation to 2GB
+- ✅ Increased memory allocation from 2GB to 3GB
+- ✅ Reduced PWA cache size from 3MB to 2MB
+- ✅ Added swap space configuration guide
 - ✅ See BUILD_GUIDE.md for troubleshooting
 
 ---
