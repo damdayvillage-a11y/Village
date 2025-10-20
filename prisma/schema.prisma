@@ -48,6 +48,7 @@ model User {
   reviews          Review[]
   sentMessages     Message[]     @relation("SentMessages")
   receivedMessages Message[]     @relation("ReceivedMessages")
+  activityLogs     ActivityLog[]
   sessions         Session[]
   uploads          Media[]
   products         Product[]     @relation("ProductSeller")
@@ -913,6 +914,29 @@ model SEOSettings {
   updatedAt       DateTime @updatedAt
   
   @@map("seo_settings")
+}
+
+// ==================== ACTIVITY LOG MODELS ====================
+
+model ActivityLog {
+  id          String       @id @default(cuid())
+  userId      String
+  action      String       // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, VIEW, etc.
+  entity      String?      // User, Product, Order, Booking, etc.
+  entityId    String?      // ID of the entity affected
+  description String?      // Human-readable description
+  metadata    Json?        // Additional context data
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime     @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("activity_logs")
 }
 
 // ==================== BOOKING MODELS (PR #6) ====================
