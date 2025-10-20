@@ -2,20 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import EmailTemplateEditor from '@/components/admin/EmailTemplateEditor';
-
-interface EmailTemplate {
-  id: string;
-  name: string;
-  subject: string;
-  htmlContent: string;
-  textContent: string;
-  category: string;
-  variables: string[];
-  isActive: boolean;
-  version: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { EmailTemplate } from '@/types/email-template';
 
 export default function EmailTemplatesPage() {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);

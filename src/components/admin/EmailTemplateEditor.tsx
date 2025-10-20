@@ -2,35 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { logActivity } from '@/lib/activity-logger';
-
-interface EmailTemplate {
-  id: string;
-  name: string;
-  subject: string;
-  htmlContent: string;
-  textContent: string;
-  category: string;
-  variables: string[];
-  isActive: boolean;
-  version: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { EmailTemplate, TEMPLATE_CATEGORIES } from '@/types/email-template';
 
 interface EmailTemplateEditorProps {
   template?: EmailTemplate;
   onSave: (template: Partial<EmailTemplate>) => Promise<void>;
   onCancel: () => void;
 }
-
-const TEMPLATE_CATEGORIES = [
-  'Welcome',
-  'Booking Confirmation',
-  'Order Update',
-  'Notification',
-  'Password Reset',
-  'Custom',
-];
 
 const AVAILABLE_VARIABLES = {
   User: [
@@ -133,17 +111,24 @@ export default function EmailTemplateEditor({
       await onSave(formData);
 
       // Log activity
-      await logActivity({
-        userId: 'current-user-id', // Should come from auth context
-        action: template ? 'UPDATE' : 'CREATE',
-        entity: 'EmailTemplate',
-        entityId: template?.id,
-        description: `${template ? 'Updated' : 'Created'} email template: ${formData.name}`,
-        metadata: {
-          templateName: formData.name,
-          category: formData.category,
-        },
-      });
+      // Note: userId should come from auth context in production
+      // For now, activity logging is optional and won't break if user is not authenticated
+      try {
+        await logActivity({
+          userId: 'system', // TODO: Replace with actual user ID from auth context
+          action: template ? 'UPDATE' : 'CREATE',
+          entity: 'EmailTemplate',
+          entityId: template?.id,
+          description: `${template ? 'Updated' : 'Created'} email template: ${formData.name}`,
+          metadata: {
+            templateName: formData.name,
+            category: formData.category,
+          },
+        });
+      } catch (logError) {
+        // Activity logging should not break the main flow
+        console.warn('Failed to log activity:', logError);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save template');
     } finally {
@@ -264,6 +249,9 @@ export default function EmailTemplateEditor({
           <h3 className="text-sm font-medium text-gray-700 mb-3">
             Preview (with sample data)
           </h3>
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded text-xs mb-3">
+            ⚠️ Preview only - HTML is NOT sanitized. In production, use a library like DOMPurify to sanitize HTML before rendering.
+          </div>
           <div
             className="prose max-w-none"
             dangerouslySetInnerHTML={{
@@ -323,7 +311,7 @@ export default function EmailTemplateEditor({
       <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded">
         <strong>Tips:</strong>
         <ul className="list-disc list-inside mt-1 space-y-1">
-          <li>Use variables like {'{{'}{'{'}user.name{'}}'}{'}'} to personalize emails</li>
+          <li>Use variables like {'{{user.name}}'} to personalize emails</li>
           <li>HTML content supports full HTML and inline CSS</li>
           <li>Plain text version is used as fallback for email clients that don't support HTML</li>
           <li>Preview shows how the email will look with sample data</li>
