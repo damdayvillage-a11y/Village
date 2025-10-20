@@ -15,15 +15,18 @@ import {
   Package,
   TrendingUp,
   Clock,
+  FileText,
+  RefreshCw,
+  X,
+  AlertCircle,
 } from 'lucide-react';
 
 interface Order {
   id: string;
-  orderNumber: string;
-  totalAmount: number;
+  total: number;
   status: string;
-  userId: string;
-  user: {
+  customerId: string;
+  customer: {
     name: string;
     email: string;
   };
@@ -36,6 +39,11 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundAmount, setRefundAmount] = useState(0);
+  const [refundReason, setRefundReason] = useState('');
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -78,10 +86,83 @@ export default function OrdersPage() {
     }
   };
 
+  const handleViewDetails = (order: Order) => {
+    setSelectedOrder(order);
+    setShowDetailsModal(true);
+  };
+
+  const handleGenerateInvoice = async (orderId: string) => {
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}/invoice`, {
+        method: 'GET',
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `invoice-${orderId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        alert('Failed to generate invoice. Feature coming soon.');
+      }
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      alert('Invoice generation coming soon');
+    }
+  };
+
+  const handleInitiateRefund = (order: Order) => {
+    setSelectedOrder(order);
+    setRefundAmount(order.total);
+    setRefundReason('');
+    setShowRefundModal(true);
+  };
+
+  const handleProcessRefund = async () => {
+    if (!selectedOrder) return;
+    
+    if (!refundReason.trim()) {
+      alert('Please provide a reason for the refund');
+      return;
+    }
+
+    if (refundAmount <= 0 || refundAmount > selectedOrder.total) {
+      alert('Invalid refund amount');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/orders/${selectedOrder.id}/refund`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: refundAmount,
+          reason: refundReason,
+        }),
+      });
+
+      if (response.ok) {
+        alert('Refund processed successfully');
+        setShowRefundModal(false);
+        await fetchOrders();
+      } else {
+        alert('Failed to process refund. Feature coming soon.');
+      }
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      alert('Refund processing coming soon');
+    }
+  };
+
   const filteredOrders = orders.filter((order) =>
-    order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.customer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const stats = {
@@ -90,7 +171,7 @@ export default function OrdersPage() {
     completed: orders.filter((o) => o.status === 'COMPLETED').length,
     revenue: orders
       .filter((o) => o.status === 'COMPLETED')
-      .reduce((sum, o) => sum + o.totalAmount, 0),
+      .reduce((sum, o) => sum + o.total, 0),
   };
 
   const getStatusColor = (status: string) => {
@@ -250,13 +331,13 @@ export default function OrdersPage() {
                     <tr key={order.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <span className="font-mono text-sm font-medium">
-                          {order.orderNumber}
+                          {order.id.substring(0, 8)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <div>
-                          <div className="font-medium text-gray-900">{order.user.name}</div>
-                          <div className="text-sm text-gray-500">{order.user.email}</div>
+                          <div className="font-medium text-gray-900">{order.customer.name}</div>
+                          <div className="text-sm text-gray-500">{order.customer.email}</div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -266,7 +347,7 @@ export default function OrdersPage() {
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-4 w-4 text-gray-500" />
                           <span className="font-medium">
-                            {order.totalAmount.toFixed(2)}
+                            {order.total.toFixed(2)}
                           </span>
                         </div>
                       </td>
@@ -284,9 +365,28 @@ export default function OrdersPage() {
                             size="sm"
                             variant="ghost"
                             title="View order details"
+                            onClick={() => handleViewDetails(order)}
                           >
                             <Eye className="h-4 w-4 text-blue-500" />
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            title="Generate invoice"
+                            onClick={() => handleGenerateInvoice(order.id)}
+                          >
+                            <FileText className="h-4 w-4 text-green-500" />
+                          </Button>
+                          {order.status !== 'CANCELLED' && order.status !== 'REFUNDED' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              title="Process refund"
+                              onClick={() => handleInitiateRefund(order)}
+                            >
+                              <RefreshCw className="h-4 w-4 text-orange-500" />
+                            </Button>
+                          )}
                           <select
                             value={order.status}
                             onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
@@ -309,6 +409,216 @@ export default function OrdersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Order Details Modal */}
+      {showDetailsModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Order Details - {selectedOrder.id.substring(0, 8)}
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDetailsModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Customer Info */}
+              <div>
+                <h3 className="font-semibold text-lg mb-3">Customer Information</h3>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Name:</span> {selectedOrder.customer.name}</p>
+                  <p><span className="font-medium">Email:</span> {selectedOrder.customer.email}</p>
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div>
+                <h3 className="font-semibold text-lg mb-3">Order Items</h3>
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Item</th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-700">Quantity</th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-700">Price</th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-700">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {selectedOrder.items.map((item: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-4 py-2 text-sm">{item.name || 'Product'}</td>
+                          <td className="px-4 py-2 text-sm text-right">{item.quantity || 1}</td>
+                          <td className="px-4 py-2 text-sm text-right">₹{(item.price || 0).toFixed(2)}</td>
+                          <td className="px-4 py-2 text-sm text-right font-medium">
+                            ₹{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              <div>
+                <h3 className="font-semibold text-lg mb-3">Order Summary</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>₹{selectedOrder.total.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                    <span>Total:</span>
+                    <span>₹{selectedOrder.total.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status & Actions */}
+              <div>
+                <h3 className="font-semibold text-lg mb-3">Status & Actions</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Badge className={getStatusColor(selectedOrder.status)}>
+                    {selectedOrder.status}
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleGenerateInvoice(selectedOrder.id)}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Generate Invoice
+                  </Button>
+                  {selectedOrder.status !== 'CANCELLED' && selectedOrder.status !== 'REFUNDED' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setShowDetailsModal(false);
+                        handleInitiateRefund(selectedOrder);
+                      }}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Process Refund
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Coming Soon Features */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div className="text-sm text-blue-800">
+                    <p className="font-semibold">Additional Features Coming Soon</p>
+                    <ul className="mt-2 space-y-1">
+                      <li>• Shipment tracking integration</li>
+                      <li>• Customer communication history</li>
+                      <li>• Order notes and comments</li>
+                      <li>• Automated status updates</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Refund Modal */}
+      {showRefundModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <RefreshCw className="h-5 w-5" />
+                  Process Refund
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowRefundModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-4">
+                  Order: <span className="font-medium">{selectedOrder.id.substring(0, 8)}</span>
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  Total Amount: <span className="font-medium">₹{selectedOrder.total.toFixed(2)}</span>
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Refund Amount
+                </label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max={selectedOrder.total}
+                  value={refundAmount}
+                  onChange={(e) => setRefundAmount(parseFloat(e.target.value) || 0)}
+                  placeholder="Enter refund amount"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Refund Reason *
+                </label>
+                <textarea
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  placeholder="Enter reason for refund"
+                  className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                  <div className="text-sm text-yellow-800">
+                    <p className="font-semibold">Note</p>
+                    <p className="mt-1">
+                      Refund processing is coming soon. This will integrate with the payment gateway
+                      to process refunds automatically.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <Button onClick={handleProcessRefund} className="flex-1">
+                  Process Refund
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowRefundModal(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

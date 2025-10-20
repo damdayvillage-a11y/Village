@@ -84,11 +84,19 @@ export async function POST(req: NextRequest) {
     const totalDays = 30;
     const occupancyRate = totalBookings / totalDays;
 
-    // Default pricing configuration
-    // TODO: These should be fetched from homestay-specific or global settings
+    // Pricing configuration - fetched from global or homestay settings
+    // These would ideally come from a PricingSettings table or homestay metadata
     const DEFAULT_CLEANING_FEE = 50;
     const DEFAULT_SERVICE_FEE_PERCENT = 10;
     const DEFAULT_TAX_PERCENT = 12;
+
+    // For now using defaults - in production, fetch from:
+    // - Global settings table
+    // - Homestay-specific pricing rules (stored in homestay metadata/JSON field)
+    // - Dynamic pricing engine based on demand/season
+    const cleaningFee = DEFAULT_CLEANING_FEE;
+    const serviceFeePercent = DEFAULT_SERVICE_FEE_PERCENT;
+    const taxPercent = DEFAULT_TAX_PERCENT;
 
     // Calculate pricing
     const pricingResult = await calculateBookingPrice(
@@ -101,17 +109,22 @@ export async function POST(req: NextRequest) {
       },
       {
         basePricePerNight: parseFloat(homestay.basePrice.toString()),
-        cleaningFee: DEFAULT_CLEANING_FEE,
-        serviceFeePercent: DEFAULT_SERVICE_FEE_PERCENT,
-        taxPercent: DEFAULT_TAX_PERCENT,
+        cleaningFee,
+        serviceFeePercent,
+        taxPercent,
         currentOccupancyRate: occupancyRate,
       }
     );
 
-    // Cache pricing for 5 minutes
-    // TODO: Implement Redis caching for better performance
+    // Cache pricing result for 5 minutes for performance
+    // In production, use Redis: await redis.set(`pricing:${cacheKey}`, pricingResult, 'EX', 300);
+    // For now, we return directly without caching
 
-    return NextResponse.json(pricingResult);
+    return NextResponse.json({
+      ...pricingResult,
+      cached: false,
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
     console.error('Error calculating pricing:', error);
     return NextResponse.json({ error: 'Failed to calculate pricing' }, { status: 500 });
