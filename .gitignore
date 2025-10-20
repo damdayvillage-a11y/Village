@@ -115,3 +115,11 @@ GIT_CLONE*.md
 QUICK_FIX*.md
 SECURITY_SUMMARY.md
 STORYBOOK*.md
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Test screenshots (commit these for documentation)
+# /tests/screenshots/
