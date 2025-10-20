@@ -249,6 +249,72 @@ This is why 4GB+ RAM (or swap) is required.
 
 ---
 
+## Automated Docker Cleanup (NEW)
+
+### Preventing "No Space Left on Device" Errors
+
+**IMPORTANT**: Automated cleanup prevents build failures due to disk space issues.
+
+#### Initial Setup (One-Time)
+
+```bash
+# SSH into your CapRover server
+ssh root@your-server-ip
+
+# Navigate to your app's persistent directory
+cd /var/lib/docker/volumes/captain--my-village-app/_data
+
+# Run initial cleanup
+sudo ./scripts/auto-docker-cleanup.sh
+
+# Setup automated daily cleanup (2:00 AM)
+sudo ./scripts/setup-auto-cleanup.sh
+```
+
+#### Manual Cleanup
+
+Run this anytime you're low on disk space:
+```bash
+sudo /var/lib/docker/volumes/captain--my-village-app/_data/scripts/auto-docker-cleanup.sh
+```
+
+#### What Gets Cleaned
+
+- ✅ Stopped containers
+- ✅ Unused networks  
+- ✅ Unused volumes
+- ✅ Dangling images
+- ✅ Build cache (when disk < 5GB free)
+- ✅ Old images > 48 hours (when disk < 5GB free)
+- ✅ Docker logs > 7 days old
+
+#### Monitoring Cleanup
+
+```bash
+# View cleanup logs
+tail -f /var/log/docker-cleanup.log
+
+# Check scheduled jobs
+crontab -l
+
+# Check current disk usage
+df -h
+docker system df
+```
+
+#### Customize Cleanup Settings
+
+Edit the cleanup script:
+```bash
+nano /var/lib/docker/volumes/captain--my-village-app/_data/scripts/auto-docker-cleanup.sh
+
+# Adjust these values:
+MIN_FREE_SPACE_GB=5    # Trigger aggressive cleanup
+RETENTION_HOURS=48     # Keep recent images
+```
+
+---
+
 ## Monitoring & Maintenance
 
 ### Health Checks

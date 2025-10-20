@@ -4,6 +4,11 @@ import { authOptions } from '@/lib/auth/config';
 import { UserRole } from '@prisma/client';
 import prisma from '@/lib/db/prisma';
 
+// Force dynamic rendering - this route uses request parameters
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+
 const DEFAULT_SEO = {
   '/': {
     title: 'Damday Village - Smart Carbon-Free Village',
