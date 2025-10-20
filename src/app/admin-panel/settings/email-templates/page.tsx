@@ -85,7 +85,7 @@ export default function EmailTemplatesPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const categories = ['All', ...new Set(templates.map((t) => t.category))];
+  const categories = ['All', ...Array.from(new Set(templates.map((t) => t.category)))];
 
   if (isEditing) {
     return (
