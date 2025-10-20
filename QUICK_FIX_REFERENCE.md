@@ -766,6 +766,81 @@ After completing PR #1:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-10-19  
-**Part Of**: PR #1 - Critical Admin Panel Fixes
+## Build Issues Fix (2025-10-20)
+
+### ISSUE: Error Code 137 (OOM - Out of Memory)
+
+**Status**: ✅ FIXED  
+**Time**: Applied  
+**Difficulty**: Easy (configuration change)
+
+#### Symptoms
+- Build process gets "Killed" during Docker build
+- Error message: `returned a non-zero code: 137`
+- Happens at Step 44/73 during `npm run build:production`
+
+#### Root Cause
+Insufficient memory allocated for Next.js build process (was 1GB, needs 2GB+)
+
+#### Fix Applied ✅
+
+1. **Increased Node.js Heap Memory** (1GB → 2GB)
+   - Dockerfile.simple: `BUILD_MEMORY_LIMIT=2048`
+   - package.json: `--max-old-space-size=2048`
+
+2. **Optimized PWA Cache Size** (5MB → 3MB)
+   - next.config.js: `maximumFileSizeToCacheInBytes: 3000000`
+
+3. **Added Memory Limits to Docker Compose**
+   - docker-compose.coolify.yml: 4GB limit, 2GB reservation
+
+#### Server Requirements
+- **Minimum**: 3GB total RAM (2GB free during build)
+- **Recommended**: 4GB+ total RAM
+- **For CapRover**: Ensure droplet/server has at least 4GB RAM
+
+#### If Still Failing - Add Swap Space (Linux)
+```bash
+# Create 4GB swap file
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Make permanent
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+#### Verify Fix
+After deployment, check build logs for:
+1. ✅ Memory info shown during build
+2. ✅ Next.js build completes without being killed
+3. ✅ "Build complete" message appears
+4. ✅ "✅ Build and cleanup complete" message
+
+#### Files Modified
+- ✅ `Dockerfile.simple` - Increased memory to 2GB, added monitoring
+- ✅ `package.json` - Updated build scripts to use 2GB heap
+- ✅ `next.config.js` - Reduced PWA cache size to 3MB
+- ✅ `docker-compose.coolify.yml` - Added 4GB memory limit
+- ✅ `BUILD_GUIDE.md` - Created comprehensive build guide (NEW)
+
+#### Quick Commands
+```bash
+# Check system memory
+free -h
+
+# Monitor build (if locally)
+docker logs -f container-name
+
+# Build with custom memory (if needed)
+docker build --build-arg BUILD_MEMORY_LIMIT=3072 -f Dockerfile.simple .
+```
+
+See **BUILD_GUIDE.md** for comprehensive troubleshooting and deployment instructions.
+
+---
+
+**Document Version**: 1.1  
+**Last Updated**: 2025-10-20  
+**Part Of**: PR #1 - Critical Admin Panel Fixes + Build Issues

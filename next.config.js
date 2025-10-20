@@ -10,7 +10,7 @@ const withPWA = require('next-pwa')({
     /build-manifest\.json$/,
     'app-build-manifest.json'
   ],
-  maximumFileSizeToCacheInBytes: 5000000, // 5MB limit
+  maximumFileSizeToCacheInBytes: 3000000, // 3MB limit (reduced for memory optimization)
   // Runtime caching for better performance
   runtimeCaching: [
     {

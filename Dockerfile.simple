@@ -9,7 +9,7 @@ RUN apk add --no-cache python3 make g++ linux-headers
 
 # Accept build arguments from CapRover (optional)
 ARG DATABASE_URL
-ARG BUILD_MEMORY_LIMIT=1024
+ARG BUILD_MEMORY_LIMIT=2048
 
 # Configure npm early to avoid repeated configuration
 RUN npm config set strict-ssl false && \
@@ -40,9 +40,9 @@ WORKDIR /app
 RUN apk add --no-cache python3
 
 # Set Node.js memory and performance optimizations
-ARG BUILD_MEMORY_LIMIT=1024
-ENV NODE_OPTIONS="--max-old-space-size=${BUILD_MEMORY_LIMIT} --max-semi-space-size=256"
-ENV UV_THREADPOOL_SIZE=64
+ARG BUILD_MEMORY_LIMIT=2048
+ENV NODE_OPTIONS="--max-old-space-size=${BUILD_MEMORY_LIMIT}"
+ENV UV_THREADPOOL_SIZE=128
 
 # Set build-time environment variables
 ARG DATABASE_URL
@@ -92,6 +92,7 @@ COPY scripts ./scripts
 RUN echo "🏗️ Building application..." && \
     echo "Build start: $(date)" && \
     echo "Disk before build: $(df -h / | tail -1)" && \
+    echo "Memory info: $(free -h 2>/dev/null || echo 'N/A')" && \
     npm run build:production && \
     echo "Build complete: $(date)" && \
     echo "🧹 Cleaning up build artifacts..." && \
