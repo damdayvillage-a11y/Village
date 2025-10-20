@@ -57,6 +57,7 @@ export default function ProductEditor({ productId, onSave, onCancel }: ProductEd
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState('');
+  const [sellers, setSellers] = useState<Array<{ id: string; name: string; email: string }>>([]);
   
   const [formData, setFormData] = useState<ProductData>({
     name: '',
@@ -73,11 +74,24 @@ export default function ProductEditor({ productId, onSave, onCancel }: ProductEd
   });
 
   useEffect(() => {
+    fetchSellers();
     if (productId) {
       fetchProduct();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
+
+  const fetchSellers = async () => {
+    try {
+      const response = await fetch('/api/admin/users?role=SELLER');
+      if (response.ok) {
+        const data = await response.json();
+        setSellers(data.users || []);
+      }
+    } catch (err) {
+      console.error('Error fetching sellers:', err);
+    }
+  };
 
   const fetchProduct = async () => {
     setLoading(true);
@@ -149,6 +163,7 @@ export default function ProductEditor({ productId, onSave, onCancel }: ProductEd
     if (formData.price <= 0) return 'Price must be greater than 0';
     if (!formData.unlimited && formData.stock < 0) return 'Stock cannot be negative';
     if (formData.images.length === 0) return 'At least one image is required';
+    if (!formData.sellerId && !productId) return 'Seller must be selected';
     return null;
   };
 
@@ -263,6 +278,29 @@ export default function ProductEditor({ productId, onSave, onCancel }: ProductEd
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <Label htmlFor="seller">Seller *</Label>
+              <select
+                id="seller"
+                value={formData.sellerId || ''}
+                onChange={(e) => handleInputChange('sellerId', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required={!productId}
+              >
+                <option value="">Select a seller...</option>
+                {sellers.map((seller) => (
+                  <option key={seller.id} value={seller.id}>
+                    {seller.name} ({seller.email})
+                  </option>
+                ))}
+              </select>
+              {sellers.length === 0 && (
+                <p className="text-sm text-amber-600 mt-1">
+                  No sellers available. Please create sellers with SELLER role first.
+                </p>
+              )}
             </div>
           </div>
 

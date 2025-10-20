@@ -22,12 +22,47 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
+    
+    // Advanced filtering
+    const category = searchParams.get('category');
+    const active = searchParams.get('active');
+    const sellerId = searchParams.get('sellerId');
+    const search = searchParams.get('search');
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = searchParams.get('sortOrder') || 'desc';
+
+    // Build where clause
+    const where: any = {};
+    
+    if (category) {
+      where.category = category;
+    }
+    
+    if (active !== null && active !== undefined) {
+      where.active = active === 'true';
+    }
+    
+    if (sellerId) {
+      where.sellerId = sellerId;
+    }
+    
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Build orderBy
+    const orderBy: any = {};
+    orderBy[sortBy] = sortOrder;
 
     const [products, total] = await Promise.all([
       prisma.product.findMany({
+        where,
         take: limit,
         skip,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         include: {
           seller: {
             select: {
@@ -36,9 +71,15 @@ export async function GET(request: NextRequest) {
               email: true,
             },
           },
+          _count: {
+            select: {
+              orderItems: true,
+              wishlists: true,
+            },
+          },
         },
       }),
-      prisma.product.count(),
+      prisma.product.count({ where }),
     ]);
 
     return NextResponse.json({
@@ -74,24 +115,76 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, price, category, sellerId, images } = body;
+    const { 
+      name, 
+      description, 
+      price, 
+      category, 
+      sellerId, 
+      images,
+      stock,
+      unlimited,
+      currency,
+      carbonFootprint,
+      locallySourced,
+      active
+    } = body;
 
-    if (!name || !price || !sellerId) {
+    // Validation
+    if (!name || !name.trim()) {
       return NextResponse.json(
-        { error: 'Missing required fields: name, price, sellerId' },
+        { error: 'Product name is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!price || price <= 0) {
+      return NextResponse.json(
+        { error: 'Valid price is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!sellerId) {
+      return NextResponse.json(
+        { error: 'Seller ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Verify seller exists and has SELLER role
+    const seller = await prisma.user.findUnique({
+      where: { id: sellerId },
+    });
+
+    if (!seller) {
+      return NextResponse.json(
+        { error: 'Seller not found' },
+        { status: 404 }
+      );
+    }
+
+    if (seller.role !== UserRole.SELLER && seller.role !== UserRole.ADMIN) {
+      return NextResponse.json(
+        { error: 'User must have SELLER or ADMIN role' },
         { status: 400 }
       );
     }
 
     const product = await prisma.product.create({
       data: {
-        name,
-        description,
+        name: name.trim(),
+        description: description || '',
         price,
-        category,
+        category: category || 'Other',
         sellerId,
         images: images || [],
-        active: true,
+        stock: unlimited ? 0 : (stock || 0),
+        unlimited: unlimited || false,
+        currency: currency || 'INR',
+        carbonFootprint: carbonFootprint || 0,
+        locallySourced: locallySourced || false,
+        active: active !== undefined ? active : true,
       },
       include: {
         seller: {

@@ -23,11 +23,10 @@ import {
 
 interface Order {
   id: string;
-  orderNumber: string;
-  totalAmount: number;
+  total: number;
   status: string;
-  userId: string;
-  user: {
+  customerId: string;
+  customer: {
     name: string;
     email: string;
   };
@@ -119,7 +118,7 @@ export default function OrdersPage() {
 
   const handleInitiateRefund = (order: Order) => {
     setSelectedOrder(order);
-    setRefundAmount(order.totalAmount);
+    setRefundAmount(order.total);
     setRefundReason('');
     setShowRefundModal(true);
   };
@@ -132,7 +131,7 @@ export default function OrdersPage() {
       return;
     }
 
-    if (refundAmount <= 0 || refundAmount > selectedOrder.totalAmount) {
+    if (refundAmount <= 0 || refundAmount > selectedOrder.total) {
       alert('Invalid refund amount');
       return;
     }
@@ -161,9 +160,9 @@ export default function OrdersPage() {
   };
 
   const filteredOrders = orders.filter((order) =>
-    order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.customer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const stats = {
@@ -172,7 +171,7 @@ export default function OrdersPage() {
     completed: orders.filter((o) => o.status === 'COMPLETED').length,
     revenue: orders
       .filter((o) => o.status === 'COMPLETED')
-      .reduce((sum, o) => sum + o.totalAmount, 0),
+      .reduce((sum, o) => sum + o.total, 0),
   };
 
   const getStatusColor = (status: string) => {
@@ -332,13 +331,13 @@ export default function OrdersPage() {
                     <tr key={order.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <span className="font-mono text-sm font-medium">
-                          {order.orderNumber}
+                          {order.id.substring(0, 8)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <div>
-                          <div className="font-medium text-gray-900">{order.user.name}</div>
-                          <div className="text-sm text-gray-500">{order.user.email}</div>
+                          <div className="font-medium text-gray-900">{order.customer.name}</div>
+                          <div className="text-sm text-gray-500">{order.customer.email}</div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -348,7 +347,7 @@ export default function OrdersPage() {
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-4 w-4 text-gray-500" />
                           <span className="font-medium">
-                            {order.totalAmount.toFixed(2)}
+                            {order.total.toFixed(2)}
                           </span>
                         </div>
                       </td>
@@ -419,7 +418,7 @@ export default function OrdersPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Order Details - {selectedOrder.orderNumber}
+                  Order Details - {selectedOrder.id.substring(0, 8)}
                 </CardTitle>
                 <Button
                   variant="outline"
@@ -435,8 +434,8 @@ export default function OrdersPage() {
               <div>
                 <h3 className="font-semibold text-lg mb-3">Customer Information</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">Name:</span> {selectedOrder.user.name}</p>
-                  <p><span className="font-medium">Email:</span> {selectedOrder.user.email}</p>
+                  <p><span className="font-medium">Name:</span> {selectedOrder.customer.name}</p>
+                  <p><span className="font-medium">Email:</span> {selectedOrder.customer.email}</p>
                 </div>
               </div>
 
@@ -475,11 +474,11 @@ export default function OrdersPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>₹{selectedOrder.totalAmount.toFixed(2)}</span>
+                    <span>₹{selectedOrder.total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg border-t pt-2">
                     <span>Total:</span>
-                    <span>₹{selectedOrder.totalAmount.toFixed(2)}</span>
+                    <span>₹{selectedOrder.total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -557,10 +556,10 @@ export default function OrdersPage() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-sm text-gray-600 mb-4">
-                  Order: <span className="font-medium">{selectedOrder.orderNumber}</span>
+                  Order: <span className="font-medium">{selectedOrder.id.substring(0, 8)}</span>
                 </p>
                 <p className="text-sm text-gray-600 mb-4">
-                  Total Amount: <span className="font-medium">₹{selectedOrder.totalAmount.toFixed(2)}</span>
+                  Total Amount: <span className="font-medium">₹{selectedOrder.total.toFixed(2)}</span>
                 </p>
               </div>
 
@@ -572,7 +571,7 @@ export default function OrdersPage() {
                   type="number"
                   step="0.01"
                   min="0"
-                  max={selectedOrder.totalAmount}
+                  max={selectedOrder.total}
                   value={refundAmount}
                   onChange={(e) => setRefundAmount(parseFloat(e.target.value) || 0)}
                   placeholder="Enter refund amount"
