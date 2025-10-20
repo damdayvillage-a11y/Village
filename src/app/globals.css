@@ -142,9 +142,20 @@
 @keyframes pulse-slow {
   0%, 100% {
     opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
   }
 }
 
@@ -167,4 +178,12 @@
 
 .backdrop-blur-sm {
   backdrop-filter: blur(8px);
+}
+
+/* Professional gradient text for government theme */
+.text-gradient-government {
+  background: linear-gradient(135deg, #ff9933 0%, #ffffff 50%, #138808 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

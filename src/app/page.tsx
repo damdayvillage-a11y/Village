@@ -66,21 +66,27 @@ export default async function HomePage() {
       
       {/* Three.js Animated Background */}
       <ThreeJSBackground 
-        preset="nature" 
-        particleCount={800}
-        animationSpeed={1.0}
+        preset="government" 
+        particleCount={1200}
+        animationSpeed={0.8}
         enableInteraction={true}
       />
       
+      {/* Professional gradient overlay for better text readability */}
+      <div className="fixed inset-0 bg-gradient-to-b from-blue-900/40 via-transparent to-blue-900/60 pointer-events-none -z-10" aria-hidden="true" />
+      
     <div className="min-h-screen relative">
-      {/* Hero Section */}
+      {/* Hero Section with Government-inspired styling */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6 drop-shadow-lg animate-fade-in">
+          <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6 drop-shadow-2xl animate-fade-in">
             Welcome to{' '}
-            <span className="text-emerald-300 animate-pulse-slow">Smart Carbon-Free Village</span>
+            <span className="text-amber-300 animate-pulse-slow">Damday Village</span>
           </h1>
-          <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto text-balance drop-shadow-md">
+          <h2 className="text-2xl md:text-3xl font-semibold text-orange-200 mb-4 drop-shadow-lg">
+            Smart Carbon-Free Gram Panchayat
+          </h2>
+          <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto text-balance drop-shadow-md leading-relaxed">
             Experience Damday Village in Pithoragarh - a pioneering carbon-neutral, 
             culturally-rich, and technologically progressive model village 
             nestled at 2,100m elevation in the pristine Kumaon Himalayas.
@@ -88,24 +94,24 @@ export default async function HomePage() {
           
           {/* Real-time Village Stats */}
           <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm animate-slide-up">
-            <div className="flex items-center px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-green-200 shadow-lg hover:scale-105 transition-transform">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-green-700 font-medium">Solar Grid: 45kW Active</span>
+            <div className="flex items-center px-4 py-2 bg-gradient-to-r from-green-500/90 to-green-600/90 backdrop-blur-sm rounded-full border-2 border-green-300/50 shadow-lg hover:scale-105 transition-transform">
+              <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
+              <span className="text-white font-semibold">Solar Grid: 45kW Active</span>
             </div>
-            <div className="flex items-center px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-blue-200 shadow-lg hover:scale-105 transition-transform">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-              <span className="text-blue-700 font-medium">Air Quality: Excellent (AQI: 18)</span>
+            <div className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-sm rounded-full border-2 border-blue-300/50 shadow-lg hover:scale-105 transition-transform">
+              <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
+              <span className="text-white font-semibold">Air Quality: Excellent (AQI: 18)</span>
             </div>
-            <div className="flex items-center px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-purple-200 shadow-lg hover:scale-105 transition-transform">
-              <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-              <span className="text-purple-700 font-medium">Carbon Neutral: 100%</span>
+            <div className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-500/90 to-orange-600/90 backdrop-blur-sm rounded-full border-2 border-orange-300/50 shadow-lg hover:scale-105 transition-transform">
+              <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
+              <span className="text-white font-semibold">Carbon Neutral: 100%</span>
             </div>
           </div>
 
           {/* Village Statistics - Real Data */}
           {villageStats && (
-            <div className="mb-12 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
-              <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+            <div className="mb-12 bg-gradient-to-br from-white/95 to-blue-50/95 backdrop-blur-md rounded-2xl p-8 shadow-2xl border-2 border-blue-200/50">
+              <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent mb-8">
                 Live Village Statistics
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -151,8 +157,8 @@ export default async function HomePage() {
           )}
 
           {/* Live Environmental Data */}
-          <div className="mb-12 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
-            <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
+          <div className="mb-12 bg-gradient-to-br from-white/95 to-green-50/95 backdrop-blur-md rounded-2xl p-8 shadow-2xl border-2 border-green-200/50">
+            <h2 className="text-2xl font-bold text-center bg-gradient-to-r from-green-900 to-green-700 bg-clip-text text-transparent mb-6">
               Live Environmental Data
             </h2>
             <Suspense fallback={<div className="text-center text-gray-600">Loading live data...</div>}>
@@ -181,11 +187,11 @@ export default async function HomePage() {
 
         {/* Featured Homestays - Real Data */}
         {featuredHomestays.length > 0 && (
-          <div className="mt-20 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
+          <div className="mt-20 bg-gradient-to-br from-white/95 to-orange-50/95 backdrop-blur-md rounded-2xl p-8 shadow-2xl border-2 border-orange-200/50">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Featured Homestays</h2>
-                <p className="text-gray-600 mt-2">Experience authentic Himalayan hospitality</p>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-900 to-orange-700 bg-clip-text text-transparent">Featured Homestays</h2>
+                <p className="text-gray-700 mt-2 font-medium">Experience authentic Himalayan hospitality</p>
               </div>
               <Link href="/homestays">
                 <Button variant="outline">View All Homestays →</Button>
@@ -213,11 +219,11 @@ export default async function HomePage() {
 
         {/* Featured Products - Real Data */}
         {featuredProducts.length > 0 && (
-          <div className="mt-20 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
+          <div className="mt-20 bg-gradient-to-br from-white/95 to-green-50/95 backdrop-blur-md rounded-2xl p-8 shadow-2xl border-2 border-green-200/50">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Local Marketplace</h2>
-                <p className="text-gray-600 mt-2">Authentic handcrafted products from village artisans</p>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-green-900 to-green-700 bg-clip-text text-transparent">Local Marketplace</h2>
+                <p className="text-gray-700 mt-2 font-medium">Authentic handcrafted products from village artisans</p>
               </div>
               <Link href="/marketplace">
                 <Button variant="outline">View All Products →</Button>
