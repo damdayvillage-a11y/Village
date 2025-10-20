@@ -277,6 +277,12 @@ docker run -d \
 - ⚡ Build Time: 6-10 minutes
 - 📦 Image Size: 200-400MB
 - 🎯 Success Rate: 95%+
+- 💾 **Memory Requirement**: 3GB+ RAM (4GB recommended)
+
+**Build Fix (2025-10-20):**
+- ✅ Fixed Docker build OOM error (code 137)
+- ✅ Increased memory allocation to 2GB
+- ✅ See BUILD_GUIDE.md for troubleshooting
 
 ---
 
@@ -286,7 +292,7 @@ docker run -d \
 
 | Metric | Status | Details |
 |--------|--------|---------|
-| Build | ✅ Passing | Clean production build |
+| Build | ✅ Passing | Clean production build (OOM fixed) |
 | Tests | ✅ 25/25 Passing | 100% success rate |
 | Linting | ✅ 0 Warnings | ESLint clean |
 | Type Safety | ✅ 0 Errors | TypeScript clean |
