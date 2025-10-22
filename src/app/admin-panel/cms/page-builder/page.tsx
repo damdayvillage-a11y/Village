@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
@@ -9,6 +10,7 @@ import { Badge } from '@/lib/components/ui/Badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/lib/components/ui/select';
 import { ContentBlockEditor, type BlockType } from '@/components/admin/ContentBlockEditor';
 import { generateSlug } from '@/lib/cms-utils';
+import { AdminPanelLayout } from '@/lib/components/admin-panel/AdminPanelLayout';
 import {
   Plus,
   Save,
@@ -43,6 +45,7 @@ interface PageBlock {
 }
 
 export default function PageBuilderPage() {
+  const { data: session } = useSession();
   const [pages, setPages] = useState<Page[]>([]);
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
@@ -217,15 +220,13 @@ export default function PageBuilderPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Page Builder</h1>
-          <p className="text-muted-foreground">
-            Create and manage dynamic pages with drag-and-drop blocks
-          </p>
-        </div>
-        <div className="flex gap-2">
+    <AdminPanelLayout
+      session={session}
+      title="📄 Page Builder"
+      subtitle="Create and manage dynamic pages with drag-and-drop blocks"
+    >
+      <div className="container mx-auto space-y-6">
+        <div className="flex items-center justify-end gap-2">
           {selectedPage && (
             <>
               <Button
@@ -488,6 +489,6 @@ export default function PageBuilderPage() {
           )}
         </div>
       </div>
-    </div>
+    </AdminPanelLayout>
   );
 }

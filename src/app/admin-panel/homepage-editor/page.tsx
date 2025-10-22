@@ -77,20 +77,19 @@ export default function HomepageEditorPage() {
     >
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-end gap-4 mb-8">
-            <Button
-              variant="outline"
-              onClick={() => window.open('/', '_blank')}
-            >
-              👁️ Preview Homepage
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? '💾 Saving...' : '💾 Save Changes'}
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={() => window.open('/', '_blank')}
+          >
+            👁️ Preview Homepage
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? '💾 Saving...' : '💾 Save Changes'}
+          </Button>
         </div>
 
         {message && (
