@@ -206,7 +206,19 @@ export default function HomepageEditorPage() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      checked={config?.showStatistics || false}
+                      checked={config?.showLeadership !== undefined ? config.showLeadership : true}
+                      onChange={(e) => updateField('showLeadership', e.target.checked)}
+                      className="w-5 h-5 text-blue-600"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Show Leadership</span>
+                  </label>
+                </div>
+                
+                <div>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={config?.showStatistics !== undefined ? config.showStatistics : true}
                       onChange={(e) => updateField('showStatistics', e.target.checked)}
                       className="w-5 h-5 text-blue-600"
                     />
@@ -218,7 +230,7 @@ export default function HomepageEditorPage() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      checked={config?.showEnvironment || false}
+                      checked={config?.showEnvironment !== undefined ? config.showEnvironment : true}
                       onChange={(e) => updateField('showEnvironment', e.target.checked)}
                       className="w-5 h-5 text-blue-600"
                     />
@@ -230,7 +242,19 @@ export default function HomepageEditorPage() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      checked={config?.showHomestays || false}
+                      checked={config?.showProjects !== undefined ? config.showProjects : true}
+                      onChange={(e) => updateField('showProjects', e.target.checked)}
+                      className="w-5 h-5 text-blue-600"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Show Projects</span>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={config?.showHomestays !== undefined ? config.showHomestays : true}
                       onChange={(e) => updateField('showHomestays', e.target.checked)}
                       className="w-5 h-5 text-blue-600"
                     />
@@ -242,7 +266,7 @@ export default function HomepageEditorPage() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      checked={config?.showProducts || false}
+                      checked={config?.showProducts !== undefined ? config.showProducts : true}
                       onChange={(e) => updateField('showProducts', e.target.checked)}
                       className="w-5 h-5 text-blue-600"
                     />
@@ -251,7 +275,21 @@ export default function HomepageEditorPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Max Projects
+                  </label>
+                  <input
+                    type="number"
+                    value={config?.maxProjects || 6}
+                    onChange={(e) => updateField('maxProjects', parseInt(e.target.value))}
+                    min={1}
+                    max={20}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Max Homestays
@@ -278,6 +316,38 @@ export default function HomepageEditorPage() {
                     max={12}
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Statistics Widget Size
+                  </label>
+                  <select
+                    value={config?.statsSize || 'small'}
+                    onChange={(e) => updateField('statsSize', e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="small">Small (Compact)</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Environment Widget Size
+                  </label>
+                  <select
+                    value={config?.environmentSize || 'small'}
+                    onChange={(e) => updateField('environmentSize', e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="small">Small (Compact)</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                  </select>
                 </div>
               </div>
 
@@ -326,6 +396,19 @@ export default function HomepageEditorPage() {
           </Card>
         </div>
 
+        {/* Quick Links */}
+        <Card className="p-6 mt-6 bg-green-50 border-2 border-green-200">
+          <h3 className="text-lg font-bold text-green-900 mb-2">🔗 Related Pages</h3>
+          <div className="flex gap-4">
+            <a href="/admin-panel/leadership" className="text-sm text-green-800 hover:underline font-medium">
+              👥 Manage Village Leaders →
+            </a>
+            <a href="/admin-panel/projects" className="text-sm text-green-800 hover:underline font-medium">
+              🏗️ Manage Projects →
+            </a>
+          </div>
+        </Card>
+
         {/* Help Text */}
         <Card className="p-6 mt-6 bg-blue-50 border-2 border-blue-200">
           <h3 className="text-lg font-bold text-blue-900 mb-2">💡 Tips</h3>
@@ -333,6 +416,8 @@ export default function HomepageEditorPage() {
             <li>Use high-quality images from <a href="https://unsplash.com" target="_blank" className="underline">Unsplash</a> for the hero section</li>
             <li>Keep the hero title concise and impactful (max 50 characters recommended)</li>
             <li>The bilingual subtitle helps reach a wider audience</li>
+            <li>Smaller widget sizes create a more compact, professional layout</li>
+            <li>Village leaders can be managed in the <a href="/admin-panel/leadership" className="underline font-medium">Leadership Management</a> page</li>
             <li>Changes are applied immediately after saving - reload the homepage to see them</li>
             <li>Database must be configured to persist changes permanently</li>
           </ul>
