@@ -3,6 +3,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import type { ProjectStatus } from '@prisma/client';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -109,22 +110,20 @@ export async function getFeaturedHomestaysData(): Promise<ApiResponse<any[]>> {
     // Try to fetch from database
     const homestays = await prisma.homestay.findMany({
       where: {
-        status: 'APPROVED',
-        isActive: true,
+        available: true,
       },
       take: 6,
       orderBy: [
-        { featured: 'desc' },
         { createdAt: 'desc' },
       ],
       select: {
         id: true,
         name: true,
         description: true,
-        location: true,
-        pricePerNight: true,
+        address: true,
+        basePrice: true,
         maxGuests: true,
-        images: true,
+        photos: true,
         amenities: true,
         reviews: {
           select: {
@@ -144,11 +143,11 @@ export async function getFeaturedHomestaysData(): Promise<ApiResponse<any[]>> {
         id: homestay.id,
         name: homestay.name,
         description: homestay.description,
-        location: homestay.location,
-        pricePerNight: homestay.pricePerNight,
+        location: homestay.address,
+        pricePerNight: homestay.basePrice,
         maxGuests: homestay.maxGuests,
-        image: Array.isArray(homestay.images) && homestay.images.length > 0 
-          ? homestay.images[0] 
+        image: Array.isArray(homestay.photos) && homestay.photos.length > 0 
+          ? homestay.photos[0] 
           : '/placeholder-homestay.jpg',
         rating: Math.round(avgRating * 10) / 10,
         reviewCount: reviews.length,
@@ -177,15 +176,13 @@ export async function getFeaturedProductsData(): Promise<ApiResponse<any[]>> {
   try {
     const products = await prisma.product.findMany({
       where: {
-        status: 'APPROVED',
-        isActive: true,
+        active: true,
         stock: {
           gt: 0,
         },
       },
       take: 8,
       orderBy: [
-        { featured: 'desc' },
         { createdAt: 'desc' },
       ],
       select: {
@@ -234,6 +231,14 @@ export async function getFeaturedProductsData(): Promise<ApiResponse<any[]>> {
  * Get village statistics for homepage display
  */
 export async function getVillageStatsData(): Promise<ApiResponse<any>> {
+  // During build time or when database is unavailable, return mock data immediately
+  if (process.env.NODE_ENV === 'production' && process.env.SKIP_DB_AT_BUILD === 'true') {
+    return {
+      success: true,
+      data: getMockVillageStats(),
+    };
+  }
+
   try {
     const [
       homestaysCount,
@@ -244,21 +249,21 @@ export async function getVillageStatsData(): Promise<ApiResponse<any>> {
       carbonOffset,
     ] = await Promise.all([
       prisma.homestay.count({
-        where: { status: 'APPROVED', isActive: true },
-      }),
+        where: { available: true },
+      }).catch(() => 0),
       prisma.product.count({
-        where: { status: 'APPROVED', isActive: true },
-      }),
+        where: { active: true },
+      }).catch(() => 0),
       prisma.booking.count({
         where: { status: { not: 'CANCELLED' } },
-      }),
-      prisma.user.count(),
+      }).catch(() => 0),
+      prisma.user.count().catch(() => 0),
       prisma.review.findMany({
         select: { rating: true },
-      }),
+      }).catch(() => []),
       prisma.carbonCredit.aggregate({
-        _sum: { amount: true },
-      }),
+        _sum: { totalEarned: true },
+      }).catch(() => ({ _sum: { totalEarned: 0 } })),
     ]);
 
     const avgRating = reviews.length > 0
@@ -288,7 +293,7 @@ export async function getVillageStatsData(): Promise<ApiResponse<any>> {
         avgRating,
       },
       carbonOffset: {
-        total: Math.round(carbonOffset._sum.amount || 0),
+        total: Math.round(carbonOffset._sum.totalEarned || 0),
         label: 'Carbon Offset (kg CO₂)',
       },
     };
@@ -302,33 +307,259 @@ export async function getVillageStatsData(): Promise<ApiResponse<any>> {
     // Return mock data if database is not available
     return {
       success: true,
-      data: {
-        homestays: {
-          total: 12,
-          label: 'Total Homestays',
-        },
-        products: {
-          total: 45,
-          label: 'Total Products',
-        },
-        bookings: {
-          total: 238,
-          label: 'Total Bookings',
-        },
-        users: {
-          total: 156,
-          label: 'Registered Users',
-        },
-        reviews: {
-          total: 89,
-          label: 'Reviews & Ratings',
-          avgRating: 4.7,
-        },
-        carbonOffset: {
-          total: 12500,
-          label: 'Carbon Offset (kg CO₂)',
-        },
-      },
+      data: getMockVillageStats(),
     };
   }
+}
+
+function getMockVillageStats() {
+  return {
+    homestays: {
+      total: 12,
+      label: 'Total Homestays',
+    },
+    products: {
+      total: 45,
+      label: 'Total Products',
+    },
+    bookings: {
+      total: 238,
+      label: 'Total Bookings',
+    },
+    users: {
+      total: 156,
+      label: 'Registered Users',
+    },
+    reviews: {
+      total: 89,
+      label: 'Reviews & Ratings',
+      avgRating: 4.7,
+    },
+    carbonOffset: {
+      total: 12500,
+      label: 'Carbon Offset (kg CO₂)',
+    },
+  };
+}
+
+/**
+ * Get village leaders data for homepage display
+ */
+export async function getVillageLeadersData(): Promise<ApiResponse<any[]>> {
+  // During build time or when database is unavailable, return mock data
+  if (process.env.NODE_ENV === 'production' && process.env.SKIP_DB_AT_BUILD === 'true') {
+    return {
+      success: true,
+      data: getMockVillageLeaders(),
+    };
+  }
+
+  try {
+    const leaders = await prisma.villageLeader.findMany({
+      where: {
+        isActive: true,
+      },
+      orderBy: {
+        priority: 'asc',
+      },
+    });
+
+    return {
+      success: true,
+      data: leaders.length > 0 ? leaders : getMockVillageLeaders(),
+    };
+  } catch (error) {
+    console.error('Error fetching village leaders, using mock data:', error);
+    return {
+      success: true,
+      data: getMockVillageLeaders(),
+    };
+  }
+}
+
+function getMockVillageLeaders() {
+  return [
+    {
+      id: '1',
+      name: 'श्री नरेंद्र मोदी',
+      position: 'प्रधान मंत्री',
+      photo: '/images/leaders/pm.jpg',
+      message: null,
+      priority: 1,
+      isActive: true,
+    },
+    {
+      id: '2',
+      name: 'श्री पुष्कर सिंह धामी',
+      position: 'मुख्यमंत्री उत्तराखंड',
+      photo: '/images/leaders/cm.jpg',
+      message: null,
+      priority: 2,
+      isActive: true,
+    },
+    {
+      id: '3',
+      name: 'श्री राजेंद्र सिंह',
+      position: 'ग्राम प्रधान',
+      photo: '/images/leaders/pradhan.jpg',
+      message: 'हमारे गांव में आपका स्वागत है। हम एक स्वच्छ, हरित और आत्मनिर्भर गांव बनाने के लिए प्रतिबद्ध हैं।',
+      priority: 3,
+      isActive: true,
+    },
+  ];
+}
+
+/**
+ * Get projects data for homepage display
+ */
+export async function getProjectsData(limit: number = 6): Promise<ApiResponse<any>> {
+  // During build time or when database is unavailable, return mock data
+  if (process.env.NODE_ENV === 'production' && process.env.SKIP_DB_AT_BUILD === 'true') {
+    return {
+      success: true,
+      data: getMockProjects(),
+    };
+  }
+
+  try {
+    const [completed, inProgress, upcoming] = await Promise.all([
+      prisma.project.findMany({
+        where: {
+          status: 'COMPLETED' as ProjectStatus,
+        },
+        take: 3,
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          status: true,
+          fundingGoal: true,
+          currentFunding: true,
+          startDate: true,
+          endDate: true,
+          photos: true,
+        },
+      }).catch(() => []),
+      prisma.project.findMany({
+        where: {
+          status: 'IN_PROGRESS' as ProjectStatus,
+        },
+        take: 2,
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          status: true,
+          fundingGoal: true,
+          currentFunding: true,
+          startDate: true,
+          endDate: true,
+          photos: true,
+        },
+      }).catch(() => []),
+      prisma.project.findMany({
+        where: {
+          status: {
+            in: ['PLANNING', 'VOTING', 'FUNDED'] as ProjectStatus[],
+          },
+        },
+        take: 1,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          status: true,
+          fundingGoal: true,
+          currentFunding: true,
+          startDate: true,
+          endDate: true,
+          photos: true,
+        },
+      }).catch(() => []),
+    ]);
+
+    const projects = {
+      completed,
+      inProgress,
+      upcoming,
+    };
+
+    // If no data, return mock data
+    const hasData = completed.length > 0 || inProgress.length > 0 || upcoming.length > 0;
+    
+    return {
+      success: true,
+      data: hasData ? projects : getMockProjects(),
+    };
+  } catch (error) {
+    console.error('Error fetching projects, using mock data:', error);
+    return {
+      success: true,
+      data: getMockProjects(),
+    };
+  }
+}
+
+function getMockProjects() {
+  return {
+    completed: [
+      {
+        id: '1',
+        name: 'सोलर पावर ग्रिड',
+        description: 'पूरे गांव के लिए 45kW सोलर पावर सिस्टम स्थापित किया गया',
+        status: 'COMPLETED',
+        fundingGoal: 5000000,
+        currentFunding: 5000000,
+        startDate: new Date('2023-01-01'),
+        endDate: new Date('2023-12-31'),
+        photos: ['/images/projects/solar.jpg'],
+      },
+      {
+        id: '2',
+        name: 'जल संरक्षण प्रणाली',
+        description: 'वर्षा जल संचयन और जल शोधन प्रणाली',
+        status: 'COMPLETED',
+        fundingGoal: 2000000,
+        currentFunding: 2000000,
+        startDate: new Date('2023-06-01'),
+        endDate: new Date('2024-03-31'),
+        photos: ['/images/projects/water.jpg'],
+      },
+    ],
+    inProgress: [
+      {
+        id: '3',
+        name: 'ऑर्गेनिक फार्मिंग सेंटर',
+        description: 'जैविक खेती प्रशिक्षण और उत्पादन केंद्र',
+        status: 'IN_PROGRESS',
+        fundingGoal: 3000000,
+        currentFunding: 1800000,
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-12-31'),
+        photos: ['/images/projects/farming.jpg'],
+      },
+    ],
+    upcoming: [
+      {
+        id: '4',
+        name: 'डिजिटल लर्निंग सेंटर',
+        description: 'आधुनिक डिजिटल शिक्षा केंद्र की स्थापना',
+        status: 'PLANNING',
+        fundingGoal: 4000000,
+        currentFunding: 500000,
+        startDate: new Date('2025-01-01'),
+        endDate: null,
+        photos: [],
+      },
+    ],
+  };
 }

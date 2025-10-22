@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/config';
 import { logActivity } from '@/lib/activity-logger';
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { action, entity, ids, updates } = body;
 
@@ -25,11 +32,14 @@ export async function POST(request: Request) {
         // TODO: Implement bulk delete
         results.success = ids.length;
         await logActivity({
+          userId: session.user.id,
           action: 'DELETE',
           entity: entity.toUpperCase(),
           entityId: ids.join(','),
           description: `Bulk deleted ${ids.length} ${entity}`,
           metadata: { count: ids.length },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
         break;
 
@@ -43,11 +53,14 @@ export async function POST(request: Request) {
         // TODO: Implement bulk status update
         results.success = ids.length;
         await logActivity({
+          userId: session.user.id,
           action: 'UPDATE',
           entity: entity.toUpperCase(),
           entityId: ids.join(','),
           description: `Bulk updated status to ${updates.status} for ${ids.length} ${entity}`,
           metadata: { count: ids.length, newStatus: updates.status },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
         break;
 
@@ -61,11 +74,14 @@ export async function POST(request: Request) {
         // TODO: Implement bulk price update
         results.success = ids.length;
         await logActivity({
+          userId: session.user.id,
           action: 'UPDATE',
           entity: entity.toUpperCase(),
           entityId: ids.join(','),
           description: `Bulk updated price to ${updates.price} for ${ids.length} ${entity}`,
           metadata: { count: ids.length, newPrice: updates.price },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
         break;
 
@@ -73,11 +89,14 @@ export async function POST(request: Request) {
         // TODO: Implement bulk export
         results.success = ids.length;
         await logActivity({
+          userId: session.user.id,
           action: 'EXPORT',
           entity: entity.toUpperCase(),
           entityId: ids.join(','),
           description: `Bulk exported ${ids.length} ${entity}`,
           metadata: { count: ids.length },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
         break;
 
@@ -86,11 +105,14 @@ export async function POST(request: Request) {
         // TODO: Implement bulk activate/deactivate
         results.success = ids.length;
         await logActivity({
+          userId: session.user.id,
           action: 'STATUS_CHANGE',
           entity: entity.toUpperCase(),
           entityId: ids.join(','),
           description: `Bulk ${action}d ${ids.length} ${entity}`,
           metadata: { count: ids.length, action },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
         break;
 

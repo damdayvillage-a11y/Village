@@ -974,14 +974,21 @@ model HomepageConfig {
   layoutType      String   @default("vertical-sidebar") // vertical-sidebar, horizontal, compact
   showStatistics  Boolean  @default(true)
   showEnvironment Boolean  @default(true)
+  showLeadership  Boolean  @default(true)
+  showProjects    Boolean  @default(true)
   showHomestays   Boolean  @default(true)
   showProducts    Boolean  @default(true)
   
-  // Statistics Configuration
+  // Statistics Configuration - Compact Mode
   statsPosition   String   @default("left") // left, right, top
-  statsStyle      String   @default("vertical-cards") // vertical-cards, horizontal-grid, compact
+  statsStyle      String   @default("compact") // vertical-cards, horizontal-grid, compact
+  statsSize       String   @default("small") // small, medium, large
+  
+  // Environmental Data Configuration
+  environmentSize String   @default("small") // small, medium, large
   
   // Content Limits
+  maxProjects     Int      @default(6)
   maxHomestays    Int      @default(3)
   maxProducts     Int      @default(4)
   
@@ -1003,4 +1010,20 @@ model HomepageConfig {
   updatedBy       String?
   
   @@map("homepage_config")
+}
+
+// Village Leaders Model for displaying leadership on homepage
+model VillageLeader {
+  id          String   @id @default(cuid())
+  name        String
+  position    String   // Prime Minister, Chief Minister, Gram Pradhan
+  photo       String   // URL to photo
+  message     String?  @db.Text // Optional message
+  priority    Int      @default(0) // Display order
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([priority])
+  @@map("village_leaders")
 }
