@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/lib/components/ui/Button';
 import { Card } from '@/lib/components/ui/Card';
+import { AdminPanelLayout } from '@/lib/components/admin-panel/AdminPanelLayout';
 
 export default function HomepageEditorPage() {
+  const { data: session } = useSession();
   const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -58,38 +61,35 @@ export default function HomepageEditorPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <AdminPanelLayout session={session}>
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Homepage Editor</h1>
           <p>Loading configuration...</p>
         </div>
-      </div>
+      </AdminPanelLayout>
     );
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <AdminPanelLayout
+      session={session}
+      title="🏠 Homepage Editor"
+      subtitle="Customize the homepage layout, content, and appearance"
+    >
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Homepage Editor</h1>
-            <p className="text-gray-600 mt-2">Customize the homepage layout, content, and appearance</p>
-          </div>
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={() => window.open('/', '_blank')}
-            >
-              👁️ Preview Homepage
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? '💾 Saving...' : '💾 Save Changes'}
-            </Button>
-          </div>
+        <div className="flex items-center justify-end gap-4 mb-8">
+          <Button
+            variant="outline"
+            onClick={() => window.open('/', '_blank')}
+          >
+            👁️ Preview Homepage
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? '💾 Saving...' : '💾 Save Changes'}
+          </Button>
         </div>
 
         {message && (
@@ -583,6 +583,6 @@ export default function HomepageEditorPage() {
           </div>
         </Card>
       </div>
-    </div>
+    </AdminPanelLayout>
   );
 }
