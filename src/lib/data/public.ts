@@ -110,22 +110,20 @@ export async function getFeaturedHomestaysData(): Promise<ApiResponse<any[]>> {
     // Try to fetch from database
     const homestays = await prisma.homestay.findMany({
       where: {
-        status: 'APPROVED',
-        isActive: true,
+        available: true,
       },
       take: 6,
       orderBy: [
-        { featured: 'desc' },
         { createdAt: 'desc' },
       ],
       select: {
         id: true,
         name: true,
         description: true,
-        location: true,
-        pricePerNight: true,
+        address: true,
+        basePrice: true,
         maxGuests: true,
-        images: true,
+        photos: true,
         amenities: true,
         reviews: {
           select: {
@@ -145,11 +143,11 @@ export async function getFeaturedHomestaysData(): Promise<ApiResponse<any[]>> {
         id: homestay.id,
         name: homestay.name,
         description: homestay.description,
-        location: homestay.location,
-        pricePerNight: homestay.pricePerNight,
+        location: homestay.address,
+        pricePerNight: homestay.basePrice,
         maxGuests: homestay.maxGuests,
-        image: Array.isArray(homestay.images) && homestay.images.length > 0 
-          ? homestay.images[0] 
+        image: Array.isArray(homestay.photos) && homestay.photos.length > 0 
+          ? homestay.photos[0] 
           : '/placeholder-homestay.jpg',
         rating: Math.round(avgRating * 10) / 10,
         reviewCount: reviews.length,
@@ -178,15 +176,13 @@ export async function getFeaturedProductsData(): Promise<ApiResponse<any[]>> {
   try {
     const products = await prisma.product.findMany({
       where: {
-        status: 'APPROVED',
-        isActive: true,
+        active: true,
         stock: {
           gt: 0,
         },
       },
       take: 8,
       orderBy: [
-        { featured: 'desc' },
         { createdAt: 'desc' },
       ],
       select: {
@@ -253,10 +249,10 @@ export async function getVillageStatsData(): Promise<ApiResponse<any>> {
       carbonOffset,
     ] = await Promise.all([
       prisma.homestay.count({
-        where: { status: 'APPROVED', isActive: true },
+        where: { available: true },
       }).catch(() => 0),
       prisma.product.count({
-        where: { status: 'APPROVED', isActive: true },
+        where: { active: true },
       }).catch(() => 0),
       prisma.booking.count({
         where: { status: { not: 'CANCELLED' } },
@@ -266,8 +262,8 @@ export async function getVillageStatsData(): Promise<ApiResponse<any>> {
         select: { rating: true },
       }).catch(() => []),
       prisma.carbonCredit.aggregate({
-        _sum: { amount: true },
-      }).catch(() => ({ _sum: { amount: 0 } })),
+        _sum: { totalEarned: true },
+      }).catch(() => ({ _sum: { totalEarned: 0 } })),
     ]);
 
     const avgRating = reviews.length > 0
@@ -297,7 +293,7 @@ export async function getVillageStatsData(): Promise<ApiResponse<any>> {
         avgRating,
       },
       carbonOffset: {
-        total: Math.round(carbonOffset._sum.amount || 0),
+        total: Math.round(carbonOffset._sum.totalEarned || 0),
         label: 'Carbon Offset (kg CO₂)',
       },
     };

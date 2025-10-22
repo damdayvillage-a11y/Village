@@ -74,11 +74,14 @@ export async function POST(request: Request) {
         // TODO: Implement bulk price update
         results.success = ids.length;
         await logActivity({
+          userId: session.user.id,
           action: 'UPDATE',
           entity: entity.toUpperCase(),
           entityId: ids.join(','),
           description: `Bulk updated price to ${updates.price} for ${ids.length} ${entity}`,
           metadata: { count: ids.length, newPrice: updates.price },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
         break;
 
@@ -86,11 +89,14 @@ export async function POST(request: Request) {
         // TODO: Implement bulk export
         results.success = ids.length;
         await logActivity({
+          userId: session.user.id,
           action: 'EXPORT',
           entity: entity.toUpperCase(),
           entityId: ids.join(','),
           description: `Bulk exported ${ids.length} ${entity}`,
           metadata: { count: ids.length },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
         break;
 
@@ -99,11 +105,14 @@ export async function POST(request: Request) {
         // TODO: Implement bulk activate/deactivate
         results.success = ids.length;
         await logActivity({
+          userId: session.user.id,
           action: 'STATUS_CHANGE',
           entity: entity.toUpperCase(),
           entityId: ids.join(','),
           description: `Bulk ${action}d ${ids.length} ${entity}`,
           metadata: { count: ids.length, action },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
         break;
 
