@@ -12,6 +12,7 @@ export default function HomepageEditorPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [databaseConnected, setDatabaseConnected] = useState(true);
 
   useEffect(() => {
     fetchConfig();
@@ -23,10 +24,14 @@ export default function HomepageEditorPage() {
       const data = await response.json();
       if (data.success) {
         setConfig(data.data);
+        setDatabaseConnected(data.databaseConnected !== false);
+        if (data.warning) {
+          setMessage('⚠️ ' + data.warning);
+        }
       }
     } catch (error) {
       console.error('Error fetching config:', error);
-      setMessage('Failed to load configuration');
+      setMessage('❌ Failed to load configuration');
     } finally {
       setLoading(false);
     }
@@ -76,6 +81,25 @@ export default function HomepageEditorPage() {
       subtitle="Customize the homepage layout, content, and appearance"
     >
       <div className="max-w-6xl mx-auto">
+        {/* Database Connection Status */}
+        {!databaseConnected && (
+          <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-lg">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div className="flex-1">
+                <h3 className="font-bold text-amber-900 mb-1">Database Not Connected</h3>
+                <p className="text-sm text-amber-800">
+                  The application is not connected to a database. You are viewing default settings.
+                  Any changes you make will <strong>NOT be saved</strong>.
+                </p>
+                <p className="text-sm text-amber-800 mt-2">
+                  <strong>To fix this:</strong> Configure the DATABASE_URL environment variable with your PostgreSQL connection string.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-end gap-4 mb-8">
           <Button
             variant="outline"
@@ -86,7 +110,8 @@ export default function HomepageEditorPage() {
           <Button
             variant="primary"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !databaseConnected}
+            title={!databaseConnected ? 'Database not connected - cannot save' : 'Save changes'}
           >
             {saving ? '💾 Saving...' : '💾 Save Changes'}
           </Button>
