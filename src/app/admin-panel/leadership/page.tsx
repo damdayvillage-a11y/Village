@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/lib/components/ui/Button';
 import { Card } from '@/lib/components/ui/Card';
+import { AdminPanelLayout } from '@/lib/components/admin-panel/AdminPanelLayout';
 import Image from 'next/image';
 
 interface VillageLeader {
@@ -18,6 +20,7 @@ interface VillageLeader {
 }
 
 export default function LeadershipManagementPage() {
+  const { data: session } = useSession();
   const [leaders, setLeaders] = useState<VillageLeader[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -182,45 +185,40 @@ export default function LeadershipManagementPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <AdminPanelLayout session={session}>
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Leadership Management</h1>
           <p>Loading leaders...</p>
         </div>
-      </div>
+      </AdminPanelLayout>
     );
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <AdminPanelLayout 
+      session={session}
+      title="👥 Leadership Management"
+      subtitle="Manage village leadership displayed on the homepage"
+    >
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">👥 Leadership Management</h1>
-            <p className="text-gray-600 mt-2">
-              Manage village leadership displayed on the homepage
-            </p>
-          </div>
-          <div className="flex gap-4">
+        {/* Header Actions */}
+        <div className="flex items-center justify-end gap-4 mb-8">
+          <Button
+            variant="outline"
+            onClick={() => window.open('/', '_blank')}
+          >
+            👁️ Preview Homepage
+          </Button>
+          {!showForm && (
             <Button
-              variant="outline"
-              onClick={() => window.open('/', '_blank')}
+              variant="primary"
+              onClick={() => {
+                resetForm();
+                setShowForm(true);
+              }}
             >
-              👁️ Preview Homepage
+              ➕ Add Leader
             </Button>
-            {!showForm && (
-              <Button
-                variant="primary"
-                onClick={() => {
-                  resetForm();
-                  setShowForm(true);
-                }}
-              >
-                ➕ Add Leader
-              </Button>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Message */}
@@ -482,6 +480,6 @@ export default function LeadershipManagementPage() {
           </ul>
         </Card>
       </div>
-    </div>
+    </AdminPanelLayout>
   );
 }
