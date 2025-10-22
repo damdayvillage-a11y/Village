@@ -957,3 +957,50 @@ model Availability {
   @@index([date])
   @@map("availability")
 }
+
+// ==================== HOMEPAGE CMS MODELS ====================
+
+model HomepageConfig {
+  id              String   @id @default(cuid())
+  
+  // Hero Section
+  heroTitle       String   @default("Damday Village")
+  heroSubtitle    String   @default("स्मार्ट कार्बन-मुक्त ग्राम पंचायत")
+  heroDescription String   @default("Experience Damday Village in Pithoragarh - a pioneering carbon-neutral, culturally-rich, and technologically progressive model village nestled at 2,100m elevation in the pristine Kumaon Himalayas.")
+  heroImage       String   @default("https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=2070")
+  heroImageAlt    String   @default("Himalayan Village Landscape")
+  
+  // Layout Configuration
+  layoutType      String   @default("vertical-sidebar") // vertical-sidebar, horizontal, compact
+  showStatistics  Boolean  @default(true)
+  showEnvironment Boolean  @default(true)
+  showHomestays   Boolean  @default(true)
+  showProducts    Boolean  @default(true)
+  
+  // Statistics Configuration
+  statsPosition   String   @default("left") // left, right, top
+  statsStyle      String   @default("vertical-cards") // vertical-cards, horizontal-grid, compact
+  
+  // Content Limits
+  maxHomestays    Int      @default(3)
+  maxProducts     Int      @default(4)
+  
+  // Call-to-Action Buttons
+  ctaButtons      Json     @default("[{\"id\":\"1\",\"text\":\"🏔️ Explore Digital Twin\",\"link\":\"/digital-twin\",\"variant\":\"primary\"},{\"id\":\"2\",\"text\":\"🌐 360° Village Tour\",\"link\":\"/village-tour\",\"variant\":\"outline\"},{\"id\":\"3\",\"text\":\"🏠 Browse Homestays\",\"link\":\"/homestays\",\"variant\":\"outline\"}]")
+  
+  // Branding
+  emblemText      String   @default("DV")
+  primaryColor    String   @default("#1e40af") // blue-900
+  accentColor     String   @default("#f59e0b") // amber-500
+  
+  // Meta
+  active          Boolean  @default(true)
+  version         Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  publishedAt     DateTime?
+  createdBy       String?
+  updatedBy       String?
+  
+  @@map("homepage_config")
+}
