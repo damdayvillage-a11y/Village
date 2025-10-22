@@ -64,27 +64,27 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
-      {/* Three.js Animated Background */}
-      <ThreeJSBackground 
-        preset="government" 
-        particleCount={1200}
-        animationSpeed={0.8}
-        enableInteraction={true}
-      />
-      
-      {/* Professional gradient overlay for better text readability */}
-      <div className="fixed inset-0 bg-gradient-to-b from-blue-900/40 via-transparent to-blue-900/60 pointer-events-none -z-10" aria-hidden="true" />
+      {/* Professional Government-Style Background - Simple and Clean */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 -z-10" aria-hidden="true" />
+      <div className="fixed inset-0 bg-[url('/patterns/government-pattern.svg')] opacity-5 -z-10" aria-hidden="true" />
       
     <div className="min-h-screen relative">
-      {/* Hero Section with Government-inspired styling */}
+      {/* Hero Section with Professional Government-inspired styling */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6 drop-shadow-2xl animate-fade-in">
+          {/* Government Emblem Style Header */}
+          <div className="mb-8 flex justify-center">
+            <div className="w-20 h-20 bg-amber-400 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
+              <span className="text-3xl font-bold text-blue-900">DV</span>
+            </div>
+          </div>
+          
+          <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6 drop-shadow-xl">
             Welcome to{' '}
-            <span className="text-amber-300 animate-pulse-slow">Damday Village</span>
+            <span className="text-amber-300">Damday Village</span>
           </h1>
-          <h2 className="text-2xl md:text-3xl font-semibold text-orange-200 mb-4 drop-shadow-lg">
-            Smart Carbon-Free Gram Panchayat
+          <h2 className="text-2xl md:text-3xl font-semibold text-orange-100 mb-4 drop-shadow-lg">
+            स्मार्ट कार्बन-मुक्त ग्राम पंचायत | Smart Carbon-Free Gram Panchayat
           </h2>
           <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto text-balance drop-shadow-md leading-relaxed">
             Experience Damday Village in Pithoragarh - a pioneering carbon-neutral, 
