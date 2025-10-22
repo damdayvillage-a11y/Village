@@ -8,6 +8,7 @@
   },
   "scripts": {
     "prestart": "node scripts/startup-check.js",
+    "prebuild": "prisma generate",
     "dev": "next dev",
     "build": "next build",
     "build:docker": "NODE_OPTIONS='--max-old-space-size=3072' NEXT_TELEMETRY_DISABLED=1 GENERATE_SOURCEMAP=false next build",
