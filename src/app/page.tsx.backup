@@ -8,244 +8,311 @@ import { LiveData } from '@/lib/components/ui/LiveData';
 import { HomestayCard } from '@/lib/components/public/HomestayCard';
 import { ProductCard } from '@/lib/components/public/ProductCard';
 import { StatsCounter } from '@/lib/components/public/StatsCounter';
-
-// Fetch featured homestays
-async function getFeaturedHomestays() {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/public/featured-homestays`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) return { success: false, data: [] };
-    const result = await res.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching homestays:', error);
-    return { success: false, data: [] };
-  }
-}
-
-// Fetch featured products
-async function getFeaturedProducts() {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/public/featured-products`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) return { success: false, data: [] };
-    const result = await res.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return { success: false, data: [] };
-  }
-}
-
-// Fetch village stats
-async function getVillageStats() {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/public/village-stats`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) return { success: false, data: null };
-    const result = await res.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    return { success: false, data: null };
-  }
-}
+import { ThreeJSBackground } from '@/components/animations/ThreeJSBackground';
+import {
+  getFeaturedHomestaysData,
+  getFeaturedProductsData,
+  getVillageStatsData,
+} from '@/lib/data/public';
 
 export default async function HomePage() {
   // Fetch all data in parallel
   const [homestaysResult, productsResult, statsResult] = await Promise.all([
-    getFeaturedHomestays(),
-    getFeaturedProducts(),
-    getVillageStats(),
+    getFeaturedHomestaysData(),
+    getFeaturedProductsData(),
+    getVillageStatsData(),
   ]);
 
   const featuredHomestays = homestaysResult.data || [];
   const featuredProducts = productsResult.data || [];
   const villageStats = statsResult.data;
 
+  // Structured Data for SEO (JSON-LD)
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristDestination',
+    name: 'Damday Village',
+    description: 'A pioneering carbon-neutral, culturally-rich, and technologically progressive model village nestled at 2,100m elevation in the pristine Kumaon Himalayas',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Pithoragarh',
+      addressRegion: 'Uttarakhand',
+      addressCountry: 'IN',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 29.5830,
+      longitude: 80.2180,
+      elevation: '2100',
+    },
+    url: 'https://village-app.captain.damdayvillage.com',
+    image: 'https://village-app.captain.damdayvillage.com/village-hero.jpg',
+    amenityFeature: [
+      { '@type': 'LocationFeatureSpecification', name: 'Carbon Neutral' },
+      { '@type': 'LocationFeatureSpecification', name: 'Solar Powered' },
+      { '@type': 'LocationFeatureSpecification', name: 'IoT Enabled' },
+      { '@type': 'LocationFeatureSpecification', name: 'Homestays' },
+      { '@type': 'LocationFeatureSpecification', name: 'Local Marketplace' },
+    ],
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
-      {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-display font-bold text-gray-900 mb-6">
-            Welcome to{' '}
-            <span className="text-primary-600">Smart Carbon-Free Village</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto text-balance">
-            Experience Damday Village in Pithoragarh - a pioneering carbon-neutral, 
-            culturally-rich, and technologically progressive model village 
-            nestled at 2,100m elevation in the pristine Kumaon Himalayas.
-          </p>
-          
-          {/* Real-time Village Stats */}
-          <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm">
-            <div className="flex items-center px-4 py-2 bg-white/80 rounded-full border border-green-200">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-green-700 font-medium">Solar Grid: 45kW Active</span>
-            </div>
-            <div className="flex items-center px-4 py-2 bg-white/80 rounded-full border border-blue-200">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-              <span className="text-blue-700 font-medium">Air Quality: Excellent (AQI: 18)</span>
-            </div>
-            <div className="flex items-center px-4 py-2 bg-white/80 rounded-full border border-purple-200">
-              <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-              <span className="text-purple-700 font-medium">Carbon Neutral: 100%</span>
-            </div>
-          </div>
+    <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
+      {/* Hero Section with Government-Style Header Image */}
+      <div className="relative min-h-[600px] bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
+        {/* Background Hero Image - Open Source Himalayan Village */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=2070"
+            alt="Himalayan Village Landscape"
+            fill
+            className="object-cover opacity-30"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/70 via-blue-900/50 to-blue-900/90" />
+        </div>
 
-          {/* Live Environmental Data */}
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
-              Live Environmental Data
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            {/* Government Emblem Style Header */}
+            <div className="mb-8 flex justify-center">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white">
+                  <span className="text-4xl font-bold text-blue-900">DV</span>
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+              </div>
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 drop-shadow-2xl">
+              <span className="text-amber-300">Damday Village</span>
+            </h1>
+            <h2 className="text-3xl md:text-4xl font-semibold text-orange-100 mb-6 drop-shadow-lg">
+              स्मार्ट कार्बन-मुक्त ग्राम पंचायत
             </h2>
-            <Suspense fallback={<div className="text-center">Loading live data...</div>}>
-              <LiveData />
-            </Suspense>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link href="/digital-twin">
-              <Button variant="primary" size="lg">
-                🏔️ Explore Digital Twin
-              </Button>
-            </Link>
-            <Link href="/village-tour">
-              <Button variant="outline" size="lg">
-                🌐 360° Village Tour
-              </Button>
-            </Link>
-            <Link href="/book-homestay">
-              <Button variant="outline" size="lg">
-                🏠 Book Homestay
-              </Button>
-            </Link>
+            <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-4xl mx-auto drop-shadow-md leading-relaxed font-light">
+              Smart Carbon-Free Gram Panchayat
+            </p>
+            <p className="text-lg text-gray-200 mb-12 max-w-3xl mx-auto leading-relaxed">
+              Experience Damday Village in Pithoragarh - a pioneering carbon-neutral, 
+              culturally-rich, and technologically progressive model village 
+              nestled at 2,100m elevation in the pristine Kumaon Himalayas.
+            </p>
+            
+            {/* Call-to-Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Link href="/digital-twin">
+                <Button variant="primary" size="lg" className="bg-amber-500 hover:bg-amber-600 text-blue-900 font-bold shadow-xl">
+                  🏔️ Explore Digital Twin
+                </Button>
+              </Link>
+              <Link href="/village-tour">
+                <Button variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white hover:text-blue-900 shadow-xl">
+                  🌐 360° Village Tour
+                </Button>
+              </Link>
+              <Link href="/homestays">
+                <Button variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white hover:text-blue-900 shadow-xl">
+                  🏠 Browse Homestays
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
+      </div>
+      
+    <div className="min-h-screen relative bg-gray-50">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Main Content Grid with Vertical Widgets */}
+        <div className="grid lg:grid-cols-3 gap-8">
 
-        {/* Features Grid with Enhanced Visuals */}
-        <div className="grid md:grid-cols-3 gap-8 mt-16">
-          <Card className="p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+          {/* Left Sidebar - Village Statistics Vertical Widget */}
+          <div className="lg:col-span-1">
+            {villageStats && (
+              <div className="sticky top-4 bg-white rounded-2xl p-6 shadow-xl border-2 border-blue-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent">
+                    Live Statistics
+                  </h2>
+                  <span className="flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </span>
+                </div>
+                
+                <div className="space-y-4">
+                  {villageStats.homestays && (
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border-l-4 border-orange-500">
+                      <div>
+                        <div className="text-3xl font-bold text-orange-900">{villageStats.homestays.total}</div>
+                        <div className="text-sm text-orange-700 font-medium">{villageStats.homestays.label}</div>
+                      </div>
+                      <div className="text-4xl">🏠</div>
+                    </div>
+                  )}
+                  
+                  {villageStats.products && (
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border-l-4 border-green-500">
+                      <div>
+                        <div className="text-3xl font-bold text-green-900">{villageStats.products.total}</div>
+                        <div className="text-sm text-green-700 font-medium">{villageStats.products.label}</div>
+                      </div>
+                      <div className="text-4xl">🛍️</div>
+                    </div>
+                  )}
+                  
+                  {villageStats.bookings && (
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-l-4 border-blue-500">
+                      <div>
+                        <div className="text-3xl font-bold text-blue-900">{villageStats.bookings.total}</div>
+                        <div className="text-sm text-blue-700 font-medium">{villageStats.bookings.label}</div>
+                      </div>
+                      <div className="text-4xl">📅</div>
+                    </div>
+                  )}
+                  
+                  {villageStats.users && (
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border-l-4 border-purple-500">
+                      <div>
+                        <div className="text-3xl font-bold text-purple-900">{villageStats.users.total}</div>
+                        <div className="text-sm text-purple-700 font-medium">{villageStats.users.label}</div>
+                      </div>
+                      <div className="text-4xl">👥</div>
+                    </div>
+                  )}
+                  
+                  {villageStats.reviews && (
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl border-l-4 border-amber-500">
+                      <div>
+                        <div className="text-3xl font-bold text-amber-900">{villageStats.reviews.total}</div>
+                        <div className="text-sm text-amber-700 font-medium">{villageStats.reviews.label}</div>
+                        <div className="text-xs text-amber-600">({villageStats.reviews.avgRating}★)</div>
+                      </div>
+                      <div className="text-4xl">⭐</div>
+                    </div>
+                  )}
+                  
+                  {villageStats.carbonOffset && (
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl border-l-4 border-emerald-500">
+                      <div>
+                        <div className="text-3xl font-bold text-emerald-900">{villageStats.carbonOffset.total}</div>
+                        <div className="text-sm text-emerald-700 font-medium">{villageStats.carbonOffset.label}</div>
+                      </div>
+                      <div className="text-4xl">🌱</div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Quick Stats Summary */}
+                <div className="mt-6 pt-6 border-t-2 border-gray-200">
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="p-2 bg-green-50 rounded-lg">
+                      <div className="text-xs text-green-600 font-medium">Solar Grid</div>
+                      <div className="text-sm font-bold text-green-900">45kW</div>
+                    </div>
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <div className="text-xs text-blue-600 font-medium">Air Quality</div>
+                      <div className="text-sm font-bold text-blue-900">AQI 18</div>
+                    </div>
+                    <div className="p-2 bg-orange-50 rounded-lg">
+                      <div className="text-xs text-orange-600 font-medium">Carbon</div>
+                      <div className="text-sm font-bold text-orange-900">100%</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <h3 className="text-xl font-semibold mb-3 text-gray-900">3D Digital Twin</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Explore Damday Village through immersive 3D visualization featuring authentic Himalayan architecture and real-time environmental data.
-            </p>
-            <Badge className="mt-3 bg-primary-50 text-primary-700 border border-primary-200">
-              Real-time Data
-            </Badge>
-          </Card>
-
-          <Card className="p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold mb-3 text-gray-900">100% Carbon Neutral</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Powered entirely by solar energy with 24/7 monitoring of environmental impact and carbon footprint reduction.
-            </p>
-            <Badge className="mt-3 bg-green-50 text-green-700 border border-green-200">
-              -2.5 tons CO₂/year
-            </Badge>
-          </Card>
-
-          <Card className="p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold mb-3 text-gray-900">Smart IoT Network</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Advanced sensor network monitoring air quality, energy usage, weather conditions, and microgrid performance.
-            </p>
-            <Badge className="mt-3 bg-blue-50 text-blue-700 border border-blue-200">
-              15 Active Sensors
-            </Badge>
-          </Card>
-        </div>
-
-        {/* Available Features & Services */}
-        <div className="mt-20 text-center">
-          <h2 className="text-3xl font-display font-bold text-gray-900 mb-4">
-            Available Services
-          </h2>
-          <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
-            Explore our range of sustainable tourism and community development services
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-green-700 mb-2">Homestay Booking</h4>
-              <p className="text-sm text-green-600 mb-3">Authentic village accommodations with local families</p>
-              <Badge className="bg-green-100 text-green-700 border border-green-300">
-                ₹2,500-3,500/night
-              </Badge>
-            </Card>
+            )}
             
-            <Card className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
+            {/* Environmental Data Vertical Widget */}
+            <div className="mt-8 bg-white rounded-2xl p-6 shadow-xl border-2 border-green-100">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-green-900 to-green-700 bg-clip-text text-transparent mb-6">
+                Live Environmental Data
+              </h2>
+              <Suspense fallback={<div className="text-center text-gray-600">Loading...</div>}>
+                <LiveData />
+              </Suspense>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="lg:col-span-2">
+
+            {/* Featured Homestays */}
+            {featuredHomestays.length > 0 && (
+              <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-orange-100 mb-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-900 to-orange-700 bg-clip-text text-transparent">Featured Homestays</h2>
+                    <p className="text-gray-600 mt-2">Experience authentic Himalayan hospitality</p>
+                  </div>
+                  <Link href="/homestays">
+                    <Button variant="outline" size="sm">View All →</Button>
+                  </Link>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {featuredHomestays.slice(0, 4).map((homestay: any) => (
+                    <HomestayCard
+                      key={homestay.id}
+                      id={homestay.id}
+                      name={homestay.name}
+                      description={homestay.description}
+                      location={homestay.location}
+                      pricePerNight={homestay.pricePerNight}
+                      maxGuests={homestay.maxGuests}
+                      image={homestay.image}
+                      rating={homestay.rating}
+                      reviewCount={homestay.reviewCount}
+                      amenities={homestay.amenities}
+                    />
+                  ))}
+                </div>
               </div>
-              <h4 className="font-semibold text-orange-700 mb-2">Local Marketplace</h4>
-              <p className="text-sm text-orange-600 mb-3">Handcrafted products from village artisans</p>
-              <Badge className="bg-orange-100 text-orange-700 border border-orange-300">
-                25+ Products
-              </Badge>
-            </Card>
-            
-            <Card className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
+            )}
+
+            {/* Featured Products */}
+            {featuredProducts.length > 0 && (
+              <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-green-100">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-green-900 to-green-700 bg-clip-text text-transparent">Local Marketplace</h2>
+                    <p className="text-gray-600 mt-2">Authentic handcrafted products from village artisans</p>
+                  </div>
+                  <Link href="/marketplace">
+                    <Button variant="outline" size="sm">View All →</Button>
+                  </Link>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  {featuredProducts.slice(0, 4).map((product: any) => (
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      name={product.name}
+                      description={product.description}
+                      price={product.price}
+                      stock={product.stock}
+                      inStock={product.inStock}
+                      image={product.image}
+                      category={product.category}
+                      locallySourced={product.locallySourced}
+                      carbonFootprint={product.carbonFootprint}
+                    />
+                  ))}
+                </div>
               </div>
-              <h4 className="font-semibold text-purple-700 mb-2">AR Cultural Tours</h4>
-              <p className="text-sm text-purple-600 mb-3">Interactive 360° cultural experiences</p>
-              <Badge className="bg-purple-100 text-purple-700 border border-purple-300">
-                5 Tour Routes
-              </Badge>
-            </Card>
-            
-            <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-blue-700 mb-2">Community Projects</h4>
-              <p className="text-sm text-blue-600 mb-3">Transparent development initiatives</p>
-              <Badge className="bg-blue-100 text-blue-700 border border-blue-300">
-                8 Active Projects
-              </Badge>
-            </Card>
+            )}
           </div>
         </div>
       </main>
     </div>
+    </>
   );
 }
