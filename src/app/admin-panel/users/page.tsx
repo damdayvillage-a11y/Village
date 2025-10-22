@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
+import { AdminPanelLayout } from '@/lib/components/admin-panel/AdminPanelLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
@@ -34,6 +36,7 @@ interface User {
 }
 
 export default function UsersPage() {
+  const { data: session } = useSession();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,14 +211,12 @@ export default function UsersPage() {
   const filteredUsers = users;
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-        <p className="text-gray-600 mt-2">
-          Manage user accounts, roles, and permissions
-        </p>
-      </div>
+    <AdminPanelLayout
+      session={session}
+      title="User Management"
+      subtitle="Manage user accounts, roles, and permissions"
+    >
+      <div className="max-w-7xl mx-auto">
 
       {/* Filters and Actions */}
       <Card className="mb-6">
@@ -560,6 +561,7 @@ export default function UsersPage() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </AdminPanelLayout>
   );
 }
