@@ -102,6 +102,13 @@ export function AdminPanelLayout({
       section: 'operations',
     },
     {
+      id: 'bookings-analytics',
+      label: 'Booking Analytics',
+      icon: TrendingUp,
+      href: '/admin-panel/bookings/analytics',
+      section: 'operations',
+    },
+    {
       id: 'carbon-credits',
       label: 'Carbon Credits',
       icon: Leaf,
@@ -121,6 +128,13 @@ export function AdminPanelLayout({
       label: 'Products',
       icon: Package,
       href: '/admin-panel/marketplace/products',
+      section: 'commerce',
+    },
+    {
+      id: 'categories',
+      label: 'Categories',
+      icon: FolderTree,
+      href: '/admin-panel/marketplace/categories',
       section: 'commerce',
     },
     {
@@ -184,6 +198,13 @@ export function AdminPanelLayout({
       section: 'monitoring',
     },
     {
+      id: 'iot-alerts',
+      label: 'IoT Alerts',
+      icon: Bell,
+      href: '/admin-panel/iot/alerts',
+      section: 'monitoring',
+    },
+    {
       id: 'monitoring',
       label: 'System Monitor',
       icon: Activity,
@@ -195,6 +216,13 @@ export function AdminPanelLayout({
       label: 'Analytics',
       icon: TrendingUp,
       href: '/admin-panel/analytics',
+      section: 'monitoring',
+    },
+    {
+      id: 'reports',
+      label: 'Reports',
+      icon: FileText,
+      href: '/admin-panel/reports',
       section: 'monitoring',
     },
     {
@@ -235,10 +263,31 @@ export function AdminPanelLayout({
       section: 'settings',
     },
     {
+      id: 'features',
+      label: 'Features',
+      icon: Settings,
+      href: '/admin-panel/settings/features',
+      section: 'settings',
+    },
+    {
+      id: 'email-templates',
+      label: 'Email Templates',
+      icon: MessageSquare,
+      href: '/admin-panel/settings/email-templates',
+      section: 'settings',
+    },
+    {
       id: 'theme',
       label: 'Theme',
       icon: Palette,
       href: '/admin-panel/cms/theme',
+      section: 'settings',
+    },
+    {
+      id: 'theme-advanced',
+      label: 'Advanced Theme',
+      icon: Palette,
+      href: '/admin-panel/settings/theme/advanced',
       section: 'settings',
     },
     {

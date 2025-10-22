@@ -1,20 +1,60 @@
-# Database Migration Guide - Village Leaders Table
+# Database Setup and Migration Guide
 
-This guide explains how to create the `village_leaders` table in your database.
+This guide explains how to setup and migrate your database for the Damday Village application.
 
-## Problem
+## Automatic Database Setup (Recommended)
 
-The application references a `village_leaders` table that doesn't exist in the database, causing errors like:
+The application now **automatically runs database migrations** when you build or deploy it, as long as your `DATABASE_URL` environment variable is configured.
+
+### How It Works
+
+1. **During Build**: The Prisma client is automatically generated before building (`npm run build`)
+2. **On Startup**: Database migrations are automatically applied when the application starts
+
+### Setup Steps
+
+1. Set your database URL in environment variables:
+   ```bash
+   DATABASE_URL="postgresql://username:password@localhost:5432/smart_village_db"
+   ```
+
+2. Build and start the application:
+   ```bash
+   npm install
+   npm run build
+   npm start
+   ```
+
+That's it! The database will be automatically set up with all required tables.
+
+### Disabling Auto-Migration
+
+If you need to disable automatic migrations (e.g., for manual control in production):
+
+```bash
+SKIP_MIGRATIONS=true
 ```
-The table `public.village_leaders` does not exist in the current database.
+
+## Manual Migration (Alternative)
+
+If you prefer to run migrations manually, you have several options:
+
+### Option 1: Using Prisma CLI
+
+```bash
+# Generate Prisma client
+npm run db:generate
+
+# Run migrations
+npm run db:migrate
+
+# (Optional) Seed initial data
+npm run db:seed
 ```
 
-## Solution
+### Option 2: Using Migration Scripts
 
-We've created migration scripts that will:
-1. Create the `village_leaders` table with proper schema
-2. Add necessary indexes for performance
-3. Insert default village leaders (Prime Minister, Chief Minister, Gram Pradhan)
+For the `village_leaders` table specifically:
 
 ## Migration Methods
 
