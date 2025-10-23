@@ -399,7 +399,7 @@ function getMockVillageLeaders() {
     },
     {
       id: '3',
-      name: 'श्री राजेंद्र सिंह',
+      name: 'Shiwani Vishwakarma',
       position: 'ग्राम प्रधान',
       photo: '/images/leaders/pradhan.jpg',
       message: 'हमारे गांव में आपका स्वागत है। हम एक स्वच्छ, हरित और आत्मनिर्भर गांव बनाने के लिए प्रतिबद्ध हैं।',
