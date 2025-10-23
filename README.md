@@ -380,6 +380,70 @@ We welcome contributions! Here's how to get started:
 
 ---
 
+## 🤖 GitHub Copilot Coding Agent
+
+This repository is configured for **autonomous operation** with GitHub Copilot Coding Agent using Model Context Protocol (MCP).
+
+### Features
+
+✅ **Autonomous Operations**:
+- Reads and respects all `.md` documentation files
+- Executes database migrations and seeding
+- Manages build, test, and deployment tasks
+- Creates PRs and issues for human review
+
+✅ **Secure Access**:
+- PostgreSQL database operations
+- API logs and monitoring
+- GitHub repository management
+- Firewall-protected network access (15 approved domains)
+
+### Quick Setup
+
+1. **Configure Secrets** (Settings → Secrets → Actions):
+   - `DATABASE_URL` - PostgreSQL connection string
+   - `API_TOKEN` - API logs access token
+   - `GITHUB_TOKEN` - Repository access (auto-provided)
+   - `NEXTAUTH_SECRET` - Session encryption key
+
+2. **Enable Copilot Agent** (Settings → Copilot → Coding Agent):
+   - Enable Model Context Protocol (MCP)
+   - Select configuration: `.github/copilot/mcp-config.json`
+   - Verify: "✅ MCP configuration loaded successfully"
+
+3. **Test Activation**:
+   ```bash
+   @copilot verify environment setup
+   ```
+
+### Documentation
+
+- **Setup Guide**: [COPILOT_SETUP_GUIDE.md](./COPILOT_SETUP_GUIDE.md) - Complete setup instructions
+- **Firewall Config**: [FIREWALL_CONFIG.md](./FIREWALL_CONFIG.md) - Network security details
+- **Agent Instructions**: [COPILOT_INSTRUCTIONS.md](./COPILOT_INSTRUCTIONS.md) - Behavior guidelines
+- **MCP Config**: [.github/copilot/mcp-config.json](./.github/copilot/mcp-config.json) - Configuration file
+
+### Usage Examples
+
+```bash
+# Environment verification
+@copilot recall memories and verify environment
+
+# Database operations
+@copilot run database migrations and seed data
+
+# Build and test
+@copilot build application and run all tests
+
+# Documentation sync
+@copilot update documentation and sync memory state
+
+# System health
+@copilot check system health and report status
+```
+
+---
+
 ## 📞 Support
 
 ### Getting Help

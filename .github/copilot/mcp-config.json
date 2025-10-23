@@ -1,0 +1,275 @@
+{
+  "$schema": "https://github.com/modelcontextprotocol/specification/blob/main/schema/mcp-config.schema.json",
+  "version": "1.0",
+  "description": "Model Context Protocol configuration for GitHub Copilot Coding Agent - Smart Carbon-Free Village",
+  "mcpServers": {
+    "village-docs": {
+      "type": "file",
+      "description": "Access to all documentation files in the repository",
+      "rootPath": "./",
+      "include": [
+        "CONFIGURATION.md",
+        "REQUIREMENTS.md",
+        "MEMORY.md",
+        "PR.md",
+        "COPILOT_INSTRUCTIONS.md",
+        "README.md",
+        "QUICK_START.md",
+        "ISSUES.md",
+        "CLEANUP_SUMMARY.md",
+        "docs/**/*.md"
+      ],
+      "exclude": [
+        "node_modules/**",
+        ".next/**",
+        "dist/**"
+      ],
+      "permissions": {
+        "read": true,
+        "write": false
+      }
+    },
+    "village-database": {
+      "type": "database",
+      "description": "PostgreSQL database connection for Village application",
+      "driver": "postgresql",
+      "connectionString": "${{ secrets.DATABASE_URL }}",
+      "permissions": {
+        "read": true,
+        "write": true,
+        "migrate": true
+      },
+      "features": {
+        "migrations": true,
+        "seeding": true,
+        "schema-validation": true,
+        "query-logging": false
+      }
+    },
+    "village-logs": {
+      "type": "http",
+      "description": "API logs and monitoring endpoint",
+      "baseUrl": "https://api.damdayvillage.com/logs",
+      "headers": {
+        "Authorization": "Bearer ${{ secrets.API_TOKEN }}",
+        "Content-Type": "application/json"
+      },
+      "permissions": {
+        "read": true,
+        "write": false
+      },
+      "timeout": 30000,
+      "retryPolicy": {
+        "maxRetries": 3,
+        "backoffMs": 1000
+      }
+    },
+    "github-repo": {
+      "type": "github",
+      "description": "GitHub repository access for PRs, issues, and commits",
+      "repo": "damdayvillage-a11y/Village",
+      "accessToken": "${{ secrets.GITHUB_TOKEN }}",
+      "permissions": {
+        "issues": {
+          "read": true,
+          "write": true
+        },
+        "pull_requests": {
+          "read": true,
+          "write": true
+        },
+        "contents": {
+          "read": true,
+          "write": true
+        },
+        "actions": {
+          "read": true,
+          "write": false
+        }
+      },
+      "features": {
+        "auto-pr-creation": true,
+        "issue-management": true,
+        "commit-signing": false,
+        "branch-protection": true
+      }
+    }
+  },
+  "firewall": {
+    "enabled": true,
+    "mode": "allowlist",
+    "description": "Only allow network access to approved domains",
+    "allowlist": [
+      "github.com",
+      "api.github.com",
+      "raw.githubusercontent.com",
+      "npmjs.org",
+      "registry.npmjs.org",
+      "nodejs.org",
+      "pypi.org",
+      "docker.io",
+      "hub.docker.com",
+      "registry.hub.docker.com",
+      "prisma.io",
+      "postgresql.org",
+      "damdayvillage.com",
+      "api.damdayvillage.com",
+      "www.damdayvillage.com"
+    ],
+    "blocklist": [],
+    "allowByDefault": false
+  },
+  "security": {
+    "secretManagement": {
+      "enabled": true,
+      "provider": "github-secrets",
+      "requiredSecrets": [
+        "DATABASE_URL",
+        "API_TOKEN",
+        "GITHUB_TOKEN",
+        "NEXTAUTH_SECRET"
+      ],
+      "validation": {
+        "checkFormat": true,
+        "checkExpiry": false
+      }
+    },
+    "dataProtection": {
+      "maskSensitiveData": true,
+      "noPlaintextLogging": true,
+      "encryptionAtRest": false
+    },
+    "accessControl": {
+      "requireAuthentication": true,
+      "roleBasedAccess": true,
+      "auditLogging": true
+    }
+  },
+  "agent": {
+    "capabilities": {
+      "autonomous": true,
+      "canModifyCode": true,
+      "canCreatePRs": true,
+      "canManageIssues": true,
+      "canExecuteBuilds": true,
+      "canRunTests": true,
+      "canDeployToStaging": false,
+      "canDeployToProduction": false
+    },
+    "restrictions": {
+      "requireHumanApproval": [
+        "production-deployment",
+        "database-schema-changes",
+        "security-configuration-changes"
+      ],
+      "forbiddenActions": [
+        "delete-repository",
+        "modify-github-secrets",
+        "disable-security-features"
+      ]
+    },
+    "behavior": {
+      "readDocsFirst": true,
+      "respectMemoryState": true,
+      "updateMemoryAfterGoals": true,
+      "createPRsForReview": true,
+      "runTestsBeforeCommit": true,
+      "validateBeforeDeploy": true
+    }
+  },
+  "documentation": {
+    "sources": {
+      "primary": [
+        "CONFIGURATION.md",
+        "REQUIREMENTS.md",
+        "MEMORY.md",
+        "COPILOT_INSTRUCTIONS.md"
+      ],
+      "secondary": [
+        "PR.md",
+        "ISSUES.md",
+        "README.md",
+        "QUICK_START.md"
+      ],
+      "reference": [
+        "docs/BUILD_GUIDE.md",
+        "docs/DEPLOY_CAPROVER.md",
+        "docs/DATABASE_MIGRATION_GUIDE.md",
+        "docs/HOW_TO_USE_ISSUES_MD.md",
+        "docs/HOW_TO_USE_PR_MD.md"
+      ]
+    },
+    "indexingStrategy": {
+      "autoIndex": true,
+      "updateFrequency": "on-change",
+      "semanticSearch": true,
+      "prioritizeRecent": true
+    }
+  },
+  "automation": {
+    "tasks": {
+      "environmentVerification": {
+        "enabled": true,
+        "schedule": "on-startup",
+        "actions": [
+          "check-database-connection",
+          "validate-environment-variables",
+          "verify-required-secrets"
+        ]
+      },
+      "databaseManagement": {
+        "enabled": true,
+        "autoMigrate": true,
+        "autoSeed": true,
+        "backupBeforeMigration": true
+      },
+      "deployment": {
+        "enabled": true,
+        "platform": "docker",
+        "healthChecks": true,
+        "rollbackOnFailure": true,
+        "notifyOnCompletion": true
+      },
+      "monitoring": {
+        "enabled": true,
+        "checkEndpoints": [
+          "https://damdayvillage.com/api/health",
+          "https://api.damdayvillage.com/health"
+        ],
+        "alertOnFailure": true
+      }
+    }
+  },
+  "notifications": {
+    "channels": {
+      "github-issues": {
+        "enabled": true,
+        "events": [
+          "error",
+          "deployment-failure",
+          "security-alert"
+        ]
+      },
+      "pull-requests": {
+        "enabled": true,
+        "events": [
+          "progress-update",
+          "task-completion",
+          "review-requested"
+        ]
+      }
+    },
+    "format": {
+      "includeLogSummary": true,
+      "includeSuggestedFix": true,
+      "includeNextActionPlan": true
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2025-10-23",
+    "repository": "damdayvillage-a11y/Village",
+    "maintainer": "Copilot Coding Agent",
+    "documentation": "See COPILOT_SETUP_GUIDE.md for complete setup instructions"
+  }
+}
