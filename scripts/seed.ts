@@ -1,11 +1,17 @@
-import { PrismaClient } from '@prisma/client';
-import { SAMPLE_DEVICES } from '../lib/device-simulator';
+import { PrismaClient, TransactionType } from '@prisma/client';
+import { SAMPLE_DEVICES } from '../lib/sample-devices';
 import { hashPassword } from '../lib/auth/password';
 
 const db = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding Smart Carbon-Free Village database...');
+
+  // Configuration: Change these values before deployment if needed
+  const ADMIN_EMAIL = 'admin@damdayvillage.org';
+  const ADMIN_PASSWORD = 'Admin@123';
+  const HOST_EMAIL = 'host@damdayvillage.org';
+  const HOST_PASSWORD = 'Host@123';
 
   // Create Damday Village
   const village = await db.village.upsert({
@@ -30,18 +36,19 @@ async function main() {
   console.log('✅ Created village:', village.name);
 
   // Create sample users
-  const adminPassword = 'Admin@123'; // Default admin password
-  const hashedAdminPassword = await hashPassword(adminPassword);
+  const hashedAdminPassword = await hashPassword(ADMIN_PASSWORD);
   
   const adminUser = await db.user.upsert({
-    where: { email: 'admin@damdayvillage.org' },
+    where: { email: ADMIN_EMAIL },
     update: {},
     create: {
-      email: 'admin@damdayvillage.org',
+      email: ADMIN_EMAIL,
       name: 'Village Administrator',
       role: 'ADMIN',
       password: hashedAdminPassword,
       verified: true,
+      active: true,
+      emailVerified: new Date(),
       preferences: {
         language: 'en',
         notifications: true
@@ -49,18 +56,19 @@ async function main() {
     }
   });
 
-  const hostPassword = 'Host@123'; // Default host password
-  const hashedHostPassword = await hashPassword(hostPassword);
+  const hashedHostPassword = await hashPassword(HOST_PASSWORD);
   
   const hostUser = await db.user.upsert({
-    where: { email: 'host@damdayvillage.org' },
+    where: { email: HOST_EMAIL },
     update: {},
     create: {
-      email: 'host@damdayvillage.org',
+      email: HOST_EMAIL,
       name: 'Raj Singh',
       role: 'HOST',
       password: hashedHostPassword,
       verified: true,
+      active: true,
+      emailVerified: new Date(),
       phone: '+91-9876543210',
       preferences: {
         language: 'hi',
@@ -72,10 +80,11 @@ async function main() {
   console.log('✅ Created users:', adminUser.name, 'and', hostUser.name);
   console.log('');
   console.log('🔑 Default Login Credentials:');
-  console.log('   Admin Email: admin@damdayvillage.org');
-  console.log('   Admin Password: Admin@123');
-  console.log('   Host Email: host@damdayvillage.org');  
-  console.log('   Host Password: Host@123');
+  console.log(`   Admin Email: ${ADMIN_EMAIL}`);
+  console.log(`   Admin Password: ${ADMIN_PASSWORD}`);
+  console.log(`   Host Email: ${HOST_EMAIL}`);  
+  console.log(`   Host Password: ${HOST_PASSWORD}`);
+  console.log('   ⚠️  CHANGE THESE PASSWORDS IMMEDIATELY AFTER FIRST LOGIN!');
   console.log('');
 
   // Create sample homestay
@@ -215,6 +224,91 @@ async function main() {
     console.log('✅ Created product:', product.name);
   }
 
+  // Create Carbon Credits for users
+  const adminCarbonCredit = await db.carbonCredit.upsert({
+    where: { userId: adminUser.id },
+    update: {},
+    create: {
+      userId: adminUser.id,
+      balance: 150.5,
+      totalEarned: 200.5,
+      totalSpent: 50.0
+    }
+  });
+
+  const hostCarbonCredit = await db.carbonCredit.upsert({
+    where: { userId: hostUser.id },
+    update: {},
+    create: {
+      userId: hostUser.id,
+      balance: 75.0,
+      totalEarned: 100.0,
+      totalSpent: 25.0
+    }
+  });
+
+  console.log('✅ Created carbon credits for users');
+
+  // Create sample Carbon Transactions
+  const transactions = [
+    {
+      userId: adminUser.id,
+      creditId: adminCarbonCredit.id,
+      type: TransactionType.EARN,
+      amount: 50.0,
+      reason: 'Initial bonus',
+      description: 'Welcome bonus for joining the carbon credit program'
+    },
+    {
+      userId: adminUser.id,
+      creditId: adminCarbonCredit.id,
+      type: TransactionType.EARN,
+      amount: 25.5,
+      reason: 'Sustainable travel',
+      description: 'Carbon credits earned for using bicycle instead of vehicle'
+    },
+    {
+      userId: adminUser.id,
+      creditId: adminCarbonCredit.id,
+      type: TransactionType.SPEND,
+      amount: -25.0,
+      reason: 'Carbon offset purchase',
+      description: 'Purchased carbon offsets for air travel'
+    },
+    {
+      userId: hostUser.id,
+      creditId: hostCarbonCredit.id,
+      type: TransactionType.EARN,
+      amount: 50.0,
+      reason: 'Initial bonus',
+      description: 'Welcome bonus for joining the carbon credit program'
+    },
+    {
+      userId: hostUser.id,
+      creditId: hostCarbonCredit.id,
+      type: TransactionType.EARN,
+      amount: 30.0,
+      reason: 'Solar energy usage',
+      description: 'Carbon credits for using 100% solar energy'
+    },
+    {
+      userId: hostUser.id,
+      creditId: hostCarbonCredit.id,
+      type: TransactionType.SPEND,
+      amount: -15.0,
+      reason: 'Tree planting',
+      description: 'Spent credits on community tree planting initiative'
+    }
+  ];
+
+  for (const transactionData of transactions) {
+    await db.carbonTransaction.create({
+      data: transactionData
+    });
+  }
+
+  console.log('✅ Created sample carbon transactions');
+
   console.log('\n🎉 Database seeded successfully!');
   console.log('\nSample data created:');
   console.log('- 1 Village (Damday Village)');
@@ -223,9 +317,12 @@ async function main() {
   console.log('- 3 IoT Devices');
   console.log('- 1 Community Project');
   console.log('- 3 Marketplace Products');
+  console.log('- 2 Carbon Credit Accounts');
+  console.log('- 6 Carbon Transactions');
   console.log('\n🔑 Login with these credentials:');
-  console.log('   Admin: admin@damdayvillage.org / Admin@123');
-  console.log('   Host: host@damdayvillage.org / Host@123');
+  console.log(`   Admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+  console.log(`   Host: ${HOST_EMAIL} / ${HOST_PASSWORD}`);
+  console.log('\n⚠️  IMPORTANT: Change these default passwords immediately after first login!');
 }
 
 function getDeviceSchema(deviceType: string) {

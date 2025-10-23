@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+// Force dynamic rendering to prevent database connection during build
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Sample homestays data for the marketplace
@@ -32,7 +35,9 @@ export async function GET(request: NextRequest) {
     ];
 
     // Try to fetch from database only if DATABASE_URL is available and not during build
-    if (process.env.DATABASE_URL && process.env.DATABASE_URL !== 'postgresql://dummy:dummy@localhost:5432/dummy') {
+    if (process.env.SKIP_DB_DURING_BUILD !== 'true' && 
+        process.env.DATABASE_URL && 
+        process.env.DATABASE_URL !== 'postgresql://dummy:dummy@localhost:5432/dummy') {
       try {
         const homestays = await prisma.homestay.findMany({
           include: {

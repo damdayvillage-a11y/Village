@@ -32,8 +32,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.simple
+      args:
+        BUILD_MEMORY_LIMIT: 3072
     container_name: village-app
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 6G  # Increased to prevent OOM during build (was 4G)
+        reservations:
+          memory: 3G
     depends_on:
       database:
         condition: service_healthy

@@ -1,80 +1,123 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import { Search, ShoppingCart, Heart, SlidersHorizontal, Grid, List } from 'lucide-react';
 import { Card } from '@/lib/components/ui/Card';
 import { Button } from '@/lib/components/ui/Button';
 import { Input } from '@/lib/components/ui/Input';
 import { Badge } from '@/lib/components/ui/Badge';
+import { ProductCard } from '@/lib/components/public/ProductCard';
+
+// Note: For SEO, consider converting to server component with metadata export
+// export const metadata = {
+//   title: 'Village Marketplace',
+//   description: 'Shop authentic handcrafted products from local artisans...',
+// };
 
 interface Product {
   id: string;
   name: string;
-  price: number;
-  rating: number;
-  seller: string;
-  category: string;
   description: string;
+  price: number;
   stock: number;
+  inStock: boolean;
+  image: string;
+  category: string;
+  locallySourced?: boolean;
+  carbonFootprint?: number;
 }
 
-const sampleProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Handwoven Pashmina Shawl',
-    price: 15000,
-    rating: 4.9,
-    seller: 'Himalayan Handicrafts Co.',
-    category: 'Local Crafts',
-    description: 'Authentic handwoven pashmina shawl from local artisans',
-    stock: 5
-  },
-  {
-    id: '2', 
-    name: 'Organic Himalayan Honey',
-    price: 800,
-    rating: 4.8,
-    seller: 'Mountain View Organic Farm',
-    category: 'Organic Food',
-    description: 'Pure organic honey from Himalayan wildflowers',
-    stock: 12
-  },
-  {
-    id: '3',
-    name: 'Traditional Copper Water Bottle',
-    price: 1200,
-    rating: 4.9,
-    seller: 'Local Artisan Collective',
-    category: 'Local Crafts',
-    description: 'Handcrafted copper bottle with traditional designs',
-    stock: 8
-  },
-  {
-    id: '4',
-    name: 'Himalayan Pink Rock Salt',
-    price: 300,
-    rating: 4.7,
-    seller: 'Village Cooperative',
-    category: 'Organic Food',
-    description: 'Natural pink rock salt from Himalayan mines',
-    stock: 25
-  }
-];
-
 export default function MarketplacePage() {
-  const [products] = useState<Product[]>(sampleProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState<'price-low' | 'price-high' | 'name'>('name');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 50000 });
+  const [showFilters, setShowFilters] = useState(false);
   const [cart, setCart] = useState<{[key: string]: number}>({});
-  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+  const [categories, setCategories] = useState<string[]>(['All']);
 
-  const categories = ['All', 'Local Crafts', 'Organic Food', 'Textiles', 'Tea & Spices'];
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/public/products');
+      if (response.ok) {
+        const data = await response.json();
+        const productData = data.data || [];
+        setProducts(productData);
+        
+        // Extract unique categories
+        const categorySet = new Set(productData.map((p: Product) => p.category).filter(Boolean));
+        const uniqueCategories: string[] = ['All', ...Array.from(categorySet) as string[]];
+        setCategories(uniqueCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filterAndSortProducts = useCallback(() => {
+    let filtered = [...products];
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(p => p.category === selectedCategory);
+    }
+
+    // Price range filter
+    filtered = filtered.filter(p =>
+      p.price >= priceRange.min && p.price <= priceRange.max
+    );
+
+    // Sorting
+    filtered.sort((a, b) => {
+      if (sortBy === 'price-low') return a.price - b.price;
+      if (sortBy === 'price-high') return b.price - a.price;
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      return 0;
+    });
+
+    setFilteredProducts(filtered);
+  }, [products, searchTerm, selectedCategory, sortBy, priceRange]);
+
+  const loadCartFromStorage = useCallback(() => {
+    const savedCart = localStorage.getItem('villageCart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
+
+  const saveCartToStorage = useCallback(() => {
+    localStorage.setItem('villageCart', JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    fetchProducts();
+    loadCartFromStorage();
+  }, [fetchProducts, loadCartFromStorage]);
+
+  useEffect(() => {
+    filterAndSortProducts();
+  }, [filterAndSortProducts]);
+
+  useEffect(() => {
+    saveCartToStorage();
+  }, [saveCartToStorage]);
 
   const addToCart = (productId: string) => {
     setCart(prev => ({
@@ -83,177 +126,209 @@ export default function MarketplacePage() {
     }));
   };
 
-  const toggleWishlist = (productId: string) => {
-    setWishlist(prev => {
-      const newWishlist = new Set(prev);
-      if (newWishlist.has(productId)) {
-        newWishlist.delete(productId);
-      } else {
-        newWishlist.add(productId);
-      }
-      return newWishlist;
-    });
-  };
-
   const getTotalCartItems = () => {
     return Object.values(cart).reduce((sum, count) => sum + count, 0);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Village Marketplace
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Authentic Himalayan products from local artisans and organic farmers
-          </p>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="flex-1">
-              <Input
-                type="search"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {categories.map(category => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category)}
-                  className="whitespace-nowrap"
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Village Marketplace
+            </h1>
+            <p className="text-gray-600">
+              Authentic Himalayan products from local artisans and organic farmers
+            </p>
           </div>
-          
-          {/* Cart Summary */}
+          {/* Cart Icon */}
           {getTotalCartItems() > 0 && (
-            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-              <div className="flex items-center justify-between">
-                <span className="text-green-800 font-medium">
-                  🛒 Cart: {getTotalCartItems()} items
-                </span>
-                <Button variant="default" size="sm">
-                  View Cart & Checkout
-                </Button>
-              </div>
-            </div>
+            <Link href="/cart">
+              <Button variant="primary" className="relative">
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                Cart ({getTotalCartItems()})
+              </Button>
+            </Link>
           )}
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map(product => (
-            <Card key={product.id} className="hover:shadow-lg transition-shadow duration-200">
-              <div className="relative">
-                <div className="w-full h-48 bg-gradient-to-br from-green-100 to-green-200 rounded-t-lg flex items-center justify-center">
-                  <span className="text-6xl">
-                    {product.category === 'Local Crafts' ? '🧣' : '🍯'}
-                  </span>
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
+          {/* Search Bar */}
+          <div className="flex gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Input
+                type="text"
+                placeholder="Search products by name, description, or category..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full"
+              />
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Filters
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Category Pills */}
+          <div className="flex flex-wrap gap-2">
+            {categories.map(category => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+
+          {/* Filters Panel */}
+          {showFilters && (
+            <Card className="p-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Sort By */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sort By
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="name">Name (A-Z)</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
                 </div>
-                <button
-                  onClick={() => toggleWishlist(product.id)}
-                  className={`absolute top-2 right-2 p-2 rounded-full transition-colors ${
-                    wishlist.has(product.id) 
-                      ? 'bg-red-500 text-white' 
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  ❤️
-                </button>
-                <Badge 
-                  className="absolute top-2 left-2 bg-green-500 text-white"
-                  variant="default"
-                >
-                  {product.category}
-                </Badge>
-              </div>
-              
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">
-                  {product.name}
-                </h3>
-                
-                <p className="text-gray-600 text-sm mb-3">
-                  {product.description}
-                </p>
-                
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-green-600">
-                    ₹{product.price.toLocaleString()}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-yellow-500">⭐</span>
-                    <span className="text-gray-600 text-sm">{product.rating}</span>
+
+                {/* Price Range */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price Range (₹)
+                  </label>
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      type="number"
+                      value={priceRange.min}
+                      onChange={(e) => setPriceRange({ ...priceRange, min: parseInt(e.target.value) || 0 })}
+                      placeholder="Min"
+                      className="w-28"
+                    />
+                    <span>-</span>
+                    <Input
+                      type="number"
+                      value={priceRange.max}
+                      onChange={(e) => setPriceRange({ ...priceRange, max: parseInt(e.target.value) || 50000 })}
+                      placeholder="Max"
+                      className="w-28"
+                    />
                   </div>
                 </div>
-                
-                <div className="mb-3">
-                  <p className="text-gray-500 text-sm">by {product.seller}</p>
-                  <p className="text-gray-500 text-xs">
-                    {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                  </p>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={() => addToCart(product.id)}
-                    disabled={product.stock === 0}
-                    className="flex-1"
-                    variant="default"
-                  >
-                    {cart[product.id] ? `In Cart (${cart[product.id]})` : 'Add to Cart'}
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    View
-                  </Button>
-                </div>
+              </div>
+
+              {/* Reset Filters */}
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategory('All');
+                    setSortBy('name');
+                    setPriceRange({ min: 0, max: 50000 });
+                  }}
+                >
+                  Reset Filters
+                </Button>
               </div>
             </Card>
-          ))}
+          )}
         </div>
 
-        {/* Web3 Escrow Notice */}
-        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">
-            🔗 Web3 Escrow Available
-          </h3>
-          <p className="text-blue-700">
-            For enhanced transparency and security, select purchases can use our blockchain escrow system 
-            powered by smart contracts on Polygon. This ensures secure transactions with automated 
-            dispute resolution.
+        {/* Results Count */}
+        <div className="mb-4">
+          <p className="text-gray-600">
+            {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found
           </p>
         </div>
 
-        {/* Seller Information */}
-        <div className="mt-8 bg-white rounded-lg p-6 shadow-sm">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Our Village Sellers
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from(new Set(products.map(p => p.seller))).map(seller => (
-              <div key={seller} className="text-center p-4 border rounded-lg">
-                <div className="w-12 h-12 bg-green-100 rounded-full mx-auto mb-2 flex items-center justify-center">
-                  🏪
-                </div>
-                <h4 className="font-medium text-gray-800">{seller}</h4>
-                <p className="text-sm text-gray-600">Verified Seller</p>
-              </div>
+        {/* Products Grid */}
+        {filteredProducts.length === 0 ? (
+          <Card className="p-12 text-center">
+            <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600 mb-4">
+              Try adjusting your filters or search terms
+            </p>
+            <Button
+              variant="primary"
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('All');
+                setSortBy('name');
+                setPriceRange({ min: 0, max: 50000 });
+              }}
+            >
+              Reset All Filters
+            </Button>
+          </Card>
+        ) : (
+          <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' : 'space-y-4'}>
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                description={product.description}
+                price={product.price}
+                stock={product.stock}
+                inStock={product.inStock}
+                image={product.image}
+                category={product.category}
+                locallySourced={product.locallySourced}
+                carbonFootprint={product.carbonFootprint}
+              />
             ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

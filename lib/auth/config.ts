@@ -8,8 +8,21 @@ import { db } from '../db';
 import { verifyPassword } from './password';
 import { UserRole } from '@prisma/client';
 
+// Determine if we should use the database adapter
+// Skip adapter if DATABASE_URL is not configured, contains dummy values, or is a CapRover placeholder
+const shouldUseAdapter = () => {
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) return false;
+  if (dbUrl.includes('dummy:dummy')) return false;
+  if (dbUrl.includes('$$cap_')) return false;
+  if (process.env.SKIP_DB_DURING_BUILD === 'true') return false;
+  return true;
+};
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db),
+  // Conditionally use PrismaAdapter only when database is properly configured
+  // This prevents 500 errors when DB is unavailable and allows JWT-only mode for credentials
+  ...(shouldUseAdapter() ? { adapter: PrismaAdapter(db) } : {}),
   providers: [
     // OAuth Providers - only include if credentials are configured
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
@@ -55,8 +68,17 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        // Validate credentials exist
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password required');
+          console.warn('Login attempt with missing credentials');
+          return null;
+        }
+
+        // Check if database is properly configured before attempting connection
+        const dbUrl = process.env.DATABASE_URL;
+        if (!dbUrl || dbUrl.includes('dummy:dummy') || dbUrl.includes('$$cap_')) {
+          console.error('Database not configured properly. Cannot authenticate.');
+          throw new Error('Database configuration error. Please check DATABASE_URL environment variable.');
         }
 
         let retries = 3;
@@ -69,8 +91,14 @@ export const authOptions: NextAuthOptions = {
               where: { email: credentials.email },
             });
 
+            // Invalid credentials - user not found or no password
             if (!user || !user.password) {
-              throw new Error('Invalid credentials');
+              if (!user) {
+                console.warn(`Login attempt for non-existent user: ${credentials.email}`);
+              } else {
+                console.warn(`Login attempt for user without password: ${credentials.email}`);
+              }
+              return null;
             }
 
             const isValidPassword = await verifyPassword(
@@ -78,18 +106,26 @@ export const authOptions: NextAuthOptions = {
               user.password
             );
 
+            // Invalid password
             if (!isValidPassword) {
-              throw new Error('Invalid credentials');
+              console.warn(`Invalid password for user: ${credentials.email}`);
+              return null;
             }
 
+            // User not verified
             if (!user.verified) {
-              throw new Error('Please verify your email before logging in');
+              console.warn(`Login attempt for unverified user: ${credentials.email} (verified=${user.verified})`);
+              return null;
             }
 
+            // User account deactivated
             if (!user.active) {
-              throw new Error('Account has been deactivated');
+              console.warn(`Login attempt for deactivated user: ${credentials.email} (active=${user.active})`);
+              return null;
             }
 
+            // Success - return user object
+            console.log(`Successful login for user: ${credentials.email} (verified=${user.verified}, active=${user.active})`);
             return {
               id: user.id,
               email: user.email,
@@ -100,17 +136,9 @@ export const authOptions: NextAuthOptions = {
             };
           } catch (error) {
             lastError = error instanceof Error ? error : new Error('Unknown error');
-            
-            // If it's a validation error we threw, don't retry - just fail
-            if (lastError.message === 'Invalid credentials' ||
-                lastError.message === 'Please verify your email before logging in' ||
-                lastError.message === 'Account has been deactivated' ||
-                lastError.message === 'Email and password required') {
-              throw lastError;
-            }
-
-            // For database connection errors, retry if we have attempts left
             const errorMsg = lastError.message;
+            
+            // Check if this is a transient database error that we should retry
             const isTransientError = errorMsg.includes('connect') || 
                                     errorMsg.includes('ECONNREFUSED') || 
                                     errorMsg.includes('timeout') ||
@@ -118,25 +146,31 @@ export const authOptions: NextAuthOptions = {
                                     errorMsg.includes('ENOTFOUND');
 
             if (isTransientError && attempt < retries) {
-              console.warn(`Auth attempt ${attempt} failed, retrying...`, errorMsg);
+              console.warn(`Auth attempt ${attempt} failed with transient error, retrying...`, errorMsg);
               // Wait before retry (exponential backoff)
               await new Promise(resolve => setTimeout(resolve, attempt * 500));
               continue;
             }
 
-            // Log error for debugging but don't expose internals to user
+            // Log error for debugging
             console.error('Database error during authentication:', lastError);
             
+            // For transient errors after all retries, throw to indicate system error
+            // This will result in a proper error being shown to the user
             if (isTransientError) {
-              throw new Error('Database connection failed. Please try again or contact support.');
+              throw new Error('Database connection failed. Please try again later.');
             }
             
-            throw new Error('Unable to authenticate. Please try again later.');
+            // For other unexpected errors, log and return null
+            // This prevents 500 errors for authentication failures
+            console.error('Unexpected error during authentication:', lastError);
+            return null;
           }
         }
 
-        // Should not reach here, but just in case
-        throw lastError || new Error('Authentication failed after retries');
+        // Exhausted retries with transient errors
+        console.error('Authentication failed after retries:', lastError);
+        return null;
       },
     }),
     
@@ -209,7 +243,7 @@ export const authOptions: NextAuthOptions = {
       return `${baseUrl}/dashboard`;
     },
     
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       // Add custom fields to JWT token
       if (user) {
         token.role = 'role' in user ? user.role : UserRole.GUEST;
@@ -222,6 +256,12 @@ export const authOptions: NextAuthOptions = {
         token.provider = account.provider;
       }
       
+      // Update lastLoginUpdate timestamp when appropriate
+      // This happens on sign-in or when explicitly triggered by update
+      if (trigger === 'signIn' || trigger === 'signUp') {
+        token.lastLoginUpdate = Date.now();
+      }
+      
       return token;
     },
     
@@ -229,36 +269,50 @@ export const authOptions: NextAuthOptions = {
       try {
         // Add custom fields to session
         if (token && session.user) {
-          (session.user as any).id = token.userId as string;
-          (session.user as any).role = token.role as UserRole;
-          (session.user as any).verified = token.verified as boolean;
-          (session.user as any).provider = token.provider as string;
+          session.user.id = token.userId;
+          session.user.role = token.role;
+          session.user.verified = token.verified;
+          session.user.provider = token.provider;
         }
         
         // Update last login timestamp (non-blocking, fails gracefully)
         // Only attempt if database is likely available (not a dummy URL)
+        // Update at most once per hour to avoid connection pool exhaustion
         if (session.user && 'id' in session.user && 
             process.env.DATABASE_URL && 
             !process.env.DATABASE_URL.includes('dummy:dummy') &&
             !process.env.DATABASE_URL.includes('$$cap_')) {
           
-          // Use a short timeout to prevent hanging
-          const updatePromise = db.user.update({
-            where: { id: (session.user as any).id },
-            data: { lastLogin: new Date() },
-          });
+          // Only update if the token doesn't have a recent lastLoginUpdate timestamp
+          // or if more than 1 hour has passed since last update
+          const lastUpdate = token.lastLoginUpdate;
+          const now = Date.now();
+          const oneHour = 60 * 60 * 1000;
           
-          // Set a timeout for the update operation
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Update timeout')), 2000)
-          );
-          
-          try {
-            await Promise.race([updatePromise, timeoutPromise]);
-          } catch (error) {
-            // Log but don't fail the session if database update fails
-            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-            console.warn('Failed to update last login timestamp:', errorMsg);
+          if (!lastUpdate || now - lastUpdate > oneHour) {
+            // Fire and forget - don't block the session response
+            // Use a short timeout to prevent hanging database connections
+            const updatePromise = db.user.update({
+              where: { id: session.user.id },
+              data: { lastLogin: new Date() },
+            });
+            
+            // Set a timeout for the update operation
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Update timeout')), 2000)
+            );
+            
+            // Run update in background - don't await to avoid blocking
+            Promise.race([updatePromise, timeoutPromise]).catch(error => {
+              // Log but don't fail the session if database update fails
+              const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+              console.warn('Failed to update last login timestamp:', errorMsg);
+            });
+            
+            // Note: We don't update token.lastLoginUpdate here to avoid race conditions
+            // Token mutations should only happen in the JWT callback (not session callback)
+            // The lastLoginUpdate timestamp will be refreshed when the user signs in again
+            // (see JWT callback where trigger === 'signIn' || trigger === 'signUp')
           }
         }
         

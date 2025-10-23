@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
       length: process.env.NEXTAUTH_SECRET?.length || 0,
       valid: process.env.NEXTAUTH_SECRET && 
              process.env.NEXTAUTH_SECRET.length >= 32 &&
-             !process.env.NEXTAUTH_SECRET.includes('dummy'),
+             !process.env.NEXTAUTH_SECRET.includes('dummy') &&
+             !process.env.NEXTAUTH_SECRET.includes('$$cap_') &&
+             !process.env.NEXTAUTH_SECRET.includes('change-this'),
     },
     database: {
       configured: false,
@@ -40,7 +42,11 @@ export async function GET(request: NextRequest) {
 
   // Check database configuration
   if (!process.env.DATABASE_URL) {
-    checks.database.message = 'DATABASE_URL not configured';
+    checks.database.message = 'DATABASE_URL not configured - Set this environment variable to connect to PostgreSQL';
+  } else if (process.env.DATABASE_URL.includes('MISSING_DATABASE_URL') ||
+             process.env.DATABASE_URL.includes('invalid:5432')) {
+    checks.database.configured = false;
+    checks.database.message = 'DATABASE_URL not configured - Environment variable is not set';
   } else if (process.env.DATABASE_URL.includes('dummy:dummy')) {
     checks.database.configured = true;
     checks.database.message = 'Using dummy database (build mode)';
@@ -91,12 +97,14 @@ export async function GET(request: NextRequest) {
       
       if (errorMsg.includes('timeout')) {
         checks.database.message = 'Database connection timeout';
-      } else if (errorMsg.includes('ECONNREFUSED')) {
+      } else if (errorMsg.includes('ECONNREFUSED') || errorMsg.includes("Can't reach database server")) {
         checks.database.message = 'Database connection refused - is PostgreSQL running?';
       } else if (errorMsg.includes('ENOTFOUND')) {
         checks.database.message = 'Database host not found - check DATABASE_URL';
       } else if (errorMsg.includes('authentication')) {
         checks.database.message = 'Database authentication failed - check credentials';
+      } else if (errorMsg.includes('MISSING_DATABASE_URL') || errorMsg.includes('invalid:5432')) {
+        checks.database.message = 'DATABASE_URL environment variable is not set';
       } else {
         checks.database.message = `Database error: ${errorMsg}`;
       }
@@ -132,6 +140,10 @@ export async function GET(request: NextRequest) {
       recommendations.push('Set NEXTAUTH_SECRET - generate with: openssl rand -base64 32');
     } else if (checks.nextauth_secret.length < 32) {
       recommendations.push(`NEXTAUTH_SECRET too short (${checks.nextauth_secret.length} chars, need 32+)`);
+    } else if (process.env.NEXTAUTH_SECRET?.includes('$$cap_')) {
+      recommendations.push('Replace $$cap_*$$ placeholder in NEXTAUTH_SECRET');
+    } else if (process.env.NEXTAUTH_SECRET?.includes('change-this')) {
+      recommendations.push('Replace default NEXTAUTH_SECRET with actual secret');
     }
   }
 

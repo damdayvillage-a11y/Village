@@ -10,7 +10,7 @@ const withPWA = require('next-pwa')({
     /build-manifest\.json$/,
     'app-build-manifest.json'
   ],
-  maximumFileSizeToCacheInBytes: 5000000, // 5MB limit
+  maximumFileSizeToCacheInBytes: 2000000, // 2MB limit (reduced for memory optimization)
   // Runtime caching for better performance
   runtimeCaching: [
     {
@@ -51,7 +51,20 @@ const nextConfig = {
   swcMinify: true,
   output: 'standalone',
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
   },
   eslint: {
     // Disable ESLint during production builds

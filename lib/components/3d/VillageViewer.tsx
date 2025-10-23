@@ -26,6 +26,9 @@ const VillageViewer: React.FC<VillageViewerProps> = ({
   useEffect(() => {
     if (!mountRef.current) return;
 
+    // Capture the current mount ref value for cleanup
+    const mount = mountRef.current;
+
     try {
       // Scene setup
       const scene = new THREE.Scene();
@@ -118,8 +121,8 @@ const VillageViewer: React.FC<VillageViewerProps> = ({
           cancelAnimationFrame(frameRef.current);
         }
         renderer.domElement.removeEventListener('mousemove', handleMouseMove);
-        if (mountRef.current && renderer.domElement) {
-          mountRef.current.removeChild(renderer.domElement);
+        if (mount && mount.contains(renderer.domElement)) {
+          mount.removeChild(renderer.domElement);
         }
         renderer.dispose();
       };
