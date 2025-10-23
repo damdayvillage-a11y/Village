@@ -45,15 +45,23 @@ if (!fs.existsSync(mcpConfigPath)) {
     
     // Check 4: Verify MCP servers
     console.log('\n🖥️  Checking MCP Servers...');
-    const expectedServers = ['village-docs', 'village-database', 'village-logs', 'github-repo'];
+    const expectedServers = [
+      'codebase-structure',
+      'prisma-schema',
+      'api-endpoints',
+      'documentation',
+      'postgresql-database',
+      'github-repository'
+    ];
     const configuredServers = Object.keys(mcpConfig.mcpServers || {});
     const missingServers = expectedServers.filter(server => !configuredServers.includes(server));
     
     if (missingServers.length > 0) {
-      console.error(`❌ Missing MCP servers: ${missingServers.join(', ')}`);
+      console.error(`❌ Missing critical MCP servers: ${missingServers.join(', ')}`);
       hasErrors = true;
     } else {
-      console.log(`✅ All 4 MCP servers configured: ${configuredServers.join(', ')}`);
+      console.log(`✅ ${configuredServers.length} MCP servers configured`);
+      console.log(`   Critical servers present: ${expectedServers.length}/${expectedServers.length}`);
     }
     
     // Check 5: Verify firewall configuration
@@ -75,7 +83,16 @@ if (!fs.existsSync(mcpConfigPath)) {
     }
     
     if (firewall && firewall.allowlist) {
-      console.log(`✅ Allowlist contains ${firewall.allowlist.length} domains`);
+      // Handle both array and object allowlist formats
+      let allDomains = [];
+      if (Array.isArray(firewall.allowlist)) {
+        allDomains = firewall.allowlist;
+      } else if (typeof firewall.allowlist === 'object') {
+        // Flatten object allowlist (categorized format)
+        allDomains = Object.values(firewall.allowlist).flat();
+      }
+      
+      console.log(`✅ Allowlist contains ${allDomains.length} domains`);
       
       // Verify critical domains
       const criticalDomains = [
@@ -87,7 +104,33 @@ if (!fs.existsSync(mcpConfigPath)) {
       ];
       
       const missingCritical = criticalDomains.filter(domain => 
-        !firewall.allowlist.includes(domain)
+        !allDomains.includes(domain)
+      );
+      
+      if (missingCritical.length > 0) {
+        console.warn(`⚠️  Missing critical domains: ${missingCritical.join(', ')}`);
+        hasWarnings = true;
+      }
+    } else if (firewall && firewall.domains) {
+      // Handle new 'domains' field with categories
+      let allDomains = [];
+      if (typeof firewall.domains === 'object') {
+        allDomains = Object.values(firewall.domains).flat();
+      }
+      
+      console.log(`✅ Firewall domains contains ${allDomains.length} approved domains`);
+      
+      // Verify critical domains
+      const criticalDomains = [
+        'github.com',
+        'api.github.com',
+        'npmjs.org',
+        'registry.npmjs.org',
+        'docker.io'
+      ];
+      
+      const missingCritical = criticalDomains.filter(domain => 
+        !allDomains.includes(domain)
       );
       
       if (missingCritical.length > 0) {
@@ -100,17 +143,33 @@ if (!fs.existsSync(mcpConfigPath)) {
     console.log('\n🔐 Checking Security Configuration...');
     const security = mcpConfig.security;
     
-    if (!security || !security.secretManagement || !security.secretManagement.enabled) {
-      console.warn('⚠️  Secret management not enabled');
+    // Handle both old and new security structures
+    let secretsConfigured = false;
+    let requiredSecrets = [];
+    
+    if (security && security.secretManagement && security.secretManagement.enabled) {
+      secretsConfigured = true;
+      requiredSecrets = security.secretManagement.requiredSecrets || [];
+    } else if (security && security.secrets && security.secrets.provider) {
+      secretsConfigured = true;
+      // Flatten required secrets from categorized structure
+      if (security.secrets.required && typeof security.secrets.required === 'object') {
+        requiredSecrets = Object.values(security.secrets.required).flat();
+      }
+    }
+    
+    if (!secretsConfigured) {
+      console.warn('⚠️  Secret management not configured');
       hasWarnings = true;
     } else {
-      console.log('✅ Secret management enabled');
+      console.log('✅ Secret management configured');
       
-      const requiredSecrets = security.secretManagement.requiredSecrets || [];
-      console.log(`✅ ${requiredSecrets.length} secrets configured:`);
-      requiredSecrets.forEach(secret => {
-        console.log(`   - ${secret}`);
-      });
+      if (requiredSecrets.length > 0) {
+        console.log(`✅ ${requiredSecrets.length} required secrets defined:`);
+        requiredSecrets.forEach(secret => {
+          console.log(`   - ${secret}`);
+        });
+      }
     }
     
   } catch (error) {
