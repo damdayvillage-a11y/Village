@@ -1,37 +1,185 @@
 {
   "$schema": "https://github.com/modelcontextprotocol/specification/blob/main/schema/mcp-config.schema.json",
-  "version": "1.0",
-  "description": "Model Context Protocol configuration for GitHub Copilot Coding Agent - Smart Carbon-Free Village",
+  "version": "2.0",
+  "description": "MCP configuration for Village repository codebase access and operations",
   "mcpServers": {
-    "village-docs": {
+    "codebase-structure": {
       "type": "file",
-      "description": "Access to all documentation files in the repository",
-      "rootPath": "./",
+      "description": "Repository source code and type definitions",
+      "rootPath": "./src",
       "include": [
-        "CONFIGURATION.md",
-        "REQUIREMENTS.md",
-        "MEMORY.md",
-        "PR.md",
-        "COPILOT_INSTRUCTIONS.md",
-        "README.md",
-        "QUICK_START.md",
-        "ISSUES.md",
-        "CLEANUP_SUMMARY.md",
-        "docs/**/*.md"
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "**/*.jsx"
       ],
       "exclude": [
-        "node_modules/**",
-        ".next/**",
-        "dist/**"
+        "**/*.test.*",
+        "**/*.spec.*",
+        "**/node_modules/**",
+        "**/.next/**"
+      ],
+      "permissions": {
+        "read": true,
+        "write": true
+      },
+      "context": {
+        "apiRoutes": 95,
+        "adminRoutes": 52,
+        "userRoutes": 19,
+        "components": 26,
+        "mainDirectories": [
+          "src/app/api",
+          "src/components",
+          "src/lib",
+          "src/types"
+        ]
+      }
+    },
+    "prisma-schema": {
+      "type": "file",
+      "description": "Database schema and migrations",
+      "rootPath": "./prisma",
+      "include": [
+        "schema.prisma",
+        "migrations/**/*.sql"
       ],
       "permissions": {
         "read": true,
         "write": false
+      },
+      "context": {
+        "models": 39,
+        "provider": "postgresql",
+        "extensions": ["TimescaleDB"],
+        "keyModels": [
+          "User",
+          "Booking",
+          "Product",
+          "Order",
+          "Homestay",
+          "Device",
+          "SensorReading",
+          "CarbonCredit"
+        ]
       }
     },
-    "village-database": {
+    "api-endpoints": {
+      "type": "file",
+      "description": "Next.js API route handlers",
+      "rootPath": "./src/app/api",
+      "include": [
+        "**/route.ts"
+      ],
+      "permissions": {
+        "read": true,
+        "write": true
+      },
+      "context": {
+        "totalRoutes": 95,
+        "adminEndpoints": 52,
+        "userEndpoints": 19,
+        "publicEndpoints": 10,
+        "categories": [
+          "admin",
+          "user",
+          "auth",
+          "booking",
+          "payment",
+          "devices",
+          "media",
+          "marketplace"
+        ]
+      }
+    },
+    "configuration-files": {
+      "type": "file",
+      "description": "Build and runtime configuration",
+      "rootPath": "./",
+      "include": [
+        "next.config.js",
+        "tsconfig.json",
+        "tsconfig.docker.json",
+        "jest.config.js",
+        "playwright.config.ts",
+        "tailwind.config.js",
+        "postcss.config.js",
+        "package.json",
+        "Dockerfile.simple",
+        "docker-compose.coolify.yml",
+        "captain-definition"
+      ],
+      "permissions": {
+        "read": true,
+        "write": false
+      },
+      "context": {
+        "runtime": "Node.js 20",
+        "framework": "Next.js 14.2.33",
+        "deployment": ["Docker", "CapRover", "Coolify"]
+      }
+    },
+    "automation-scripts": {
+      "type": "file",
+      "description": "Build, test, and deployment scripts",
+      "rootPath": "./scripts",
+      "include": [
+        "**/*.js",
+        "**/*.ts",
+        "**/*.sh"
+      ],
+      "permissions": {
+        "read": true,
+        "write": true
+      },
+      "context": {
+        "scriptCount": 10,
+        "categories": [
+          "startup-check",
+          "database-seeding",
+          "admin-verification",
+          "environment-validation",
+          "diagnostics"
+        ]
+      }
+    },
+    "documentation": {
+      "type": "file",
+      "description": "Project documentation and guides",
+      "rootPath": "./",
+      "include": [
+        "*.md",
+        "docs/**/*.md"
+      ],
+      "exclude": [
+        "node_modules/**",
+        ".next/**"
+      ],
+      "permissions": {
+        "read": true,
+        "write": true
+      },
+      "context": {
+        "primary": [
+          "CONFIGURATION.md",
+          "REQUIREMENTS.md",
+          "MEMORY.md",
+          "COPILOT_INSTRUCTIONS.md"
+        ],
+        "guides": [
+          "QUICK_START.md",
+          "COPILOT_SETUP_GUIDE.md",
+          "FIREWALL_CONFIG.md"
+        ],
+        "tracking": [
+          "PR.md",
+          "ISSUES.md"
+        ]
+      }
+    },
+    "postgresql-database": {
       "type": "database",
-      "description": "PostgreSQL database connection for Village application",
+      "description": "PostgreSQL database with Prisma ORM",
       "driver": "postgresql",
       "connectionString": "${{ secrets.DATABASE_URL }}",
       "permissions": {
@@ -40,15 +188,32 @@
         "migrate": true
       },
       "features": {
+        "orm": "prisma",
         "migrations": true,
         "seeding": true,
-        "schema-validation": true,
-        "query-logging": false
+        "schemaValidation": true,
+        "queryLogging": false
+      },
+      "context": {
+        "models": 39,
+        "userRoles": ["ADMIN", "VILLAGE_COUNCIL", "HOST", "SELLER", "OPERATOR", "GUEST", "RESEARCHER"],
+        "coreModels": [
+          "User",
+          "Village",
+          "Homestay",
+          "Booking",
+          "Product",
+          "Order",
+          "Project",
+          "Device",
+          "SensorReading",
+          "CarbonCredit"
+        ]
       }
     },
-    "village-logs": {
+    "application-logs": {
       "type": "http",
-      "description": "API logs and monitoring endpoint",
+      "description": "Application logs API endpoint",
       "baseUrl": "https://api.damdayvillage.com/logs",
       "headers": {
         "Authorization": "Bearer ${{ secrets.API_TOKEN }}",
@@ -62,11 +227,38 @@
       "retryPolicy": {
         "maxRetries": 3,
         "backoffMs": 1000
+      },
+      "context": {
+        "endpoints": [
+          "/logs/errors",
+          "/logs/access",
+          "/logs/system"
+        ]
       }
     },
-    "github-repo": {
+    "health-monitoring": {
+      "type": "http",
+      "description": "Application health check endpoints",
+      "baseUrl": "https://damdayvillage.com",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "permissions": {
+        "read": true,
+        "write": false
+      },
+      "timeout": 10000,
+      "context": {
+        "endpoints": [
+          "/api/health",
+          "/api/auth/status",
+          "/admin-panel/status"
+        ]
+      }
+    },
+    "github-repository": {
       "type": "github",
-      "description": "GitHub repository access for PRs, issues, and commits",
+      "description": "GitHub repository operations",
       "repo": "damdayvillage-a11y/Village",
       "accessToken": "${{ secrets.GITHUB_TOKEN }}",
       "permissions": {
@@ -74,7 +266,7 @@
           "read": true,
           "write": true
         },
-        "pull_requests": {
+        "pullRequests": {
           "read": true,
           "write": true
         },
@@ -88,47 +280,91 @@
         }
       },
       "features": {
-        "auto-pr-creation": true,
-        "issue-management": true,
-        "commit-signing": false,
-        "branch-protection": true
+        "autoPRCreation": true,
+        "issueManagement": true,
+        "commitSigning": false,
+        "branchProtection": true
+      },
+      "context": {
+        "branches": ["main", "copilot/*"],
+        "workflows": [".github/workflows"],
+        "requiredChecks": ["build", "test", "lint"]
+      }
+    },
+    "npm-scripts": {
+      "type": "command",
+      "description": "NPM package scripts execution",
+      "executor": "npm",
+      "permissions": {
+        "execute": true
+      },
+      "context": {
+        "scripts": {
+          "build": ["build", "build:docker", "build:production", "build:caprover"],
+          "test": ["test", "test:watch", "test:coverage", "test:e2e"],
+          "database": ["db:generate", "db:push", "db:migrate", "db:studio", "db:seed"],
+          "validation": ["lint", "type-check", "format:check"],
+          "diagnostics": ["admin:verify", "validate:env", "db:test", "diagnose", "copilot:verify"]
+        },
+        "totalScripts": 46
+      }
+    },
+    "build-system": {
+      "type": "build",
+      "description": "Next.js build and compilation",
+      "builder": "next",
+      "permissions": {
+        "execute": true
+      },
+      "context": {
+        "framework": "Next.js 14.2.33",
+        "runtime": "Node.js 20",
+        "buildConfig": "next.config.js",
+        "outputMode": "standalone",
+        "memoryLimit": "3072MB",
+        "features": [
+          "App Router",
+          "Server Components",
+          "API Routes",
+          "Image Optimization",
+          "PWA Support"
+        ]
       }
     }
   },
   "firewall": {
     "enabled": true,
     "mode": "allowlist",
-    "description": "Only allow network access to approved domains",
-    "allowlist": [
-      "github.com",
-      "api.github.com",
-      "raw.githubusercontent.com",
-      "npmjs.org",
-      "registry.npmjs.org",
-      "nodejs.org",
-      "pypi.org",
-      "docker.io",
-      "hub.docker.com",
-      "registry.hub.docker.com",
-      "prisma.io",
-      "postgresql.org",
-      "damdayvillage.com",
-      "api.damdayvillage.com",
-      "www.damdayvillage.com"
-    ],
+    "allowlist": {
+      "github": ["github.com", "api.github.com", "raw.githubusercontent.com"],
+      "packageManagers": ["npmjs.org", "registry.npmjs.org", "nodejs.org", "pypi.org"],
+      "containerRegistries": ["docker.io", "hub.docker.com", "registry.hub.docker.com"],
+      "databases": ["prisma.io", "postgresql.org"],
+      "application": ["damdayvillage.com", "api.damdayvillage.com", "www.damdayvillage.com"],
+      "cdn": ["cloudinary.com"],
+      "monitoring": ["sentry.io"]
+    },
     "blocklist": [],
     "allowByDefault": false
   },
   "security": {
-    "secretManagement": {
-      "enabled": true,
+    "secrets": {
       "provider": "github-secrets",
-      "requiredSecrets": [
-        "DATABASE_URL",
-        "API_TOKEN",
-        "GITHUB_TOKEN",
-        "NEXTAUTH_SECRET"
-      ],
+      "required": {
+        "database": ["DATABASE_URL"],
+        "authentication": ["NEXTAUTH_SECRET", "NEXTAUTH_URL"],
+        "api": ["API_TOKEN"],
+        "github": ["GITHUB_TOKEN"],
+        "optional": [
+          "SMTP_HOST",
+          "SMTP_USER",
+          "SMTP_PASSWORD",
+          "SENDGRID_API_KEY",
+          "STRIPE_SECRET_KEY",
+          "RAZORPAY_SECRET",
+          "CLOUDINARY_URL"
+        ]
+      },
       "validation": {
         "checkFormat": true,
         "checkExpiry": false
@@ -137,139 +373,178 @@
     "dataProtection": {
       "maskSensitiveData": true,
       "noPlaintextLogging": true,
-      "encryptionAtRest": false
+      "passwordHashing": "argon2"
     },
     "accessControl": {
-      "requireAuthentication": true,
-      "roleBasedAccess": true,
+      "authentication": "NextAuth.js",
+      "authorization": "RBAC",
+      "roles": ["ADMIN", "VILLAGE_COUNCIL", "HOST", "SELLER", "OPERATOR", "GUEST", "RESEARCHER"],
       "auditLogging": true
     }
   },
   "agent": {
     "capabilities": {
-      "autonomous": true,
-      "canModifyCode": true,
-      "canCreatePRs": true,
-      "canManageIssues": true,
-      "canExecuteBuilds": true,
-      "canRunTests": true,
-      "canDeployToStaging": false,
-      "canDeployToProduction": false
+      "codeModification": true,
+      "prCreation": true,
+      "issueManagement": true,
+      "buildExecution": true,
+      "testExecution": true,
+      "databaseMigrations": true,
+      "documentation": true,
+      "stagingDeployment": false,
+      "productionDeployment": false
     },
     "restrictions": {
-      "requireHumanApproval": [
+      "requireApproval": [
         "production-deployment",
-        "database-schema-changes",
-        "security-configuration-changes"
+        "schema-changes",
+        "security-config-changes",
+        "dependency-major-updates"
       ],
-      "forbiddenActions": [
-        "delete-repository",
-        "modify-github-secrets",
-        "disable-security-features"
+      "forbidden": [
+        "repository-deletion",
+        "secret-modification",
+        "security-disabling",
+        "branch-protection-bypass"
       ]
     },
-    "behavior": {
+    "workflow": {
       "readDocsFirst": true,
       "respectMemoryState": true,
-      "updateMemoryAfterGoals": true,
+      "updateMemoryAfterTasks": true,
       "createPRsForReview": true,
       "runTestsBeforeCommit": true,
-      "validateBeforeDeploy": true
+      "validateBeforeCommit": true,
+      "lintBeforeCommit": true
+    },
+    "context": {
+      "framework": "Next.js 14",
+      "language": "TypeScript",
+      "orm": "Prisma",
+      "database": "PostgreSQL",
+      "authentication": "NextAuth.js",
+      "styling": "Tailwind CSS",
+      "testing": ["Jest", "Playwright"],
+      "deployment": ["Docker", "CapRover", "Coolify"]
     }
   },
-  "documentation": {
-    "sources": {
-      "primary": [
-        "CONFIGURATION.md",
-        "REQUIREMENTS.md",
-        "MEMORY.md",
-        "COPILOT_INSTRUCTIONS.md"
-      ],
-      "secondary": [
-        "PR.md",
-        "ISSUES.md",
-        "README.md",
-        "QUICK_START.md"
-      ],
-      "reference": [
-        "docs/BUILD_GUIDE.md",
-        "docs/DEPLOY_CAPROVER.md",
-        "docs/DATABASE_MIGRATION_GUIDE.md",
-        "docs/HOW_TO_USE_ISSUES_MD.md",
-        "docs/HOW_TO_USE_PR_MD.md"
-      ]
+  "codebase": {
+    "structure": {
+      "src": {
+        "app": {
+          "api": "95 route handlers",
+          "pages": "Next.js pages and layouts"
+        },
+        "components": "26 React components",
+        "lib": "Shared utilities and services",
+        "types": "TypeScript type definitions"
+      },
+      "prisma": {
+        "schema": "39 database models",
+        "migrations": "SQL migration files"
+      },
+      "scripts": "10 automation scripts",
+      "tests": "Jest and Playwright tests",
+      "public": "Static assets"
     },
-    "indexingStrategy": {
+    "documentation": {
+      "primary": ["CONFIGURATION.md", "REQUIREMENTS.md", "MEMORY.md", "COPILOT_INSTRUCTIONS.md"],
+      "guides": ["QUICK_START.md", "COPILOT_SETUP_GUIDE.md", "docs/BUILD_GUIDE.md"],
+      "tracking": ["PR.md", "ISSUES.md"]
+    },
+    "indexing": {
       "autoIndex": true,
       "updateFrequency": "on-change",
-      "semanticSearch": true,
       "prioritizeRecent": true
     }
   },
   "automation": {
-    "tasks": {
-      "environmentVerification": {
-        "enabled": true,
-        "schedule": "on-startup",
-        "actions": [
-          "check-database-connection",
-          "validate-environment-variables",
-          "verify-required-secrets"
-        ]
+    "startup": {
+      "script": "scripts/startup-check.js",
+      "checks": [
+        "database-connection",
+        "environment-variables",
+        "required-secrets",
+        "admin-user-exists"
+      ]
+    },
+    "database": {
+      "migrations": {
+        "auto": true,
+        "backupBefore": true,
+        "command": "npx prisma migrate deploy"
       },
-      "databaseManagement": {
-        "enabled": true,
-        "autoMigrate": true,
-        "autoSeed": true,
-        "backupBeforeMigration": true
-      },
-      "deployment": {
-        "enabled": true,
-        "platform": "docker",
-        "healthChecks": true,
-        "rollbackOnFailure": true,
-        "notifyOnCompletion": true
-      },
-      "monitoring": {
-        "enabled": true,
-        "checkEndpoints": [
-          "https://damdayvillage.com/api/health",
-          "https://api.damdayvillage.com/health"
-        ],
-        "alertOnFailure": true
-      }
-    }
-  },
-  "notifications": {
-    "channels": {
-      "github-issues": {
-        "enabled": true,
-        "events": [
-          "error",
-          "deployment-failure",
-          "security-alert"
-        ]
-      },
-      "pull-requests": {
-        "enabled": true,
-        "events": [
-          "progress-update",
-          "task-completion",
-          "review-requested"
-        ]
+      "seeding": {
+        "auto": true,
+        "script": "scripts/seed.ts",
+        "defaultUsers": ["admin@damdayvillage.org", "host@damdayvillage.org"]
       }
     },
+    "build": {
+      "command": "npm run build:production",
+      "memoryLimit": "3072MB",
+      "timeout": 600,
+      "healthCheck": "/api/health"
+    },
+    "testing": {
+      "unit": "npm test",
+      "e2e": "npm run test:e2e",
+      "coverage": "npm run test:coverage",
+      "lint": "npm run lint",
+      "typeCheck": "npm run type-check"
+    },
+    "monitoring": {
+      "healthEndpoints": [
+        "/api/health",
+        "/api/auth/status"
+      ],
+      "diagnosticPages": [
+        "/admin-panel/status",
+        "/help/admin-500"
+      ]
+    }
+  },
+  "reporting": {
+    "issues": {
+      "autoCreate": true,
+      "triggers": ["error", "deployment-failure", "security-alert", "test-failure"],
+      "includeContext": true,
+      "includeLogs": true,
+      "suggestFixes": true
+    },
+    "pullRequests": {
+      "autoCreate": true,
+      "triggers": ["task-completion", "bug-fix", "feature-implementation"],
+      "includeTests": true,
+      "includeDocs": true,
+      "requestReview": true
+    },
     "format": {
-      "includeLogSummary": true,
-      "includeSuggestedFix": true,
-      "includeNextActionPlan": true
+      "logSummary": true,
+      "suggestedFix": true,
+      "nextActions": true,
+      "relatedFiles": true
+    }
+  },
+  "repository": {
+    "name": "Village",
+    "owner": "damdayvillage-a11y",
+    "type": "Next.js Application",
+    "language": "TypeScript",
+    "framework": "Next.js 14.2.33",
+    "database": "PostgreSQL with Prisma ORM",
+    "deployment": "Docker/CapRover/Coolify",
+    "statistics": {
+      "apiRoutes": 95,
+      "databaseModels": 39,
+      "components": 26,
+      "scripts": 10,
+      "userRoles": 7
     }
   },
   "metadata": {
-    "version": "1.0.0",
-    "created": "2025-10-23",
-    "repository": "damdayvillage-a11y/Village",
-    "maintainer": "Copilot Coding Agent",
-    "documentation": "See COPILOT_SETUP_GUIDE.md for complete setup instructions"
+    "configVersion": "2.0",
+    "updated": "2025-10-23",
+    "documentation": "COPILOT_SETUP_GUIDE.md"
   }
 }
