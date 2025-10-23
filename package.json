@@ -40,6 +40,7 @@
     "db:test": "node scripts/test-db-connection.js",
     "diagnose": "./scripts/diagnose-production.sh",
     "caprover:diagnose": "node scripts/caprover-diagnostic.js",
+    "copilot:verify": "node scripts/verify-copilot-setup.js",
     "device-sim": "ts-node tools/device-sim.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
