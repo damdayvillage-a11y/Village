@@ -123,3 +123,6 @@ STORYBOOK*.md
 
 # Test screenshots (commit these for documentation)
 # /tests/screenshots/
+
+# Archived documentation (kept for reference)
+# docs/archive/

@@ -51,11 +51,18 @@ const nextConfig = {
   swcMinify: true,
   output: 'standalone',
   images: {
-    domains: ['localhost', 'images.unsplash.com'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
       },
     ],
   },
